@@ -1,0 +1,48 @@
+ <!DOCTYPE html>
+ <html lang="es">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reclutamiento Anónimo</title>
+  <link rel="stylesheet" href="style.css">
+ </head>
+ <body>
+  <header>
+  <h1>Reclutamiento</h1>
+  <nav>
+  <div class="menu-icon">
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  </div>
+  </nav>
+  </header>
+
+  <main>
+  <div class="thread-container">
+  <!-- Aquí irán los hilos -->
+  </div>
+  </main>
+
+  <div class="modal" id="newThreadModal">
+  <div class="modal-content">
+  <span class="close-button">&times;</span>
+  <h2>Crear Nuevo Hilo</h2>
+  <form id="newThreadForm">
+  <label for="category">Categoría:</label>
+  <input type="text" id="category" name="category" value="Hunter" readonly><br><br>
+
+  <label for="title">Título:</label>
+  <input type="text" id="title" name="title" placeholder="ej. insertar usuario de roblox" required><br><br>
+
+  <label for="description">Descripción:</label>
+  <input type="text" id="description" name="description" placeholder="ej. inserte @(ig de la persona que te reclutó)" required><br><br>
+
+  <button type="submit">Publicar Hilo</button>
+  </form>
+  </div>
+  </div>
+
+  <script src="script.js"></script>
+ </body>
+ </html>

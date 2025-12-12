@@ -1,13 +1,71 @@
+/* Estilos base */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background: linear-gradient(to bottom, #0f4c75, #3282b8, #bbe1fa); /* Gradiente navideño azul y blanco */
     color: #333;
+    position: relative;
+    overflow-x: hidden; /* Evitar scroll horizontal por copos */
+}
+
+/* Copos de nieve cayendo */
+.snowflake {
+    position: absolute;
+    top: -10px;
+    color: #fff;
+    font-size: 1em;
+    animation: fall linear infinite;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(360deg);
+    }
+}
+
+/* Generar copos aleatorios */
+.snowflake:nth-child(odd) {
+    animation-duration: 10s;
+    left: 10%;
+}
+.snowflake:nth-child(even) {
+    animation-duration: 15s;
+    left: 20%;
+}
+.snowflake:nth-child(3n) {
+    animation-duration: 12s;
+    left: 30%;
+}
+.snowflake:nth-child(4n) {
+    animation-duration: 8s;
+    left: 40%;
+}
+.snowflake:nth-child(5n) {
+    animation-duration: 14s;
+    left: 50%;
+}
+.snowflake:nth-child(6n) {
+    animation-duration: 11s;
+    left: 60%;
+}
+.snowflake:nth-child(7n) {
+    animation-duration: 9s;
+    left: 70%;
+}
+.snowflake:nth-child(8n) {
+    animation-duration: 13s;
+    left: 80%;
+}
+.snowflake:nth-child(9n) {
+    animation-duration: 7s;
+    left: 90%;
 }
 
 header {
-    background-color: #333;
+    background: linear-gradient(to right, #d32f2f, #388e3c); /* Rojo y verde navideños */
     color: white;
     padding: 1em 0;
     text-align: center;
@@ -16,10 +74,39 @@ header {
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 header h1 {
     margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#countdown-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    font-size: 1.2em;
+    color: #ffeb3b; /* Dorado navideño */
+    font-weight: bold;
+}
+
+.puppy {
+    width: 50px;
+    height: 50px;
+    animation: bounce 2s infinite;
+    margin: 0 10px;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+#countdown {
+    text-align: center;
 }
 
 #newThreadButtonContainer {
@@ -27,21 +114,21 @@ header h1 {
 }
 
 #newThreadButton {
-    background-color: #5cb85c;
-    color: white;
+    background-color: #ffeb3b; /* Dorado navideño */
+    color: #333;
     padding: 10px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 #newThreadButton:hover {
-    background-color: #449d44;
+    background-color: #fdd835;
 }
 
 .modal-content {
     display: none;
-    /* Hidden by default */
     position: absolute;
     top: 100%;
     right: 0;
@@ -50,7 +137,6 @@ header h1 {
     padding: 20px;
     border: 1px solid #888;
     width: 300px;
-    /* Adjust as needed */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 1;
 }
@@ -81,29 +167,26 @@ main {
 
 #noThreadsMessage {
     font-style: italic;
-    color: #777;
+    color: #fff; /* Blanco para contrastar con fondo */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .thread {
-    background-color: white;
-    border: 1px solid #ddd;
+    background-color: rgba(255, 255, 255, 0.9); /* Blanco semi-transparente */
+    border: 2px solid #d32f2f; /* Borde rojo navideño */
     padding: 15px;
     margin-bottom: 20px;
     width: 80%;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: relative;
-    /* Add this to position the date */
 }
 
 .thread h2 {
-    color: #555;
+    color: #388e3c; /* Verde navideño */
     display: flex;
-    /* Use flexbox to align items */
     align-items: center;
-    /* Vertically center items */
 }
 
-/* Estilos adicionales para el formulario */
 form label {
     display: block;
     margin-bottom: 5px;
@@ -118,23 +201,22 @@ form textarea {
     border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
-    /* Make sure padding doesn't affect width */
 }
 
 form button {
-    background-color: #5cb85c;
-    color: white;
+    background-color: #ffeb3b; /* Dorado */
+    color: #333;
     padding: 10px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 form button:hover {
-    background-color: #449d44;
+    background-color: #fdd835;
 }
 
-/* Estilos para la paginación */
 #pagination-container {
     display: flex;
     justify-content: center;
@@ -142,17 +224,18 @@ form button:hover {
 }
 
 .pagination-button {
-    background-color: #f4f4f4;
+    background-color: #ffeb3b; /* Dorado */
     color: #333;
     border: 1px solid #ddd;
     padding: 8px 12px;
     margin: 0 5px;
     cursor: pointer;
     border-radius: 4px;
+    font-weight: bold;
 }
 
 .pagination-button:hover {
-    background-color: #ddd;
+    background-color: #fdd835;
 }
 
 .pagination-button:disabled {
@@ -160,7 +243,6 @@ form button:hover {
     cursor: not-allowed;
 }
 
-/* Estilos para la fecha */
 .thread-date {
     position: absolute;
     top: 10px;
@@ -169,32 +251,20 @@ form button:hover {
     color: #777;
 }
 
-/* Styles for the search input */
-/*header input[type="text"] {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    margin-right: 10px;
-    width: 200px;
-}*/
-
-/* Style for the active page button */
 .pagination-button.active-page {
-    background-color: #007bff;
-    /* Blue */
+    background-color: #d32f2f; /* Rojo navideño */
     color: white;
-    border-color: #007bff;
+    border-color: #d32f2f;
 }
 
 footer {
     text-align: center;
-    /* Center the footer content */
     padding: 20px;
-    background-color: #333;
+    background: linear-gradient(to right, #388e3c, #d32f2f); /* Verde y rojo */
     color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* Like button style */
 .like-button {
     background-color: transparent;
     border: none;
@@ -210,49 +280,36 @@ footer {
 
 .like-button i {
     color: transparent;
-    /* Initially transparent */
     -webkit-text-stroke: 1px red;
-    /* For outline effect */
     text-stroke: 1px red;
     font-size: 1.2em;
-    /* Adjust size as needed */
 }
 
 .like-button.liked i {
     color: red;
-    /* Solid red when liked */
     -webkit-text-stroke: 0px;
-    /* Remove outline */
     text-stroke: 0px;
 }
 
-/* Verified badge style for FontAwesome icon */
 .insignia-verificado {
     color: #3897f0;
-    /* Azul como Instagram */
-    margin-left: 5px; /* Add some left margin */
+    margin-left: 5px;
     font-size: 0.7em;
-    /* Ajusta el tamaño si es necesario */
     vertical-align: middle;
-    /* Alinea con el texto */
 }
 
-/* Version style */
 footer .version {
     font-size: 0.8em;
-    color: #777;
+    color: #ffeb3b; /* Dorado */
     margin-top: 5px;
 }
 
-/* Styles for the search input outside the header */
 #searchInput {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     margin: 10px auto;
-    /* Center the input */
     width: 80%;
-    /* Adjust width as needed */
     display: block;
-    /* Make it a block element to center it */
+    background-color: rgba(255, 255, 255, 0.9);
 }

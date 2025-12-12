@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reclutamientos</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.2.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.2.0/firebase-database.js"></script>
  </head>
  <body>
   <header>
   <h1>Reclutamientos</h1>
+  <input type="text" id="searchInput" placeholder="Buscar por título...">
   <div id="newThreadButtonContainer">
   <button id="newThreadButton">+ Nuevo</button>
   <div class="modal-content" id="newThreadModalContent">
@@ -35,7 +40,14 @@
   <p id="noThreadsMessage">No hay hilos aún. Sé el primero.</p>
   <!-- Aquí irán los hilos -->
   </div>
+  <div id="pagination-container">
+  </div>
   </main>
+
+     <footer>
+  <p><a href="https://www.instagram.com/arc_clxn?igsh=djhzazNnbmFzOXIy">ARC_CLXN</a> &copy; 2025. Todos los derechos reservados.</p>
+       <p class="version">v1.0.0</p>
+   </footer>
 
   <script type="module" src="script.js"></script>
  </body>

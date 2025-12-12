@@ -36,7 +36,28 @@ function getUserId() {
     return userId;
 }
 
+// Function to update the countdown timer
+function updateCountdown() {
+    const now = new Date().getTime();
+    const christmas = new Date('December 25, 2025 00:00:00').getTime(); // Navidad 2025
+    const difference = christmas - now;
+
+    if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        document.getElementById('countdown').innerHTML = `Faltan ${days} días, ${hours} horas ${minutes} minutos y ${seconds} segundos para Navidad`;
+    } else {
+        document.getElementById('countdown').innerHTML = '¡Feliz Navidad!';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Start the countdown timer
+    updateCountdown();
+    setInterval(updateCountdown, 1000); // Update every second
+
     const newThreadButton = document.getElementById('newThreadButton');
     const newThreadModalContent = document.getElementById('newThreadModalContent');
     const closeButton = document.querySelector('.close-button');

@@ -170,13 +170,13 @@ form button:hover {
 }
 
 /* Styles for the search input */
-header input[type="text"] {
+/*header input[type="text"] {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     margin-right: 10px;
     width: 200px;
-}
+}*/
 
 /* Style for the active page button */
 .pagination-button.active-page {
@@ -242,4 +242,17 @@ footer .version {
     font-size: 0.8em;
     color: #777;
     margin-top: 5px;
+}
+
+/* Styles for the search input outside the header */
+#searchInput {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin: 10px auto;
+    /* Center the input */
+    width: 80%;
+    /* Adjust width as needed */
+    display: block;
+    /* Make it a block element to center it */
 }

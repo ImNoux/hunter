@@ -230,7 +230,7 @@ footer {
 .insignia-verificado {
     color: #3897f0;
     /* Azul como Instagram */
-    margin-left: 0.2px;
+    margin-left: 5px; /* Add some left margin */
     font-size: 0.7em;
     /* Ajusta el tamaño si es necesario */
     vertical-align: middle;

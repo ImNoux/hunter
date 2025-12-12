@@ -26,6 +26,16 @@ let currentPage = 1; // Current page number
 let totalThreads = 0; // Total number of threads
 let searchTerm = ''; // Search term
 
+// Function to get or generate a unique user ID
+function getUserId() {
+    let userId = localStorage.getItem('userId');
+    if (!userId) {
+        userId = 'user_' + Math.random().toString(36).substr(2, 9); // Generate unique ID
+        localStorage.setItem('userId', userId);
+    }
+    return userId;
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const newThreadButton = document.getElementById('newThreadButton');
     const newThreadModalContent = document.getElementById('newThreadModalContent');
@@ -77,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     let [key, thread] = filteredThreads[i];
                     let newThread = document.createElement('div');
                     newThread.classList.add('thread');
-                    const userId = 'user_id'; // Replace 'user_id' with actual user ID if you have authentication
+                    const userId = getUserId(); // Get unique user ID
                     let isLiked = thread.likes && thread.likes[userId]; // Check if current user liked
                     let insigniaVerificado = thread.verificado ? '<i class="fas fa-check-circle insignia-verificado"></i>' : ''; // Ícono de verificación azul como Instagram
                     let formattedLikeCount = formatLikeCount(thread.likeCount || 0);
@@ -109,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
             likeButtons.forEach(button => {
                 button.addEventListener('click', function () {
                     const threadId = this.dataset.threadId;
-                    const userId = 'user_id'; // Replace 'user_id' with actual user ID if you have authentication
+                    const userId = getUserId(); // Get unique user ID
                     const liked = this.classList.contains('liked');
                     const currentCount = parseInt(this.dataset.likeCount);
                     const newCount = liked ? currentCount - 1 : currentCount + 1;

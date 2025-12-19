@@ -360,6 +360,17 @@
     <div class="snowflake">❄</div>
     <div class="snowflake">❅</div>
 
+    <!-- Audio de fondo navideño con autoplay -->
+    <audio id="bgMusic" loop preload="auto" autoplay>
+        <source src="https://raw.githubusercontent.com/ImNoux/hunter/8f7548b36c4c20fbe2aa9aad7c2b1717484b8995/aseetes/navidad.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <!-- Botón opcional para controlar la música -->
+    <button id="musicToggle" style="position: fixed; top: 10px; right: 10px; z-index: 1001; background: #ffeb3b; border: none; padding: 10px; border-radius: 50%; cursor: pointer;">
+        <i class="fas fa-music"></i>
+    </button>
+
     <header>
         <h1>Reclutamientos</h1>
         <div id="newThreadButtonContainer">
@@ -410,5 +421,28 @@
     </footer>
 
     <script type="module" src="script.js"></script>
+    <script>
+        // Script para controlar el audio
+        document.addEventListener('DOMContentLoaded', function() {
+            const bgMusic = document.getElementById('bgMusic');
+            const musicToggle = document.getElementById('musicToggle');
+
+            // Intentar autoplay (puede fallar en algunos navegadores)
+            bgMusic.play().catch(() => {
+                console.log('Autoplay bloqueado; usa el botón para reproducir.');
+            });
+
+            // Botón para toggle play/pause
+            musicToggle.addEventListener('click', function() {
+                if (bgMusic.paused) {
+                    bgMusic.play();
+                    this.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    bgMusic.pause();
+                    this.innerHTML = '<i class="fas fa-music"></i>';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

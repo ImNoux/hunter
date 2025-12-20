@@ -16,30 +16,27 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Get a reference to the database
 const db = getDatabase(app);
+const threadsRef = ref(db, 'threads'); 
 
-const threadsRef = ref(db, 'threads'); // Reference to the threads in Firebase
-const threadsPerPage = 5; // Number of threads per page
-let currentPage = 1; // Current page number
-let totalThreads = 0; // Total number of threads
-let searchTerm = ''; // Search term
+const threadsPerPage = 5; 
+let currentPage = 1; 
+let totalThreads = 0; 
+let searchTerm = ''; 
 
-// Function to get or generate a unique user ID
+// --- FUNCIONES DE UTILIDAD ---
 function getUserId() {
     let userId = localStorage.getItem('userId');
     if (!userId) {
-        userId = 'user_' + Math.random().toString(36).substr(2, 9); // Generate unique ID
+        userId = 'user_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('userId', userId);
     }
     return userId;
 }
 
-// Function to update the countdown timer
 function updateCountdown() {
     const now = new Date().getTime();
-    const christmas = new Date('December 25, 2025 00:00:00').getTime(); // Navidad 2025
+    const christmas = new Date('December 25, 2025 00:00:00').getTime();
     const difference = christmas - now;
 
     if (difference > 0) {
@@ -53,26 +50,110 @@ function updateCountdown() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Start the countdown timer
-    updateCountdown();
-    setInterval(updateCountdown, 1000); // Update every second
+// --- LÓGICA DEL MENÚ (TOGGLE) ---
+// Función para abrir/cerrar menú al hacer clic
+window.toggleMenu = function() {
+    const dropdown = document.querySelector('.menu-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+};
 
-    // Script para controlar el audio (movido desde el HTML inline)
+// Cerrar el menú si se hace clic fuera
+window.addEventListener('click', function(event) {
+    if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
+        const dropdowns = document.getElementsByClassName("menu-dropdown");
+        for (let i = 0; i < dropdowns.length; i++) {
+            const openDropdown = dropdowns[i];
+            if (openDropdown.classList.contains('show')) {
+                openDropdown.classList.remove('show');
+            }
+        }
+    }
+});
+
+// --- FUNCIÓN PARA ABRIR VENTANAS DE INFO (CON NIEVE) ---
+window.openInfoPage = function(type) {
+    let title = "";
+    let content = "";
+    
+    if (type === 'updates') {
+        title = "Actualizaciones";
+        content = "<h3>v1.1.0</h3><ul><li>Menú desplegable mejorado.</li><li>Efecto de nieve en ventanas.</li><li>Optimización de carga.</li></ul>";
+    } else if (type === 'about') {
+        title = "Quiénes Somos";
+        content = "<h3>ARC_CLXN</h3><p>Somos un clan enfocado en la excelencia y el reclutamiento de los mejores usuarios de la plataforma.</p>";
+    } else if (type === 'contact') {
+        title = "Contactos";
+        content = "<h3>Contacto Directo</h3><p>Instagram: @arc_clxn</p><p>Discord: Disponible pronto.</p>";
+    }
+
+    const newWindow = window.open("", "_blank", "width=600,height=500");
+    newWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${title}</title>
+            <style>
+                body { 
+                    font-family: Arial; padding: 40px; background: linear-gradient(to bottom, #0f4c75, #3282b8); 
+                    color: white; text-align: center; overflow: hidden; height: 100vh; margin: 0; position: relative;
+                }
+                .box { 
+                    background: rgba(255, 255, 255, 0.95); color: #333; padding: 20px; 
+                    border-radius: 10px; border: 3px solid #d32f2f; position: relative; z-index: 10;
+                }
+                h2 { color: #d32f2f; }
+                button { background: #ffeb3b; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; margin-top: 20px; border-radius: 5px; }
+                button:hover { background-color: #fdd835; }
+                
+                /* Nieve en la ventana emergente */
+                .snow { position: absolute; top: -20px; color: #fff; font-size: 1.5em; animation: fall linear infinite; pointer-events: none; }
+                @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+            </style>
+        </head>
+        <body>
+            <div class="snow" style="left:10%; animation-duration:5s;">❄</div>
+            <div class="snow" style="left:30%; animation-duration:8s;">❅</div>
+            <div class="snow" style="left:50%; animation-duration:6s;">❄</div>
+            <div class="snow" style="left:70%; animation-duration:9s;">❅</div>
+            <div class="snow" style="left:90%; animation-duration:7s;">❄</div>
+
+            <div class="box">
+                <h2>${title}</h2>
+                <div>${content}</div>
+                <button onclick="window.close()">Cerrar Ventana</button>
+            </div>
+        </body>
+        </html>
+    `);
+};
+
+// --- LÓGICA PRINCIPAL (DOM LOADED) ---
+document.addEventListener('DOMContentLoaded', function () {
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // Audio Logic
     const bgMusic = document.getElementById('bgMusic');
     const musicToggle = document.getElementById('musicToggle');
-    bgMusic.play().catch(() => {
-        console.log('Autoplay bloqueado; usa el botón para reproducir.');
-    });
-    musicToggle.addEventListener('click', function() {
-        if (bgMusic.paused) {
-            bgMusic.play();
-            this.innerHTML = '<i class="fas fa-pause"></i>';
-        } else {
-            bgMusic.pause();
-            this.innerHTML = '<i class="fas fa-music"></i>';
-        }
-    });
+    
+    // Intentar reproducir música
+    if (bgMusic) {
+        bgMusic.play().catch(() => console.log('Autoplay bloqueado. Usa el botón.'));
+    }
+
+    if (musicToggle) {
+        musicToggle.addEventListener('click', function() {
+            if (bgMusic.paused) {
+                bgMusic.play();
+                this.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+                bgMusic.pause();
+                this.innerHTML = '<i class="fas fa-music"></i>';
+            }
+        });
+    }
 
     const newThreadButton = document.getElementById('newThreadButton');
     const newThreadModalContent = document.getElementById('newThreadModalContent');
@@ -81,70 +162,58 @@ document.addEventListener('DOMContentLoaded', function () {
     const threadContainer = document.querySelector('.thread-container');
     const noThreadsMessage = document.getElementById('noThreadsMessage');
     const paginationContainer = document.getElementById('pagination-container');
-    const searchInput = document.getElementById('searchInput'); // Search input
+    const searchInput = document.getElementById('searchInput');
 
-    // Function to save threads to Firebase
     function saveThreadToFirebase(thread) {
-        // Add timestamp, likeCount, likes, and verificado to the thread
-        thread.timestamp = Date.now(); // Use numeric timestamp for proper sorting
-        thread.displayDate = new Date().toLocaleDateString('es-ES'); // Display date in dd/mm/yyyy format
-        thread.likeCount = 0; // Initialize likeCount
-        thread.likes = {}; // Initialize likes object
-        thread.verificado = false; // Initialize verificado as false (change to true for verified threads)
+        thread.timestamp = Date.now();
+        thread.displayDate = new Date().toLocaleDateString('es-ES');
+        thread.likeCount = 0;
+        thread.likes = {};
+        thread.verificado = false;
         push(threadsRef, thread);
     }
 
-    // Function to format like counts
     function formatLikeCount(likeCount) {
-        if (likeCount >= 1000000) {
-            const mill = likeCount / 1000000;
-            return (mill % 1 === 0 ? mill.toFixed(0) : mill.toFixed(1)) + ' mill.';
-        } else if (likeCount >= 1000) {
-            return (likeCount / 1000).toFixed(0) + ' mil';
-        } else {
-            return likeCount;
-        }
+        if (likeCount >= 1000000) return (likeCount / 1000000).toFixed(1) + ' mill.';
+        if (likeCount >= 1000) return (likeCount / 1000).toFixed(0) + ' mil';
+        return likeCount;
     }
 
-    // Function to load threads from Firebase with pagination and search
     function loadThreadsFromFirebase(page, searchTerm = '') {
         const firstThreadIndex = (page - 1) * threadsPerPage;
-
-        // Query to get all threads, ordered by timestamp descending
         const getThreads = query(threadsRef, orderByChild('timestamp'));
 
         onValue(getThreads, (snapshot) => {
-            threadContainer.innerHTML = ''; // Clear the thread container
+            threadContainer.innerHTML = '';
             let threads = snapshot.val();
             if (threads) {
-                // Sort threads by timestamp descending (newest first)
                 let allThreads = Object.entries(threads).sort((a, b) => b[1].timestamp - a[1].timestamp);
-                // Filter by search term
                 let filteredThreads = allThreads.filter(([key, thread]) =>
                     thread.title.toLowerCase().includes(searchTerm.toLowerCase())
                 );
-                totalThreads = filteredThreads.length; // Update total threads for pagination
-                // Display threads for the current page
+                totalThreads = filteredThreads.length;
+
                 for (let i = firstThreadIndex; i < firstThreadIndex + threadsPerPage && i < filteredThreads.length; i++) {
                     let [key, thread] = filteredThreads[i];
                     let newThread = document.createElement('div');
                     newThread.classList.add('thread');
-                    const userId = getUserId(); // Get unique user ID
-                    let isLiked = thread.likes && thread.likes[userId]; // Check if current user liked
-                    let insigniaVerificado = thread.verificado ? '<i class="fas fa-check-circle insignia-verificado"></i>' : ''; // Ícono de verificación azul como Instagram
+                    const userId = getUserId();
+                    let isLiked = thread.likes && thread.likes[userId];
+                    let insigniaVerificado = thread.verificado ? '<i class="fas fa-check-circle insignia-verificado"></i>' : '';
                     let formattedLikeCount = formatLikeCount(thread.likeCount || 0);
+                    
                     newThread.innerHTML = `
-            <div class="thread-date">${thread.displayDate}</div>
-            <h2>${thread.title} ${insigniaVerificado}</h2>
-            <p><strong>Categoría:</strong> ${thread.category}</p>
-            <p>${thread.description}</p>
-            <button class="like-button ${isLiked ? 'liked' : ''}" data-thread-id="${key}" data-like-count="${thread.likeCount || 0}">
-              <i class="fas fa-heart"></i> ${formattedLikeCount}
-            </button>
-          `;
+                        <div class="thread-date">${thread.displayDate}</div>
+                        <h2>${thread.title} ${insigniaVerificado}</h2>
+                        <p><strong>Categoría:</strong> ${thread.category}</p>
+                        <p>${thread.description}</p>
+                        <button class="like-button ${isLiked ? 'liked' : ''}" data-thread-id="${key}" data-like-count="${thread.likeCount || 0}">
+                          <i class="fas fa-heart"></i> ${formattedLikeCount}
+                        </button>
+                    `;
                     threadContainer.appendChild(newThread);
                 }
-                // Show "No threads yet" message if no threads match the search term
+
                 if (filteredThreads.length === 0) {
                     noThreadsMessage.style.display = 'block';
                     threadContainer.appendChild(noThreadsMessage);
@@ -152,142 +221,91 @@ document.addEventListener('DOMContentLoaded', function () {
                     noThreadsMessage.style.display = 'none';
                 }
             } else {
-                noThreadsMessage.style.display = 'block'; // Show the "No threads yet" message
+                noThreadsMessage.style.display = 'block';
                 threadContainer.appendChild(noThreadsMessage);
                 totalThreads = 0;
             }
-            createPaginationButtons(totalThreads, searchTerm); // Create pagination buttons after loading threads
-            // Attach event listeners to like buttons after they are added to the DOM
-            const likeButtons = document.querySelectorAll('.like-button');
-            likeButtons.forEach(button => {
-                button.addEventListener('click', function () {
+            createPaginationButtons(totalThreads, searchTerm);
+            
+            // Re-vincular botones de Like
+            document.querySelectorAll('.like-button').forEach(button => {
+                button.onclick = function() {
                     const threadId = this.dataset.threadId;
-                    const userId = getUserId(); // Get unique user ID
+                    const userId = getUserId();
                     const liked = this.classList.contains('liked');
                     const currentCount = parseInt(this.dataset.likeCount);
                     const newCount = liked ? currentCount - 1 : currentCount + 1;
                     const updates = {};
                     updates[`/threads/${threadId}/likeCount`] = newCount;
                     updates[`/threads/${threadId}/likes/${userId}`] = liked ? null : true;
-
                     update(ref(db), updates);
-
-                    // Update the button immediately
-                    this.classList.toggle('liked');
-                    this.innerHTML = `<i class="fas fa-heart"></i> ${formatLikeCount(newCount)}`;
-                    this.dataset.likeCount = newCount;
-                });
+                };
             });
         });
     }
 
-    // Function to create pagination buttons
     function createPaginationButtons(totalThreads, searchTerm = '') {
-        paginationContainer.innerHTML = ''; // Clear the pagination container
+        paginationContainer.innerHTML = '';
         const totalPages = Math.ceil(totalThreads / threadsPerPage);
 
-        // "Previous" button
         const prevButton = document.createElement('button');
         prevButton.textContent = '« Anterior';
         prevButton.classList.add('pagination-button');
-        prevButton.disabled = (currentPage === 1); // Disable if on the first page
-        prevButton.addEventListener('click', () => {
-            if (currentPage > 1) {
-                currentPage--;
-                loadThreadsFromFirebase(currentPage, searchTerm);
-                updatePaginationButtons();
-            }
-        });
+        prevButton.disabled = (currentPage === 1);
+        prevButton.onclick = () => { if (currentPage > 1) { currentPage--; loadThreadsFromFirebase(currentPage, searchTerm); } };
         paginationContainer.appendChild(prevButton);
 
-        // Create numbered page buttons
         for (let i = 1; i <= totalPages; i++) {
             let pageButton = document.createElement('button');
             pageButton.textContent = i;
             pageButton.classList.add('pagination-button');
-            if (i === currentPage) {
-                pageButton.classList.add('active-page');
-            }
-            pageButton.addEventListener('click', () => {
-                currentPage = i;
-                loadThreadsFromFirebase(currentPage, searchTerm);
-                updatePaginationButtons();
-            });
+            if (i === currentPage) pageButton.classList.add('active-page');
+            pageButton.onclick = () => { currentPage = i; loadThreadsFromFirebase(currentPage, searchTerm); };
             paginationContainer.appendChild(pageButton);
         }
 
-        // "Next" button
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Siguiente »';
         nextButton.classList.add('pagination-button');
-        nextButton.disabled = (currentPage === totalPages); // Disable if on the last page
-        nextButton.addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                currentPage++;
-                loadThreadsFromFirebase(currentPage, searchTerm);
-                updatePaginationButtons();
-            }
-        });
+        nextButton.disabled = (currentPage === totalPages || totalPages === 0);
+        nextButton.onclick = () => { if (currentPage < totalPages) { currentPage++; loadThreadsFromFirebase(currentPage, searchTerm); } };
         paginationContainer.appendChild(nextButton);
     }
 
-    // Function to update pagination buttons based on current page
-    function updatePaginationButtons() {
-        const pageButtons = paginationContainer.querySelectorAll('.pagination-button');
-        pageButtons.forEach(button => {
-            if (parseInt(button.textContent) === currentPage) {
-                button.classList.add('active-page');
-            } else {
-                button.classList.remove('active-page');
-            }
-        });
-    }
-
-    // Load threads from Firebase on page load
+    // Inicializar carga de hilos
     loadThreadsFromFirebase(currentPage, searchTerm);
 
-    // Event listener for "+ Nuevo" button click
-    newThreadButton.addEventListener('click', function (event) {
-        newThreadModalContent.style.display = (newThreadModalContent.style.display === 'none') ? 'block' : 'none';
-    });
-
-    // Event listener for modal close button
-    closeButton.addEventListener('click', function () {
-        newThreadModalContent.style.display = 'none';
-    });
-
-    // Event listener for new thread form submission
-    newThreadForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        let category = document.getElementById('category').value;
-        let title = document.getElementById('title').value;
-        let description = document.getElementById('description').value;
-
-        // Create a new thread object
-        let thread = {
-            title: title,
-            category: category,
-            description: description
+    // Eventos del Modal Nuevo Hilo
+    if(newThreadButton) {
+        newThreadButton.onclick = () => {
+            newThreadModalContent.style.display = (newThreadModalContent.style.display === 'none') ? 'block' : 'none';
         };
+    }
 
-        // Save the thread to Firebase
-        saveThreadToFirebase(thread);
+    if(closeButton) {
+        closeButton.onclick = () => { newThreadModalContent.style.display = 'none'; };
+    }
 
-        // Close the modal
-        newThreadModalContent.style.display = 'none';
+    if(newThreadForm) {
+        newThreadForm.onsubmit = (event) => {
+            event.preventDefault();
+            let thread = {
+                title: document.getElementById('title').value,
+                category: document.getElementById('category').value,
+                description: document.getElementById('description').value
+            };
+            saveThreadToFirebase(thread);
+            newThreadModalContent.style.display = 'none';
+            newThreadForm.reset();
+            loadThreadsFromFirebase(currentPage, searchTerm);
+        };
+    }
 
-        // Clear the form
-        newThreadForm.reset();
-
-        // Reload the threads
-        loadThreadsFromFirebase(currentPage, searchTerm);
-    });
-
-    // Event listener for search input
-    searchInput.addEventListener('input', function (event) {
-        searchTerm = event.target.value;
-        currentPage = 1; // Reset current page to 1
-        loadThreadsFromFirebase(currentPage, searchTerm);
-    });
+    if(searchInput) {
+        searchInput.oninput = (event) => {
+            searchTerm = event.target.value;
+            currentPage = 1;
+            loadThreadsFromFirebase(currentPage, searchTerm);
+        };
+    }
 });

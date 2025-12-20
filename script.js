@@ -46,7 +46,7 @@ function updateCountdown() {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
         document.getElementById('countdown').innerHTML = `Faltan ${days} días, ${hours} horas ${minutes} minutos y ${seconds} segundos para Navidad`;
     } else {
         document.getElementById('countdown').innerHTML = '¡Feliz Navidad!';
@@ -57,6 +57,35 @@ document.addEventListener('DOMContentLoaded', function () {
     // Start the countdown timer
     updateCountdown();
     setInterval(updateCountdown, 1000); // Update every second
+
+    // Script para controlar el audio (movido desde el HTML inline)
+    const bgMusic = document.getElementById('bgMusic');
+    const musicToggle = document.getElementById('musicToggle');
+    bgMusic.play().catch(() => {
+        console.log('Autoplay bloqueado; usa el botón para reproducir.');
+    });
+    musicToggle.addEventListener('click', function() {
+        if (bgMusic.paused) {
+            bgMusic.play();
+            this.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+            bgMusic.pause();
+            this.innerHTML = '<i class="fas fa-music"></i>';
+        }
+    });
+
+    // Funcionalidad del menú hamburguesa
+    const hamburgerButton = document.getElementById('hamburgerButton');
+    const hamburgerModal = document.getElementById('hamburgerModal');
+    hamburgerButton.addEventListener('click', function() {
+        hamburgerModal.style.display = hamburgerModal.style.display === 'block' ? 'none' : 'block';
+    });
+    // Cerrar el menú al hacer clic fuera
+    document.addEventListener('click', function(event) {
+        if (!hamburgerButton.contains(event.target) && !hamburgerModal.contains(event.target)) {
+            hamburgerModal.style.display = 'none';
+        }
+    });
 
     const newThreadButton = document.getElementById('newThreadButton');
     const newThreadModalContent = document.getElementById('newThreadModalContent');

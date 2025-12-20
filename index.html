@@ -29,25 +29,39 @@
             </div>
         </div>
 
-        <h1>Reclutamientos</h1>
+        <h1>COMUNIDAD ARC</h1>
 
         <div id="newThreadButtonContainer">
-            <button id="newThreadButton">Publicar</button>
+            <button id="newThreadButton">+ Nuevo</button>
             
             <div class="modal-content" id="newThreadModalContent">
-                <span class="close-button">&times;</span>
+                <span class="close-button" onclick="closeModal('newThreadModalContent')">&times;</span>
                 <h2>Crear Nuevo Hilo</h2>
                 <form id="newThreadForm">
                     <label for="category">Categoría:</label>
                     <input type="text" id="category" name="category" value="Hunter" readonly><br><br>
-
                     <label for="title">Título:</label>
-                    <input type="text" id="title" name="title" placeholder="ej. insertar usuario de roblox" required><br><br>
-
+                    <input type="text" id="title" name="title" placeholder="ej. usuario de roblox" required><br><br>
                     <label for="description">Descripción:</label>
-                    <input type="text" id="description" name="description" placeholder="ej. inserte @(ig de la persona que te reclutó)" required><br><br>
-
+                    <input type="text" id="description" name="description" placeholder="ej. @ig de quien te reclutó" required><br><br>
                     <button type="submit">Publicar Hilo</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="commentsModal" class="modal-overlay">
+            <div class="comments-content">
+                <span class="close-button" onclick="closeModal('commentsModal')">&times;</span>
+                <h3 id="commentsTitle">Comentarios</h3>
+                
+                <div id="commentsList">
+                    <p style="text-align:center; color:#777;">Cargando...</p>
+                </div>
+
+                <form id="commentForm">
+                    <input type="text" id="usernameInput" placeholder="Tu Nombre" required autocomplete="off" maxlength="15">
+                    <input type="text" id="commentInput" placeholder="Escribe..." required autocomplete="off">
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
         </div>
@@ -65,20 +79,22 @@
         <div class="thread-container">
             <p id="noThreadsMessage">No hay hilos aún. Sé el primero.</p>
         </div>
-        <div id="pagination-container">
-        </div>
+        <div id="pagination-container"></div>
     </main>
 
     <footer>
         <p><a href="https://www.instagram.com/arc_clxn?igsh=djhzazNnbmFzOXIy">ARC_CLXN</a> &copy; 2025. Todos los derechos reservados.</p>
-        <p class="version">v1.1.0</p>
+        <p class="version">v1.3.0</p>
     </footer>
 
     <script type="module" src="script.js"></script>
     <script>
-        // Funciones visuales básicas
         function toggleMenu() {
             document.getElementById("menuDropdown").classList.toggle("show");
+        }
+
+        window.closeModal = function(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
 
         window.onclick = function(event) {
@@ -95,43 +111,13 @@
 
         function openInfoPage(type) {
             let title = "", content = "";
-            if (type === 'updates') {
-                title = "Actualizaciones";
-                content = "<h3>v1.1.0</h3><ul><li>Menú desplegable mejorado.</li><li>Optimización de carga.</li></ul>";
-            } else if (type === 'about') {
-                title = "Quiénes Somos";
-                content = "<h3>ARC_CLXN</h3><p>Somos un equipo dedicado a encontrar los mejores talentos.</p>";
-            } else if (type === 'contact') {
-                title = "Contactos";
-                content = "<h3>Instagram</h3><p>@arc_clxn</p>";
-            }
+            if (type === 'updates') { title = "Actualizaciones"; content = "<h3>v1.3.0</h3><ul><li>Nombre de usuario en comentarios.</li><li>Sistema de vistas.</li></ul>"; }
+            else if (type === 'about') { title = "Quiénes Somos"; content = "<h3>ARC_CLXN</h3><p>Somos un equipo dedicado a encontrar los mejores talentos.</p>"; }
+            else if (type === 'contact') { title = "Contactos"; content = "<h3>Instagram</h3><p>@arc_clxn</p>"; }
 
             const newWindow = window.open("", "_blank", "width=600,height=500");
             newWindow.document.write(`
-                <!DOCTYPE html>
-                <html lang="es">
-                <head>
-                    <title>${title}</title>
-                    <style>
-                        body { 
-                            font-family: Arial; padding: 40px; background: linear-gradient(to bottom, #0f4c75, #3282b8); 
-                            color: white; text-align: center; margin: 0; position: relative; overflow: hidden; height: 100vh;
-                        }
-                        /* Nieve en ventana emergente */
-                        .snowflake { position: absolute; top: -20px; color: #fff; font-size: 1.5em; animation: fall linear infinite; pointer-events: none; }
-                        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
-
-                        .container { background: rgba(255, 255, 255, 0.95); color: #333; padding: 30px; border-radius: 10px; border: 2px solid #d32f2f; position: relative; z-index: 10; }
-                        button { margin-top: 20px; padding: 10px; background: #ffeb3b; border: none; cursor: pointer; font-weight: bold; }
-                    </style>
-                </head>
-                <body>
-                    <div class="snowflake" style="left: 10%; animation-duration: 5s;">❄</div>
-                    <div class="snowflake" style="left: 50%; animation-duration: 4s;">❄</div>
-                    <div class="snowflake" style="left: 90%; animation-duration: 6s;">❄</div>
-                    <div class="container"><h2>${title}</h2>${content}<button onclick="window.close()">Cerrar</button></div>
-                </body>
-                </html>
+                <!DOCTYPE html><html lang="es"><head><title>${title}</title><style>body{font-family:Arial;padding:40px;background:linear-gradient(to bottom,#0f4c75,#3282b8);color:white;text-align:center;margin:0;overflow:hidden;height:100vh;}.snowflake{position:absolute;top:-20px;color:#fff;font-size:1.5em;animation:fall linear infinite;pointer-events:none;}@keyframes fall{to{transform:translateY(110vh) rotate(360deg);}}.container{background:rgba(255,255,255,0.95);color:#333;padding:30px;border-radius:10px;border:2px solid #d32f2f;position:relative;z-index:10;}button{margin-top:20px;padding:10px;background:#ffeb3b;border:none;cursor:pointer;font-weight:bold;}</style></head><body><div class="snowflake" style="left:10%;animation-duration:5s;">❄</div><div class="snowflake" style="left:50%;animation-duration:4s;">❄</div><div class="snowflake" style="left:90%;animation-duration:6s;">❄</div><div class="container"><h2>${title}</h2>${content}<button onclick="window.close()">Cerrar</button></div></body></html>
             `);
         }
         

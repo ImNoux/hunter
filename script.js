@@ -61,6 +61,7 @@ window.openComments = function(threadId) {
     const list = document.getElementById('commentsList');
     const usernameInput = document.getElementById('usernameInput');
 
+    // Cargar nombre guardado
     const savedName = localStorage.getItem('chatUsername');
     if (savedName && usernameInput) {
         usernameInput.value = savedName;
@@ -69,11 +70,13 @@ window.openComments = function(threadId) {
     list.innerHTML = '<p style="text-align:center;">Cargando...</p>';
     modal.style.display = "block";
 
+    // 1. INCREMENTAR VISTAS
     const threadViewRef = ref(db, `threads/${threadId}/views`);
     runTransaction(threadViewRef, (currentViews) => {
         return (currentViews || 0) + 1;
     });
 
+    // 2. CARGAR COMENTARIOS
     const commentsRef = ref(db, `threads/${threadId}/comments`);
     off(commentsRef);
 
@@ -145,31 +148,17 @@ document.addEventListener('DOMContentLoaded', function () {
         push(threadsRef, thread);
     }
 
-    // --- FUNCIÓN DE FORMATO CORREGIDA (FORZANDO ELIMINACIÓN DE .0) ---
+    // --- FUNCIÓN DE FORMATO LIMPIA ---
     function formatCount(count) {
-        let num = Number(count);
-        
-        if (num >= 1000000) {
-            // Convertimos a string con 1 decimal: "1.0", "1.5"
-            let val = (num / 1000000).toFixed(0);
-            // Si termina en .0, lo cortamos
-            if (val.endsWith('.0')) {
-                val = val.slice(0, -2); // Elimina los últimos 2 caracteres
-            }
-            return val + ' mill.';
+        if (count >= 1000000) {
+            // parseFloat elimina automáticamente los ceros extra (1.0 -> 1)
+            return parseFloat((count / 1000000).toFixed(1)) + ' mill.';
         }
-        
-        if (num >= 1000) {
-            // Convertimos a string con 1 decimal: "850.0", "850.5"
-            let val = (num / 1000).toFixed(0);
-            // Si termina en .0, lo cortamos
-            if (val.endsWith('.0')) {
-                val = val.slice(0, -2); // Elimina los últimos 2 caracteres
-            }
-            return val + ' mil';
+        if (count >= 1000) {
+            // parseFloat convierte "850.0" en 850
+            return parseFloat((count / 1000).toFixed(0)) + ' mil';
         }
-        
-        return num;
+        return count;
     }
 
     function loadThreadsFromFirebase(page, searchTerm = '') {
@@ -196,6 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     
                     let rawCommentCount = thread.comments ? Object.keys(thread.comments).length : 0;
                     
+                    // Aplicar formato limpio a todo
                     let formattedLikeCount = formatCount(thread.likeCount || 0);
                     let formattedViewCount = formatCount(thread.views || 0);
                     let formattedCommentCount = formatCount(rawCommentCount);

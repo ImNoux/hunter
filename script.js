@@ -2,7 +2,6 @@
 import { initializeApp } from "https://esm.sh/firebase/app";
 import { getDatabase, ref, push, set, onValue, query, orderByKey, limitToFirst, orderByChild, limitToLast, update } from "https://esm.sh/firebase/database";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDM9E8Y_YW-ld8MH8-yKS345hklA0v5P_w",
     authDomain: "hunterteam.firebaseapp.com",
@@ -14,7 +13,6 @@ const firebaseConfig = {
     measurementId: "G-W6E0YQ8PEJ"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const threadsRef = ref(db, 'threads'); 
@@ -50,8 +48,7 @@ function updateCountdown() {
     }
 }
 
-// --- LÓGICA DEL MENÚ (TOGGLE) ---
-// Función para abrir/cerrar menú al hacer clic
+// --- MENÚ Y POPUPS ---
 window.toggleMenu = function() {
     const dropdown = document.querySelector('.menu-dropdown');
     if (dropdown) {
@@ -59,7 +56,6 @@ window.toggleMenu = function() {
     }
 };
 
-// Cerrar el menú si se hace clic fuera
 window.addEventListener('click', function(event) {
     if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
         const dropdowns = document.getElementsByClassName("menu-dropdown");
@@ -72,20 +68,20 @@ window.addEventListener('click', function(event) {
     }
 });
 
-// --- FUNCIÓN PARA ABRIR VENTANAS DE INFO (CON NIEVE) ---
+// Función SIN NIEVE
 window.openInfoPage = function(type) {
     let title = "";
     let content = "";
     
     if (type === 'updates') {
         title = "Actualizaciones";
-        content = "<h3>v1.1.0</h3><ul><li>Menú desplegable mejorado.</li><li>Efecto de nieve en ventanas.</li><li>Optimización de carga.</li></ul>";
+        content = "<h3>v1.1.0</h3><ul><li>Menú desplegable mejorado.</li><li>Optimización de carga.</li></ul>";
     } else if (type === 'about') {
         title = "Quiénes Somos";
-        content = "<h3>ARC_CLXN</h3><p>Somos un clan enfocado en la excelencia y el reclutamiento de los mejores usuarios de la plataforma.</p>";
+        content = "<h3>ARC_CLXN</h3><p>Somos un clan enfocado en la excelencia y el reclutamiento de los mejores usuarios.</p>";
     } else if (type === 'contact') {
         title = "Contactos";
-        content = "<h3>Contacto Directo</h3><p>Instagram: @arc_clxn</p><p>Discord: Disponible pronto.</p>";
+        content = "<h3>Contacto Directo</h3><p>Instagram: @arc_clxn</p>";
     }
 
     const newWindow = window.open("", "_blank", "width=600,height=500");
@@ -97,28 +93,18 @@ window.openInfoPage = function(type) {
             <style>
                 body { 
                     font-family: Arial; padding: 40px; background: linear-gradient(to bottom, #0f4c75, #3282b8); 
-                    color: white; text-align: center; overflow: hidden; height: 100vh; margin: 0; position: relative;
+                    color: white; text-align: center; margin: 0;
                 }
                 .box { 
                     background: rgba(255, 255, 255, 0.95); color: #333; padding: 20px; 
-                    border-radius: 10px; border: 3px solid #d32f2f; position: relative; z-index: 10;
+                    border-radius: 10px; border: 3px solid #d32f2f;
                 }
                 h2 { color: #d32f2f; }
                 button { background: #ffeb3b; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; margin-top: 20px; border-radius: 5px; }
                 button:hover { background-color: #fdd835; }
-                
-                /* Nieve en la ventana emergente */
-                .snow { position: absolute; top: -20px; color: #fff; font-size: 1.5em; animation: fall linear infinite; pointer-events: none; }
-                @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
             </style>
         </head>
         <body>
-            <div class="snow" style="left:10%; animation-duration:5s;">❄</div>
-            <div class="snow" style="left:30%; animation-duration:8s;">❅</div>
-            <div class="snow" style="left:50%; animation-duration:6s;">❄</div>
-            <div class="snow" style="left:70%; animation-duration:9s;">❅</div>
-            <div class="snow" style="left:90%; animation-duration:7s;">❄</div>
-
             <div class="box">
                 <h2>${title}</h2>
                 <div>${content}</div>
@@ -129,31 +115,12 @@ window.openInfoPage = function(type) {
     `);
 };
 
-// --- LÓGICA PRINCIPAL (DOM LOADED) ---
+// --- LÓGICA PRINCIPAL ---
 document.addEventListener('DOMContentLoaded', function () {
     updateCountdown();
     setInterval(updateCountdown, 1000);
 
-    // Audio Logic
-    const bgMusic = document.getElementById('bgMusic');
-    const musicToggle = document.getElementById('musicToggle');
-    
-    // Intentar reproducir música
-    if (bgMusic) {
-        bgMusic.play().catch(() => console.log('Autoplay bloqueado. Usa el botón.'));
-    }
-
-    if (musicToggle) {
-        musicToggle.addEventListener('click', function() {
-            if (bgMusic.paused) {
-                bgMusic.play();
-                this.innerHTML = '<i class="fas fa-pause"></i>';
-            } else {
-                bgMusic.pause();
-                this.innerHTML = '<i class="fas fa-music"></i>';
-            }
-        });
-    }
+    // (Código de audio eliminado)
 
     const newThreadButton = document.getElementById('newThreadButton');
     const newThreadModalContent = document.getElementById('newThreadModalContent');
@@ -227,7 +194,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
             createPaginationButtons(totalThreads, searchTerm);
             
-            // Re-vincular botones de Like
             document.querySelectorAll('.like-button').forEach(button => {
                 button.onclick = function() {
                     const threadId = this.dataset.threadId;
@@ -272,10 +238,8 @@ document.addEventListener('DOMContentLoaded', function () {
         paginationContainer.appendChild(nextButton);
     }
 
-    // Inicializar carga de hilos
     loadThreadsFromFirebase(currentPage, searchTerm);
 
-    // Eventos del Modal Nuevo Hilo
     if(newThreadButton) {
         newThreadButton.onclick = () => {
             newThreadModalContent.style.display = (newThreadModalContent.style.display === 'none') ? 'block' : 'none';

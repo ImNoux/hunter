@@ -1,6 +1,5 @@
-/* --- 1. RESETEO GLOBAL Y CORRECCIÓN DE ANCHO --- */
+/* --- 1. RESETEO GLOBAL --- */
 *, *::before, *::after { box-sizing: border-box; }
-
 html, body {
     width: 100%; margin: 0; padding: 0; overflow-x: hidden;
     font-family: Arial, sans-serif;
@@ -8,11 +7,8 @@ html, body {
     color: #333; position: relative;
 }
 
-/* --- 2. EFECTO DE NIEVE --- */
-.snowflake {
-    position: absolute; top: -10px; color: #fff; font-size: 1em;
-    animation: fall linear infinite; pointer-events: none; z-index: 1000;
-}
+/* --- 2. NIEVE --- */
+.snowflake { position: absolute; top: -10px; color: #fff; font-size: 1em; animation: fall linear infinite; pointer-events: none; z-index: 1000; }
 @keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
 .snowflake:nth-child(odd) { animation-duration: 10s; left: 10%; }
 .snowflake:nth-child(even) { animation-duration: 15s; left: 20%; }
@@ -26,27 +22,20 @@ html, body {
 
 /* --- 3. HEADER --- */
 header {
-    background: linear-gradient(to right, #d32f2f, #388e3c);
-    color: white; padding: 10px 15px; text-align: center;
-    position: relative; display: flex; justify-content: space-between; 
+    background: linear-gradient(to right, #d32f2f, #388e3c); color: white; padding: 10px 15px;
+    text-align: center; position: relative; display: flex; justify-content: space-between; 
     align-items: center; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     width: 100% !important; margin: 0 !important;
 }
-
 header h1 {
     margin: 0 5px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     animation: christmasLights 2s infinite; font-size: 1.2em; flex-grow: 1;
 }
+@keyframes christmasLights { 0% { color: #d32f2f; } 25% { color: #388e3c; } 50% { color: #1976d2; } 75% { color: #ffeb3b; } 100% { color: #d32f2f; } }
 
-@keyframes christmasLights {
-    0% { color: #d32f2f; } 25% { color: #388e3c; }
-    50% { color: #1976d2; } 75% { color: #ffeb3b; } 100% { color: #d32f2f; }
-}
-
-/* --- 4. BOTONES DEL HEADER --- */
+/* --- 4. BOTONES HEADER --- */
 .header-actions { display: flex; gap: 10px; align-items: center; }
 .menu-container, #newThreadButtonContainer { position: relative; margin: 0; }
-
 .menu-btn, #newThreadButton {
     background-color: #fff; color: #d32f2f; padding: 8px 12px;
     border: 2px solid #d32f2f; border-radius: 4px; cursor: pointer;
@@ -55,17 +44,17 @@ header h1 {
 #newThreadButton { background-color: #ffeb3b; color: #333; border: none; }
 .menu-btn:hover, #newThreadButton:hover { filter: brightness(0.9); }
 
-/* --- 5. MENÚ DESPLEGABLE --- */
+/* --- 5. MENÚ --- */
 .menu-dropdown {
     display: none; position: absolute; left: 0; top: 100%;
-    background-color: #f9f9f9; min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); z-index: 1002;
-    border-radius: 4px; overflow: hidden; text-align: center;
+    background-color: #f9f9f9; min-width: 160px; z-index: 1002;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); border-radius: 4px;
+    overflow: hidden; text-align: center;
 }
 .show { display: block !important; }
 .menu-dropdown a {
-    color: black; padding: 12px 16px; text-decoration: none;
-    display: block; border-bottom: 1px solid #eee; text-align: center;
+    color: black; padding: 12px 16px; text-decoration: none; display: block;
+    border-bottom: 1px solid #eee; text-align: center;
 }
 .menu-dropdown a:hover { background-color: #ddd; color: #d32f2f; }
 
@@ -75,22 +64,15 @@ header h1 {
     margin-top: 15px; font-size: 1em; color: #ffeb3b; font-weight: bold;
     flex-wrap: nowrap; gap: 10px; width: 100%; padding: 0 10px;
 }
-.puppy {
-    width: 45px; height: 45px; animation: bounce 2s infinite;
-    flex-shrink: 0; object-fit: contain;
-}
+.puppy { width: 45px; height: 45px; animation: bounce 2s infinite; flex-shrink: 0; object-fit: contain; }
 #countdown { text-align: center; flex: 1; line-height: 1.3; }
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); }
-}
+@keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-10px); } 60% { transform: translateY(-5px); } }
 
-/* --- 7. MODAL --- */
+/* --- 7. MODAL NUEVO HILO --- */
 .modal-content {
     display: none; position: absolute; top: 100%; right: 0;
     background-color: #fefefe; margin-top: 10px; padding: 20px;
-    border: 1px solid #888; width: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 1005;
+    border: 1px solid #888; width: 300px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); z-index: 1005;
 }
 .close-button { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
 .close-button:hover { color: black; cursor: pointer; }
@@ -99,7 +81,6 @@ header h1 {
 main { padding: 20px; }
 .thread-container { display: flex; flex-direction: column; align-items: center; }
 #noThreadsMessage { font-style: italic; color: #fff; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); }
-
 .thread {
     background-color: rgba(255, 255, 255, 0.9); border: 2px solid #d32f2f;
     padding: 15px; margin-bottom: 20px; width: 90%; max-width: 600px;
@@ -128,7 +109,6 @@ form button:hover { background-color: #fdd835; }
 .pagination-button:hover { background-color: #fdd835; }
 .pagination-button:disabled { opacity: 0.5; cursor: not-allowed; }
 .pagination-button.active-page { background-color: #d32f2f; color: white; border-color: #d32f2f; }
-
 .thread-date { position: absolute; top: 10px; right: 10px; font-size: 0.8em; color: #777; }
 
 /* --- 11. FOOTER --- */
@@ -139,37 +119,56 @@ footer {
 }
 footer .version { font-size: 0.8em; color: #ffeb3b; margin-top: 5px; }
 
-/* --- 12. BOTONES DE INTERACCIÓN (ACCIONES) --- */
-.thread-actions {
-    display: flex;
-    gap: 15px; /* Espacio entre el botón de like y comentarios */
-    margin-top: 10px;
-}
-
-/* Botón Like */
-.like-button {
-    background-color: transparent; border: none; color: red;
-    cursor: pointer; font-size: 1em; padding: 5px 10px;
-}
-.like-button:hover { color: #d32f2f; }
-.like-button i { color: transparent; -webkit-text-stroke: 1px red; font-size: 1.2em; }
-.like-button.liked i { color: red; -webkit-text-stroke: 0px; }
-
-/* Botón Comentarios */
-.comment-button {
-    background-color: transparent;
-    border: none;
-    color: #555; /* Color gris oscuro */
-    cursor: pointer;
-    font-size: 1em;
-    padding: 5px 10px;
-}
-.comment-button:hover { color: #0f4c75; /* Azul al pasar el mouse */ }
+/* --- 12. BOTONES INTERACCIÓN --- */
+.thread-actions { display: flex; gap: 15px; margin-top: 10px; align-items: center; }
+.like-button { background-color: transparent; border: none; color: red; cursor: pointer; font-size: 1em; padding: 5px 10px; }
+.like-button i { color: transparent; -webkit-text-stroke: 1px red; text-stroke: 1px red; font-size: 1.2em; }
+.like-button.liked i { color: red; -webkit-text-stroke: 0px; text-stroke: 0px; }
+.comment-button { background-color: transparent; border: none; color: #555; cursor: pointer; font-size: 1em; padding: 5px 10px; }
+.comment-button:hover { color: #0f4c75; }
 .comment-button i { font-size: 1.2em; margin-right: 5px; }
-
+.view-button { background-color: transparent; border: none; color: #555; cursor: default; font-size: 1em; padding: 5px 10px; }
+.view-button i { font-size: 1.2em; margin-right: 5px; }
 .insignia-verificado { color: #3897f0; margin-left: 5px; font-size: 0.7em; vertical-align: middle; }
-#searchInput {
-    padding: 8px; border: 1px solid #ddd; border-radius: 4px;
-    margin: 10px auto; width: 80%; display: block;
-    background-color: rgba(255, 255, 255, 0.9);
+#searchInput { padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin: 10px auto; width: 80%; display: block; background-color: rgba(255, 255, 255, 0.9); }
+
+/* --- 13. ESTILOS MODAL DE COMENTARIOS --- */
+.modal-overlay {
+    display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+    width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5);
 }
+.comments-content {
+    background-color: #fefefe; margin: 15% auto; padding: 20px;
+    border: 1px solid #888; width: 90%; max-width: 400px;
+    border-radius: 10px; position: relative; display: flex; flex-direction: column;
+    max-height: 70vh;
+}
+#commentsList {
+    flex-grow: 1; overflow-y: auto; margin-bottom: 15px; border: 1px solid #eee;
+    padding: 10px; border-radius: 5px; min-height: 150px; background: #fafafa;
+}
+
+/* ESTILO COMENTARIOS */
+.comment-item {
+    background: #f1f1f1; padding: 10px; margin-bottom: 8px;
+    border-radius: 8px; font-size: 0.95em; border: 1px solid #ddd; color: #333;
+}
+/* Estilo para el nombre del usuario */
+.comment-author {
+    font-weight: bold; color: #d32f2f; margin-right: 5px;
+}
+.comment-date { font-size: 0.7em; color: #888; float: right; margin-left: 10px; }
+
+/* Formulario con 2 inputs */
+#commentForm { display: flex; gap: 5px; }
+#usernameInput {
+    width: 30%; /* Tamaño pequeño para el nombre */
+    border-radius: 20px; padding-left: 10px;
+    margin: 0; border: 1px solid #ddd;
+}
+#commentInput {
+    width: 60%; /* El resto para el mensaje */
+    flex-grow: 1; margin: 0; border-radius: 20px;
+    padding-left: 15px;
+}
+#commentForm button { padding: 8px 15px; border-radius: 50%; }

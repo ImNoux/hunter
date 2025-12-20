@@ -12,83 +12,160 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
+    <div id="main-app">
+        <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+        <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
+        <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+        <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
+        <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+        <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
 
-    <header>
-        <div class="menu-container">
-            <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i> Menú</button>
-            <div id="menuDropdown" class="menu-dropdown">
-                <a href="#" onclick="openInfoPage('updates')">Actualizaciones</a>
-                <a href="#" onclick="openInfoPage('about')">Quiénes somos</a>
-                <a href="#" onclick="openInfoPage('contact')">Contactos</a>
-            </div>
-        </div>
-
-        <h1>COMUNIDAD ARC</h1>
-
-        <div id="newThreadButtonContainer">
-            <button id="newThreadButton">+ Nuevo</button>
-            
-            <div class="modal-content" id="newThreadModalContent">
-                <span class="close-button" onclick="closeModal('newThreadModalContent')">&times;</span>
-                <h2>Crear Nuevo Hilo</h2>
-                <form id="newThreadForm">
-                    <label for="category">Categoría:</label>
-                    <input type="text" id="category" name="category" value="Hunter" readonly><br><br>
-                    <label for="title">Título:</label>
-                    <input type="text" id="title" name="title" placeholder="ej. usuario de roblox" required><br><br>
-                    <label for="description">Descripción:</label>
-                    <input type="text" id="description" name="description" placeholder="ej. @ig de quien te reclutó" required><br><br>
-                    <button type="submit">Publicar Hilo</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="commentsModal" class="modal-overlay">
-            <div class="comments-content">
-                <span class="close-button" onclick="closeModal('commentsModal')">&times;</span>
-                <h3 id="commentsTitle">Comentarios</h3>
-                
-                <div id="commentsList">
-                    <p style="text-align:center; color:#777;">Cargando...</p>
+        <header>
+            <div class="menu-container">
+                <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i> Menú</button>
+                <div id="menuDropdown" class="menu-dropdown">
+                    <a href="#" onclick="openInfoPage('updates')">Actualizaciones</a>
+                    <a href="#" onclick="openInfoPage('about')">Quiénes somos</a>
+                    <a href="#" onclick="openInfoPage('contact')">Contactos</a>
                 </div>
-
-                <form id="commentForm">
-                    <input type="text" id="usernameInput" placeholder="Tu Nombre" required autocomplete="off" maxlength="15">
-                    <input type="text" id="commentInput" placeholder="Escribe..." required autocomplete="off">
-                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                </form>
             </div>
+
+            <h1>Reclutamientos</h1>
+
+            <div id="newThreadButtonContainer">
+                <button id="newThreadButton">+ Nuevo</button>
+                
+                <div class="modal-content" id="newThreadModalContent">
+                    <span class="close-button" onclick="closeModal('newThreadModalContent')">&times;</span>
+                    <h2>Crear Nuevo Hilo</h2>
+                    <form id="newThreadForm">
+                        <label for="category">Categoría:</label>
+                        <input type="text" id="category" name="category" value="Hunter" readonly><br><br>
+                        <label for="title">Título:</label>
+                        <input type="text" id="title" name="title" placeholder="ej. usuario de roblox" required><br><br>
+                        <label for="description">Descripción:</label>
+                        <input type="text" id="description" name="description" placeholder="ej. @ig de quien te reclutó" required><br><br>
+                        <button type="submit">Publicar Hilo</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="commentsModal" class="modal-overlay">
+                <div class="comments-content">
+                    <span class="close-button" onclick="closeModal('commentsModal')">&times;</span>
+                    <h3 id="commentsTitle">Comentarios</h3>
+                    
+                    <div id="commentsList">
+                        <p style="text-align:center; color:#777;">Cargando...</p>
+                    </div>
+
+                    <form id="commentForm">
+                        <input type="text" id="usernameInput" placeholder="Tu Nombre" required autocomplete="off" maxlength="15">
+                        <input type="text" id="commentInput" placeholder="Escribe..." required autocomplete="off">
+                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <input type="text" id="searchInput" placeholder="Buscar por título...">
+
+        <div id="countdown-container">
+            <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
+            <div id="countdown">Cargando...</div>
+            <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
         </div>
-    </header>
 
-    <input type="text" id="searchInput" placeholder="Buscar por título...">
+        <main>
+            <div class="thread-container">
+                <p id="noThreadsMessage">No hay hilos aún. Sé el primero.</p>
+            </div>
+            <div id="pagination-container"></div>
+        </main>
 
-    <div id="countdown-container">
-        <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
-        <div id="countdown">Cargando...</div>
-        <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
+        <footer>
+            <p><a href="https://www.instagram.com/arc_clxn?igsh=djhzazNnbmFzOXIy">ARC_CLXN</a> &copy; 2025. Todos los derechos reservados.</p>
+            <p class="version">v1.3.1</p>
+        </footer>
     </div>
 
-    <main>
-        <div class="thread-container">
-            <p id="noThreadsMessage">No hay hilos aún. Sé el primero.</p>
-        </div>
-        <div id="pagination-container"></div>
-    </main>
-
-    <footer>
-        <p><a href="https://www.instagram.com/arc_clxn?igsh=djhzazNnbmFzOXIy">ARC_CLXN</a> &copy; 2025. Todos los derechos reservados.</p>
-        <p class="version">v1.3.0</p>
-    </footer>
-
     <script type="module" src="script.js"></script>
+
     <script>
+        // --- LÓGICA DE PERSISTENCIA PARA VENTANAS EMERGENTES ---
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const view = params.get('view');
+
+            if (view) {
+                // SI HAY UN PARÁMETRO "VIEW", ES UNA VENTANA EMERGENTE.
+                // Reemplazamos el contenido de la página inmediatamente.
+                
+                let title = "", content = "";
+                if (view === 'updates') { 
+                    title = "Actualizaciones"; 
+                    content = "<h3>v1.3.1</h3><ul><li>Interfaz unificada.</li><li>Persistencia al refrescar.</li><li>Sistema de comentarios y vistas.</li></ul>"; 
+                } else if (view === 'about') { 
+                    title = "Quiénes Somos"; 
+                    content = "<h3>ARC_CLXN</h3><p>Somos un equipo dedicado a encontrar los mejores talentos.</p>"; 
+                } else if (view === 'contact') { 
+                    title = "Contactos"; 
+                    content = "<h3>Instagram</h3><p>@arc_clxn</p>"; 
+                }
+
+                // Definimos el HTML de la nieve para inyectarlo de nuevo
+                const snowflakesHTML = `
+                    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+                    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
+                    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+                    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
+                    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+                `;
+
+                // Reemplazamos el body entero
+                document.body.innerHTML = `
+                    ${snowflakesHTML}
+                    <div class="popup-container">
+                        <h2>${title}</h2>
+                        ${content}
+                        <button onclick="window.close()">Cerrar</button>
+                    </div>
+                    <style>
+                        /* Estilos específicos inyectados para la ventana emergente */
+                        body { 
+                            display: flex; justify-content: center; align-items: center; 
+                            height: 100vh; overflow: hidden; font-size: 1.2em;
+                            /* El fondo ya viene del style.css, pero aseguramos la alineación */
+                        }
+                        .popup-container { 
+                            background: rgba(255, 255, 255, 0.95); 
+                            color: #333; padding: 40px; 
+                            border-radius: 10px; border: 2px solid #d32f2f; 
+                            width: 90%; max-width: 500px; text-align: center;
+                            position: relative; z-index: 2000; 
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                        }
+                        h2 { color: #d32f2f; margin-top: 0; font-size: 1.8em; }
+                        h3 { color: #388e3c; }
+                        button { 
+                            margin-top: 25px; padding: 12px 25px; 
+                            background: #ffeb3b; border: none; 
+                            cursor: pointer; font-weight: bold; 
+                            border-radius: 5px; font-size: 1em;
+                        }
+                        button:hover { background-color: #fdd835; }
+                        /* Aseguramos que la nieve se vea */
+                        .snowflake { position: absolute; top: -10px; color: #fff; font-size: 1em; animation: fall linear infinite; pointer-events: none; z-index: 1000; }
+                    </style>
+                `;
+                
+                // Detenemos la ejecución de otros scripts si es posible o simplemente dejamos que el CSS oculte lo demás (al borrar el body, el script module fallará silenciosamente o no encontrará elementos, lo cual está bien aquí).
+                return;
+            }
+        })();
+
+        // --- FUNCIONES NORMALES (SOLO SI NO ES VENTANA EMERGENTE) ---
+
         function toggleMenu() {
             document.getElementById("menuDropdown").classList.toggle("show");
         }
@@ -98,27 +175,26 @@
         }
 
         window.onclick = function(event) {
-            if (!event.target.matches('.menu-btn') && !event.target.matches('.fa-bars')) {
-                var dropdowns = document.getElementsByClassName("menu-dropdown");
-                for (var i = 0; i < dropdowns.length; i++) {
-                    var openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
+            // Solo ejecutar si los elementos existen (para evitar errores en la ventana emergente)
+            if (document.querySelector('.menu-btn')) {
+                if (!event.target.matches('.menu-btn') && !event.target.matches('.fa-bars')) {
+                    var dropdowns = document.getElementsByClassName("menu-dropdown");
+                    for (var i = 0; i < dropdowns.length; i++) {
+                        var openDropdown = dropdowns[i];
+                        if (openDropdown.classList.contains('show')) {
+                            openDropdown.classList.remove('show');
+                        }
                     }
                 }
             }
         }
 
+        // --- NUEVA FUNCIÓN OPENINFOPAGE ---
         function openInfoPage(type) {
-            let title = "", content = "";
-            if (type === 'updates') { title = "Actualizaciones"; content = "<h3>v1.3.0</h3><ul><li>Nombre de usuario en comentarios.</li><li>Sistema de vistas.</li></ul>"; }
-            else if (type === 'about') { title = "Quiénes Somos"; content = "<h3>ARC_CLXN</h3><p>Somos un equipo dedicado a encontrar los mejores talentos.</p>"; }
-            else if (type === 'contact') { title = "Contactos"; content = "<h3>Instagram</h3><p>@arc_clxn</p>"; }
-
-            const newWindow = window.open("", "_blank", "width=600,height=500");
-            newWindow.document.write(`
-                <!DOCTYPE html><html lang="es"><head><title>${title}</title><style>body{font-family:Arial;padding:40px;background:linear-gradient(to bottom,#0f4c75,#3282b8);color:white;text-align:center;margin:0;overflow:hidden;height:100vh;}.snowflake{position:absolute;top:-20px;color:#fff;font-size:1.5em;animation:fall linear infinite;pointer-events:none;}@keyframes fall{to{transform:translateY(110vh) rotate(360deg);}}.container{background:rgba(255,255,255,0.95);color:#333;padding:30px;border-radius:10px;border:2px solid #d32f2f;position:relative;z-index:10;}button{margin-top:20px;padding:10px;background:#ffeb3b;border:none;cursor:pointer;font-weight:bold;}</style></head><body><div class="snowflake" style="left:10%;animation-duration:5s;">❄</div><div class="snowflake" style="left:50%;animation-duration:4s;">❄</div><div class="snowflake" style="left:90%;animation-duration:6s;">❄</div><div class="container"><h2>${title}</h2>${content}<button onclick="window.close()">Cerrar</button></div></body></html>
-            `);
+            // En lugar de escribir documento, abrimos la misma página con un parámetro
+            // Esto permite que al refrescar, la URL siga teniendo "?view=updates" y se vuelva a renderizar correctamente.
+            const url = window.location.href.split('?')[0] + '?view=' + type;
+            window.open(url, "_blank", "width=600,height=600");
         }
         
         window.toggleMenu = toggleMenu;

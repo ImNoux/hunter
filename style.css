@@ -1,4 +1,4 @@
-/* --- 1. RESETEO GLOBAL --- */
+/* --- 1. RESETEO GLOBAL Y CORRECCIÓN DE ANCHO (SOLUCIÓN MÓVIL) --- */
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -7,7 +7,7 @@ html, body {
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow-x: hidden;
+    overflow-x: hidden; /* Evita el scroll horizontal */
     font-family: Arial, sans-serif;
     background: linear-gradient(to bottom, #0f4c75, #3282b8, #bbe1fa);
     color: #333;
@@ -137,23 +137,37 @@ header h1 {
     color: #d32f2f;
 }
 
-/* --- 6. ANIMACIONES --- */
+/* --- 6. ANIMACIONES CRONÓMETRO Y PERRITOS --- */
 #countdown-container {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 10px;
-    font-size: 1.2em;
+    align-items: center;     /* Centra verticalmente */
+    justify-content: center; /* Centra horizontalmente */
+    margin-top: 15px;
+    font-size: 1em;
     color: #ffeb3b;
     font-weight: bold;
-    flex-wrap: wrap; 
+    
+    /* CORRECCIÓN PERRITOS: */
+    flex-wrap: nowrap;       /* Obliga a estar en una sola línea */
+    gap: 10px;               /* Espacio entre elementos */
+    width: 100%;
+    padding: 0 10px;
 }
 
 .puppy {
-    width: 50px;
-    height: 50px;
+    width: 45px;             /* Tamaño fijo */
+    height: 45px;
     animation: bounce 2s infinite;
-    margin: 0 10px;
+    
+    /* CORRECCIÓN PERRITOS: */
+    flex-shrink: 0;          /* No permitir que se aplasten */
+    object-fit: contain;
+}
+
+#countdown {
+    text-align: center;
+    flex: 1;                 /* Ocupa el espacio central */
+    line-height: 1.3;
 }
 
 @keyframes bounce {
@@ -161,8 +175,6 @@ header h1 {
     40% { transform: translateY(-10px); }
     60% { transform: translateY(-5px); }
 }
-
-#countdown { text-align: center; }
 
 /* --- 7. MODAL --- */
 .modal-content {

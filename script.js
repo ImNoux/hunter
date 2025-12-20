@@ -297,4 +297,4 @@ document.addEventListener('DOMContentLoaded', function () {
         currentPage = 1; // Reset current page to 1
         loadThreadsFromFirebase(currentPage, searchTerm);
     });
-});
+}); 

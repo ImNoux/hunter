@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://esm.sh/firebase/app";
-import { getDatabase, ref, push, set, onValue, query, orderByKey, limitToFirst, orderByChild, limitToLast, update } from "https://esm.sh/firebase/database";
+import { getDatabase, ref, push, set, onValue, query, orderByKey, limitToFirst, orderByChild, limitToLast, update, off, runTransaction } from "https://esm.sh/firebase/database";
 
 const firebaseConfig = {
     apiKey: "AIzaSyDM9E8Y_YW-ld8MH8-yKS345hklA0v5P_w",
@@ -21,6 +21,7 @@ const threadsPerPage = 5;
 let currentPage = 1; 
 let totalThreads = 0; 
 let searchTerm = ''; 
+let activeThreadId = null; 
 
 // --- FUNCIONES DE UTILIDAD ---
 function getUserId() {
@@ -48,72 +49,80 @@ function updateCountdown() {
     }
 }
 
-// --- MENÚ Y POPUPS ---
 window.toggleMenu = function() {
     const dropdown = document.querySelector('.menu-dropdown');
-    if (dropdown) {
-        dropdown.classList.toggle('show');
-    }
+    if (dropdown) dropdown.classList.toggle('show');
 };
 
-window.addEventListener('click', function(event) {
-    if (!event.target.matches('.menu-btn') && !event.target.closest('.menu-container')) {
-        const dropdowns = document.getElementsByClassName("menu-dropdown");
-        for (let i = 0; i < dropdowns.length; i++) {
-            const openDropdown = dropdowns[i];
-            if (openDropdown.classList.contains('show')) {
-                openDropdown.classList.remove('show');
-            }
+// --- LOGICA DE COMENTARIOS Y VISTAS ---
+window.openComments = function(threadId) {
+    activeThreadId = threadId;
+    const modal = document.getElementById('commentsModal');
+    const list = document.getElementById('commentsList');
+    const usernameInput = document.getElementById('usernameInput');
+
+    const savedName = localStorage.getItem('chatUsername');
+    if (savedName && usernameInput) {
+        usernameInput.value = savedName;
+    }
+
+    list.innerHTML = '<p style="text-align:center;">Cargando...</p>';
+    modal.style.display = "block";
+
+    const threadViewRef = ref(db, `threads/${threadId}/views`);
+    runTransaction(threadViewRef, (currentViews) => {
+        return (currentViews || 0) + 1;
+    });
+
+    const commentsRef = ref(db, `threads/${threadId}/comments`);
+    off(commentsRef);
+
+    onValue(commentsRef, (snapshot) => {
+        list.innerHTML = '';
+        const data = snapshot.val();
+        if (data) {
+            Object.values(data).forEach(comment => {
+                const item = document.createElement('div');
+                item.classList.add('comment-item');
+                const date = new Date(comment.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const authorName = comment.username || 'Anónimo';
+                item.innerHTML = `
+                    <span class="comment-author">${authorName}:</span> 
+                    <span class="comment-text">${comment.text}</span> 
+                    <span class="comment-date">${date}</span>
+                `;
+                list.appendChild(item);
+            });
+            list.scrollTop = list.scrollHeight;
+        } else {
+            list.innerHTML = '<p style="text-align:center; color:#999;">No hay comentarios aún.</p>';
         }
-    }
-});
-
-// Función SIN NIEVE
-window.openInfoPage = function(type) {
-    let title = "";
-    let content = "";
-    
-    if (type === 'updates') {
-        title = "Actualizaciones";
-        content = "<h3>v1.1.0</h3><ul><li>Menú desplegable mejorado.</li><li>Botón de comentarios añadido.</li></ul>";
-    } else if (type === 'about') {
-        title = "Quiénes Somos";
-        content = "<h3>ARC_CLXN</h3><p>Somos un clan enfocado en la excelencia y el reclutamiento de los mejores usuarios.</p>";
-    } else if (type === 'contact') {
-        title = "Contactos";
-        content = "<h3>Contacto Directo</h3><p>Instagram: @arc_clxn</p>";
-    }
-
-    const newWindow = window.open("", "_blank", "width=600,height=500");
-    newWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>${title}</title>
-            <style>
-                body { 
-                    font-family: Arial; padding: 40px; background: linear-gradient(to bottom, #0f4c75, #3282b8); 
-                    color: white; text-align: center; margin: 0;
-                }
-                .box { 
-                    background: rgba(255, 255, 255, 0.95); color: #333; padding: 20px; 
-                    border-radius: 10px; border: 3px solid #d32f2f;
-                }
-                h2 { color: #d32f2f; }
-                button { background: #ffeb3b; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; margin-top: 20px; border-radius: 5px; }
-                button:hover { background-color: #fdd835; }
-            </style>
-        </head>
-        <body>
-            <div class="box">
-                <h2>${title}</h2>
-                <div>${content}</div>
-                <button onclick="window.close()">Cerrar Ventana</button>
-            </div>
-        </body>
-        </html>
-    `);
+    });
 };
+
+const commentForm = document.getElementById('commentForm');
+if(commentForm) {
+    commentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const input = document.getElementById('commentInput');
+        const usernameInput = document.getElementById('usernameInput');
+        
+        const text = input.value.trim();
+        const username = usernameInput.value.trim() || 'Anónimo';
+
+        if (text && activeThreadId) {
+            localStorage.setItem('chatUsername', username);
+            const commentsRef = ref(db, `threads/${activeThreadId}/comments`);
+            push(commentsRef, { 
+                text: text, 
+                username: username, 
+                timestamp: Date.now(), 
+                userId: getUserId() 
+            });
+            input.value = '';
+        }
+    });
+}
 
 // --- LÓGICA PRINCIPAL ---
 document.addEventListener('DOMContentLoaded', function () {
@@ -122,7 +131,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const newThreadButton = document.getElementById('newThreadButton');
     const newThreadModalContent = document.getElementById('newThreadModalContent');
-    const closeButton = document.querySelector('.close-button');
     const newThreadForm = document.getElementById('newThreadForm');
     const threadContainer = document.querySelector('.thread-container');
     const noThreadsMessage = document.getElementById('noThreadsMessage');
@@ -133,15 +141,35 @@ document.addEventListener('DOMContentLoaded', function () {
         thread.timestamp = Date.now();
         thread.displayDate = new Date().toLocaleDateString('es-ES');
         thread.likeCount = 0;
-        thread.likes = {};
-        thread.verificado = false;
+        thread.views = 0; 
         push(threadsRef, thread);
     }
 
-    function formatLikeCount(likeCount) {
-        if (likeCount >= 1000000) return (likeCount / 1000000).toFixed(1) + ' mill.';
-        if (likeCount >= 1000) return (likeCount / 1000).toFixed(0) + ' mil';
-        return likeCount;
+    // --- FUNCIÓN DE FORMATO CORREGIDA (FORZANDO ELIMINACIÓN DE .0) ---
+    function formatCount(count) {
+        let num = Number(count);
+        
+        if (num >= 1000000) {
+            // Convertimos a string con 1 decimal: "1.0", "1.5"
+            let val = (num / 1000000).toFixed(0);
+            // Si termina en .0, lo cortamos
+            if (val.endsWith('.0')) {
+                val = val.slice(0, -2); // Elimina los últimos 2 caracteres
+            }
+            return val + ' mill.';
+        }
+        
+        if (num >= 1000) {
+            // Convertimos a string con 1 decimal: "850.0", "850.5"
+            let val = (num / 1000).toFixed(0);
+            // Si termina en .0, lo cortamos
+            if (val.endsWith('.0')) {
+                val = val.slice(0, -2); // Elimina los últimos 2 caracteres
+            }
+            return val + ' mil';
+        }
+        
+        return num;
     }
 
     function loadThreadsFromFirebase(page, searchTerm = '') {
@@ -165,23 +193,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     const userId = getUserId();
                     let isLiked = thread.likes && thread.likes[userId];
                     let insigniaVerificado = thread.verificado ? '<i class="fas fa-check-circle insignia-verificado"></i>' : '';
-                    let formattedLikeCount = formatLikeCount(thread.likeCount || 0);
                     
-                    // AQUI AGREGAMOS EL BOTON DE COMENTARIOS
+                    let rawCommentCount = thread.comments ? Object.keys(thread.comments).length : 0;
+                    
+                    let formattedLikeCount = formatCount(thread.likeCount || 0);
+                    let formattedViewCount = formatCount(thread.views || 0);
+                    let formattedCommentCount = formatCount(rawCommentCount);
+
                     newThread.innerHTML = `
                         <div class="thread-date">${thread.displayDate}</div>
                         <h2>${thread.title} ${insigniaVerificado}</h2>
                         <p><strong>Categoría:</strong> ${thread.category}</p>
                         <p>${thread.description}</p>
-                        
                         <div class="thread-actions">
                             <button class="like-button ${isLiked ? 'liked' : ''}" data-thread-id="${key}" data-like-count="${thread.likeCount || 0}">
                                 <i class="fas fa-heart"></i> ${formattedLikeCount}
                             </button>
-                            
-                            <button class="comment-button" onclick="alert('Sistema de comentarios próximamente...')">
-                                <i class="far fa-comment"></i> 0
+                            <button class="comment-button" onclick="openComments('${key}')">
+                                <i class="far fa-comment"></i> ${formattedCommentCount}
                             </button>
+                            <span class="view-button" title="Vistas">
+                                <i class="far fa-eye"></i> ${formattedViewCount}
+                            </span>
                         </div>
                     `;
                     threadContainer.appendChild(newThread);
@@ -219,7 +252,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function createPaginationButtons(totalThreads, searchTerm = '') {
         paginationContainer.innerHTML = '';
         const totalPages = Math.ceil(totalThreads / threadsPerPage);
-
         const prevButton = document.createElement('button');
         prevButton.textContent = '« Anterior';
         prevButton.classList.add('pagination-button');
@@ -250,10 +282,6 @@ document.addEventListener('DOMContentLoaded', function () {
         newThreadButton.onclick = () => {
             newThreadModalContent.style.display = (newThreadModalContent.style.display === 'none') ? 'block' : 'none';
         };
-    }
-
-    if(closeButton) {
-        closeButton.onclick = () => { newThreadModalContent.style.display = 'none'; };
     }
 
     if(newThreadForm) {

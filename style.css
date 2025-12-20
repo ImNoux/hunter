@@ -71,6 +71,7 @@ header h1 {
 .menu-container {
     position: relative;
     display: inline-block;
+  margin-left: -13px;
 }
 
 .menu-btn {

@@ -23,9 +23,9 @@
         <div class="menu-container">
             <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i> Menú</button>
             <div id="menuDropdown" class="menu-dropdown">
-                <a href="#" onclick="openInfoPage('updates')">Actualizaciones</a>
-                <a href="#" onclick="openInfoPage('about')">Quiénes somos</a>
-                <a href="#" onclick="openInfoPage('contact')">Contactos</a>
+                <a href="#" onclick="openModal('updatesModal')">Actualizaciones</a>
+                <a href="#" onclick="openModal('aboutModal')">Quiénes somos</a>
+                <a href="#" onclick="openModal('contactModal')">Contactos</a>
             </div>
         </div>
 
@@ -53,11 +53,7 @@
             <div class="comments-content">
                 <span class="close-button" onclick="closeModal('commentsModal')">&times;</span>
                 <h3 id="commentsTitle">Comentarios</h3>
-                
-                <div id="commentsList">
-                    <p style="text-align:center; color:#777;">Cargando...</p>
-                </div>
-
+                <div id="commentsList"><p style="text-align:center; color:#777;">Cargando...</p></div>
                 <form id="commentForm">
                     <input type="text" id="usernameInput" placeholder="Tu Nombre" required autocomplete="off" maxlength="15">
                     <input type="text" id="commentInput" placeholder="Escribe..." required autocomplete="off">
@@ -65,6 +61,43 @@
                 </form>
             </div>
         </div>
+
+        <div id="updatesModal" class="modal-overlay">
+            <div class="info-content">
+                <span class="close-button" onclick="closeModal('updatesModal')">&times;</span>
+                <h2>Actualizaciones</h2>
+                <h3>v1.3.1</h3>
+                <ul>
+                    <li>Menú corregido (Modales).</li>
+                    <li>Sistema de comentarios y vistas.</li>
+                    <li>Diseño adaptable a móviles.</li>
+                </ul>
+                <button class="close-btn-bottom" onclick="closeModal('updatesModal')">Cerrar</button>
+            </div>
+        </div>
+
+        <div id="aboutModal" class="modal-overlay">
+            <div class="info-content">
+                <span class="close-button" onclick="closeModal('aboutModal')">&times;</span>
+                <h2>Quiénes Somos</h2>
+                <h3>ARC_CLXN</h3>
+                <p>Somos un equipo dedicado a encontrar los mejores talentos en la comunidad de Roblox.</p>
+                <p>Nuestro objetivo es crear una comunidad competitiva y sana.</p>
+                <button class="close-btn-bottom" onclick="closeModal('aboutModal')">Cerrar</button>
+            </div>
+        </div>
+
+        <div id="contactModal" class="modal-overlay">
+            <div class="info-content">
+                <span class="close-button" onclick="closeModal('contactModal')">&times;</span>
+                <h2>Contactos</h2>
+                <h3>Redes Sociales</h3>
+                <p><i class="fab fa-instagram"></i> Instagram: @arc_clxn</p>
+                <p><i class="fab fa-discord"></i> Discord: Servidor Oficial</p>
+                <button class="close-btn-bottom" onclick="closeModal('contactModal')">Cerrar</button>
+            </div>
+        </div>
+
     </header>
 
     <input type="text" id="searchInput" placeholder="Buscar por título...">
@@ -89,82 +122,32 @@
 
     <script type="module" src="script.js"></script>
     <script>
-        // --- 1. LÓGICA DE PERSISTENCIA (Ventanas Emergentes que no se borran) ---
-        (function() {
-            const params = new URLSearchParams(window.location.search);
-            const view = params.get('view');
+        // --- FUNCIONES DE INTERFAZ (UI) ---
 
-            if (view) {
-                // Si es una ventana emergente, reemplazamos el contenido
-                let title = "", content = "";
-                if (view === 'updates') { 
-                    title = "Actualizaciones"; 
-                    content = "<h3>v1.3.1</h3><ul><li>Interfaz unificada.</li><li>Persistencia al refrescar.</li><li>Sistema de comentarios y vistas.</li></ul>"; 
-                } else if (view === 'about') { 
-                    title = "Quiénes Somos"; 
-                    content = "<h3>ARC_CLXN</h3><p>Somos un equipo dedicado a encontrar los mejores talentos.</p>"; 
-                } else if (view === 'contact') { 
-                    title = "Contactos"; 
-                    content = "<h3>Instagram</h3><p>@arc_clxn</p>"; 
-                }
-
-                // HTML de la nieve para la ventana emergente
-                const snowflakesHTML = `
-                    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-                    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
-                    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-                `;
-
-                document.body.innerHTML = `
-                    ${snowflakesHTML}
-                    <div class="popup-container">
-                        <h2>${title}</h2>
-                        ${content}
-                        <button onclick="window.close()">Cerrar</button>
-                    </div>
-                    <style>
-                        body { 
-                            display: flex; justify-content: center; align-items: center; 
-                            height: 100vh; overflow: hidden; font-size: 1.2em;
-                            margin: 0; padding: 0;
-                            background: linear-gradient(to bottom, #0f4c75, #3282b8, #bbe1fa); 
-                        }
-                        .popup-container { 
-                            background: rgba(255, 255, 255, 0.95); 
-                            color: #333; padding: 40px; 
-                            border-radius: 10px; border: 2px solid #d32f2f; 
-                            width: 90%; max-width: 500px; text-align: center;
-                            position: relative; z-index: 2000; 
-                            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-                        }
-                        h2 { color: #d32f2f; margin-top: 0; font-size: 1.8em; }
-                        h3 { color: #388e3c; }
-                        button { 
-                            margin-top: 25px; padding: 12px 25px; 
-                            background: #ffeb3b; border: none; 
-                            cursor: pointer; font-weight: bold; 
-                            border-radius: 5px; font-size: 1em;
-                        }
-                        button:hover { background-color: #fdd835; }
-                        .snowflake { position: absolute; top: -10px; color: #fff; font-size: 1em; animation: fall linear infinite; pointer-events: none; z-index: 1000; }
-                    </style>
-                `;
-                return; // Detiene la carga del resto de la app principal
-            }
-        })();
-
-        // --- 2. FUNCIONES DE LA APP PRINCIPAL ---
-
+        // 1. Alternar Menú
         function toggleMenu() {
             document.getElementById("menuDropdown").classList.toggle("show");
         }
 
+        // 2. Función Universal para Abrir Modales
+        window.openModal = function(modalId) {
+            // Cerrar menú si está abierto
+            const dropdown = document.getElementById("menuDropdown");
+            if (dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+            // Mostrar el modal
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        // 3. Función Universal para Cerrar Modales
         window.closeModal = function(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
 
+        // 4. Cerrar al hacer clic fuera
         window.onclick = function(event) {
-            // Verificamos si existe el botón del menú antes de ejecutar la lógica
+            // Cerrar menú
             if (document.querySelector('.menu-btn')) {
                 if (!event.target.matches('.menu-btn') && !event.target.matches('.fa-bars')) {
                     var dropdowns = document.getElementsByClassName("menu-dropdown");
@@ -176,26 +159,13 @@
                     }
                 }
             }
-        }
-
-        // --- 3. ABRIR VENTANA FLOTANTE (POP-UP) CENTRADA ---
-        function openInfoPage(type) {
-            // URL con parámetro para que no se borre al refrescar
-            const url = window.location.href.split('?')[0] + '?view=' + type;
-            
-            const w = 600;
-            const h = 600;
-            const left = (window.screen.width / 2) - (w / 2);
-            const top = (window.screen.height / 2) - (h / 2);
-
-            // "popup=yes" obliga a ventana flotante
-            const features = `scrollbars=yes,resizable=yes,width=${w},height=${h},top=${top},left=${left},popup=yes`;
-
-            window.open(url, "InfoWindow", features);
+            // Cerrar modales si se hace clic en el fondo oscuro
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = "none";
+            }
         }
         
         window.toggleMenu = toggleMenu;
-        window.openInfoPage = openInfoPage;
     </script>
 </body>
 </html>

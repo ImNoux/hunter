@@ -1,4 +1,4 @@
-/* --- 1. RESETEO GLOBAL Y CORRECCIÓN DE ANCHO (SOLUCIÓN MÓVIL) --- */
+/* --- 1. RESETEO GLOBAL --- */
 *, *::before, *::after {
     box-sizing: border-box;
 }
@@ -7,14 +7,14 @@ html, body {
     width: 100%;
     margin: 0;
     padding: 0;
-    overflow-x: hidden; /* Evita el scroll horizontal */
+    overflow-x: hidden;
     font-family: Arial, sans-serif;
     background: linear-gradient(to bottom, #0f4c75, #3282b8, #bbe1fa);
     color: #333;
     position: relative;
 }
 
-/* --- 2. EFECTO DE NIEVE --- */
+/* --- 2. EFECTO DE NIEVE (CONSERVADO) --- */
 .snowflake {
     position: absolute;
     top: -10px;
@@ -43,26 +43,23 @@ html, body {
 header {
     background: linear-gradient(to right, #d32f2f, #388e3c);
     color: white;
-    /* ALINEACIÓN: 15px a los lados para todo */
-    padding: 10px 15px;
+    padding: 10px 15px; /* Alineación estándar 15px */
     text-align: center;
     position: relative;
     display: flex;
     justify-content: space-between; 
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-
-    /* Asegura ancho completo en móvil */
     width: 100% !important;
     margin: 0 !important;
 }
 
 header h1 {
-    margin: 0 5px; /* Pequeño margen para separar de los botones */
+    margin: 0 5px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     animation: christmasLights 2s infinite;
-    font-size: 1.2em; /* Tamaño ajustado para que no rompa el diseño en móviles */
-    flex-grow: 1; /* Ocupa el espacio central disponible */
+    font-size: 1.2em;
+    flex-grow: 1;
 }
 
 @keyframes christmasLights {
@@ -73,7 +70,7 @@ header h1 {
     100% { color: #d32f2f; }
 }
 
-/* --- 4. BOTONES DEL HEADER (MENÚ Y NUEVO) --- */
+/* --- 4. BOTONES DEL HEADER --- */
 .header-actions {
     display: flex;
     gap: 10px;
@@ -82,7 +79,7 @@ header h1 {
 
 .menu-container, #newThreadButtonContainer {
     position: relative;
-    margin: 0; /* Sin márgenes negativos para mantener la alineación perfecta */
+    margin: 0;
 }
 
 .menu-btn, #newThreadButton {
@@ -94,10 +91,9 @@ header h1 {
     cursor: pointer;
     font-weight: bold;
     font-size: 14px;
-    white-space: nowrap; /* Evita que el texto se rompa */
+    white-space: nowrap;
 }
 
-/* Estilo específico para el botón Nuevo (amarillo) */
 #newThreadButton {
     background-color: #ffeb3b;
     color: #333;
@@ -120,7 +116,7 @@ header h1 {
     z-index: 1002;
     border-radius: 4px;
     overflow: hidden;
-    text-align: center; /* CENTRADO */
+    text-align: center;
 }
 
 .show {
@@ -133,7 +129,7 @@ header h1 {
     text-decoration: none;
     display: block;
     border-bottom: 1px solid #eee;
-    text-align: center; /* CENTRADO */
+    text-align: center;
 }
 
 .menu-dropdown a:hover {
@@ -141,25 +137,7 @@ header h1 {
     color: #d32f2f;
 }
 
-/* --- 6. BOTÓN DE MÚSICA (ALINEADO) --- */
-#musicToggle {
-    position: fixed;
-    top: 80px; /* Debajo del header */
-    right: 15px; /* Alineado con el padding del header (15px) */
-    z-index: 1001;
-    background: #ffeb3b;
-    border: none;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* --- 7. ANIMACIONES Y DECORACIÓN --- */
+/* --- 6. ANIMACIONES --- */
 #countdown-container {
     display: flex;
     align-items: center;
@@ -186,7 +164,7 @@ header h1 {
 
 #countdown { text-align: center; }
 
-/* --- 8. MODAL NUEVO HILO --- */
+/* --- 7. MODAL --- */
 .modal-content {
     display: none;
     position: absolute;
@@ -214,7 +192,7 @@ header h1 {
     cursor: pointer;
 }
 
-/* --- 9. CONTENIDO PRINCIPAL --- */
+/* --- 8. CONTENIDO --- */
 main { padding: 20px; }
 
 .thread-container {
@@ -247,7 +225,7 @@ main { padding: 20px; }
     flex-wrap: wrap; 
 }
 
-/* --- 10. FORMULARIOS --- */
+/* --- 9. FORMULARIOS --- */
 form label {
     display: block;
     margin-bottom: 5px;
@@ -275,7 +253,7 @@ form button {
 
 form button:hover { background-color: #fdd835; }
 
-/* --- 11. PAGINACIÓN --- */
+/* --- 10. PAGINACIÓN --- */
 #pagination-container {
     display: flex;
     justify-content: center;
@@ -310,15 +288,13 @@ form button:hover { background-color: #fdd835; }
     color: #777;
 }
 
-/* --- 12. FOOTER --- */
+/* --- 11. FOOTER --- */
 footer {
     text-align: center;
     padding: 20px;
     background: linear-gradient(to right, #388e3c, #d32f2f);
     color: white;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-
-    /* Asegura ancho completo */
     width: 100% !important;
     margin: 0 !important;
 }
@@ -329,7 +305,7 @@ footer .version {
     margin-top: 5px;
 }
 
-/* --- 13. LIKE & SEARCH --- */
+/* --- 12. OTROS --- */
 .like-button {
     background-color: transparent;
     border: none;

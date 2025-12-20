@@ -12,95 +12,90 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="main-app">
-        <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-        <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
-        <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-        <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
-        <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-        <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
+    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
+    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
+    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
+    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
 
-        <header>
-            <div class="menu-container">
-                <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i> Menú</button>
-                <div id="menuDropdown" class="menu-dropdown">
-                    <a href="#" onclick="openInfoPage('updates')">Actualizaciones</a>
-                    <a href="#" onclick="openInfoPage('about')">Quiénes somos</a>
-                    <a href="#" onclick="openInfoPage('contact')">Contactos</a>
-                </div>
+    <header>
+        <div class="menu-container">
+            <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i> Menú</button>
+            <div id="menuDropdown" class="menu-dropdown">
+                <a href="#" onclick="openInfoPage('updates')">Actualizaciones</a>
+                <a href="#" onclick="openInfoPage('about')">Quiénes somos</a>
+                <a href="#" onclick="openInfoPage('contact')">Contactos</a>
             </div>
-
-            <h1>Reclutamientos</h1>
-
-            <div id="newThreadButtonContainer">
-                <button id="newThreadButton">+ Nuevo</button>
-                
-                <div class="modal-content" id="newThreadModalContent">
-                    <span class="close-button" onclick="closeModal('newThreadModalContent')">&times;</span>
-                    <h2>Crear Nuevo Hilo</h2>
-                    <form id="newThreadForm">
-                        <label for="category">Categoría:</label>
-                        <input type="text" id="category" name="category" value="Hunter" readonly><br><br>
-                        <label for="title">Título:</label>
-                        <input type="text" id="title" name="title" placeholder="ej. usuario de roblox" required><br><br>
-                        <label for="description">Descripción:</label>
-                        <input type="text" id="description" name="description" placeholder="ej. @ig de quien te reclutó" required><br><br>
-                        <button type="submit">Publicar Hilo</button>
-                    </form>
-                </div>
-            </div>
-
-            <div id="commentsModal" class="modal-overlay">
-                <div class="comments-content">
-                    <span class="close-button" onclick="closeModal('commentsModal')">&times;</span>
-                    <h3 id="commentsTitle">Comentarios</h3>
-                    
-                    <div id="commentsList">
-                        <p style="text-align:center; color:#777;">Cargando...</p>
-                    </div>
-
-                    <form id="commentForm">
-                        <input type="text" id="usernameInput" placeholder="Tu Nombre" required autocomplete="off" maxlength="15">
-                        <input type="text" id="commentInput" placeholder="Escribe..." required autocomplete="off">
-                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            </div>
-        </header>
-
-        <input type="text" id="searchInput" placeholder="Buscar por título...">
-
-        <div id="countdown-container">
-            <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
-            <div id="countdown">Cargando...</div>
-            <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
         </div>
 
-        <main>
-            <div class="thread-container">
-                <p id="noThreadsMessage">No hay hilos aún. Sé el primero.</p>
-            </div>
-            <div id="pagination-container"></div>
-        </main>
+        <h1>COMUNIDAD ARC</h1>
 
-        <footer>
-            <p><a href="https://www.instagram.com/arc_clxn?igsh=djhzazNnbmFzOXIy">ARC_CLXN</a> &copy; 2025. Todos los derechos reservados.</p>
-            <p class="version">v1.3.1</p>
-        </footer>
+        <div id="newThreadButtonContainer">
+            <button id="newThreadButton">+ Nuevo</button>
+            
+            <div class="modal-content" id="newThreadModalContent">
+                <span class="close-button" onclick="closeModal('newThreadModalContent')">&times;</span>
+                <h2>Crear Nuevo Hilo</h2>
+                <form id="newThreadForm">
+                    <label for="category">Categoría:</label>
+                    <input type="text" id="category" name="category" value="Hunter" readonly><br><br>
+                    <label for="title">Título:</label>
+                    <input type="text" id="title" name="title" placeholder="ej. usuario de roblox" required><br><br>
+                    <label for="description">Descripción:</label>
+                    <input type="text" id="description" name="description" placeholder="ej. @ig de quien te reclutó" required><br><br>
+                    <button type="submit">Publicar Hilo</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="commentsModal" class="modal-overlay">
+            <div class="comments-content">
+                <span class="close-button" onclick="closeModal('commentsModal')">&times;</span>
+                <h3 id="commentsTitle">Comentarios</h3>
+                
+                <div id="commentsList">
+                    <p style="text-align:center; color:#777;">Cargando...</p>
+                </div>
+
+                <form id="commentForm">
+                    <input type="text" id="usernameInput" placeholder="Tu Nombre" required autocomplete="off" maxlength="15">
+                    <input type="text" id="commentInput" placeholder="Escribe..." required autocomplete="off">
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <input type="text" id="searchInput" placeholder="Buscar por título...">
+
+    <div id="countdown-container">
+        <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
+        <div id="countdown">Cargando...</div>
+        <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
     </div>
 
-    <script type="module" src="script.js"></script>
+    <main>
+        <div class="thread-container">
+            <p id="noThreadsMessage">No hay hilos aún. Sé el primero.</p>
+        </div>
+        <div id="pagination-container"></div>
+    </main>
 
+    <footer>
+        <p><a href="https://www.instagram.com/arc_clxn?igsh=djhzazNnbmFzOXIy">ARC_CLXN</a> &copy; 2025. Todos los derechos reservados.</p>
+        <p class="version">v1.3.1</p>
+    </footer>
+
+    <script type="module" src="script.js"></script>
     <script>
-        // --- LÓGICA DE PERSISTENCIA PARA VENTANAS EMERGENTES ---
+        // --- 1. LÓGICA DE PERSISTENCIA (Ventanas Emergentes que no se borran) ---
         (function() {
             const params = new URLSearchParams(window.location.search);
             const view = params.get('view');
 
             if (view) {
-                // SI HAY UN PARÁMETRO "VIEW", ES UNA VENTANA EMERGENTE.
-                // Reemplazamos el contenido de la página inmediatamente.
-                
+                // Si es una ventana emergente, reemplazamos el contenido
                 let title = "", content = "";
                 if (view === 'updates') { 
                     title = "Actualizaciones"; 
@@ -113,16 +108,13 @@
                     content = "<h3>Instagram</h3><p>@arc_clxn</p>"; 
                 }
 
-                // Definimos el HTML de la nieve para inyectarlo de nuevo
+                // HTML de la nieve para la ventana emergente
                 const snowflakesHTML = `
-                    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-                    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
                     <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
                     <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
                     <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
                 `;
 
-                // Reemplazamos el body entero
                 document.body.innerHTML = `
                     ${snowflakesHTML}
                     <div class="popup-container">
@@ -131,11 +123,11 @@
                         <button onclick="window.close()">Cerrar</button>
                     </div>
                     <style>
-                        /* Estilos específicos inyectados para la ventana emergente */
                         body { 
                             display: flex; justify-content: center; align-items: center; 
                             height: 100vh; overflow: hidden; font-size: 1.2em;
-                            /* El fondo ya viene del style.css, pero aseguramos la alineación */
+                            margin: 0; padding: 0;
+                            background: linear-gradient(to bottom, #0f4c75, #3282b8, #bbe1fa); 
                         }
                         .popup-container { 
                             background: rgba(255, 255, 255, 0.95); 
@@ -154,17 +146,14 @@
                             border-radius: 5px; font-size: 1em;
                         }
                         button:hover { background-color: #fdd835; }
-                        /* Aseguramos que la nieve se vea */
                         .snowflake { position: absolute; top: -10px; color: #fff; font-size: 1em; animation: fall linear infinite; pointer-events: none; z-index: 1000; }
                     </style>
                 `;
-                
-                // Detenemos la ejecución de otros scripts si es posible o simplemente dejamos que el CSS oculte lo demás (al borrar el body, el script module fallará silenciosamente o no encontrará elementos, lo cual está bien aquí).
-                return;
+                return; // Detiene la carga del resto de la app principal
             }
         })();
 
-        // --- FUNCIONES NORMALES (SOLO SI NO ES VENTANA EMERGENTE) ---
+        // --- 2. FUNCIONES DE LA APP PRINCIPAL ---
 
         function toggleMenu() {
             document.getElementById("menuDropdown").classList.toggle("show");
@@ -175,7 +164,7 @@
         }
 
         window.onclick = function(event) {
-            // Solo ejecutar si los elementos existen (para evitar errores en la ventana emergente)
+            // Verificamos si existe el botón del menú antes de ejecutar la lógica
             if (document.querySelector('.menu-btn')) {
                 if (!event.target.matches('.menu-btn') && !event.target.matches('.fa-bars')) {
                     var dropdowns = document.getElementsByClassName("menu-dropdown");
@@ -189,12 +178,20 @@
             }
         }
 
-        // --- NUEVA FUNCIÓN OPENINFOPAGE ---
+        // --- 3. ABRIR VENTANA FLOTANTE (POP-UP) CENTRADA ---
         function openInfoPage(type) {
-            // En lugar de escribir documento, abrimos la misma página con un parámetro
-            // Esto permite que al refrescar, la URL siga teniendo "?view=updates" y se vuelva a renderizar correctamente.
+            // URL con parámetro para que no se borre al refrescar
             const url = window.location.href.split('?')[0] + '?view=' + type;
-            window.open(url, "_blank", "width=600,height=600");
+            
+            const w = 600;
+            const h = 600;
+            const left = (window.screen.width / 2) - (w / 2);
+            const top = (window.screen.height / 2) - (h / 2);
+
+            // "popup=yes" obliga a ventana flotante
+            const features = `scrollbars=yes,resizable=yes,width=${w},height=${h},top=${top},left=${left},popup=yes`;
+
+            window.open(url, "InfoWindow", features);
         }
         
         window.toggleMenu = toggleMenu;

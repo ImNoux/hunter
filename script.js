@@ -75,7 +75,7 @@ window.openInfoPage = function(type) {
     
     if (type === 'updates') {
         title = "Actualizaciones";
-        content = "<h3>v1.1.0</h3><ul><li>Menú desplegable mejorado.</li><li>Optimización de carga.</li></ul>";
+        content = "<h3>v1.1.0</h3><ul><li>Menú desplegable mejorado.</li><li>Botón de comentarios añadido.</li></ul>";
     } else if (type === 'about') {
         title = "Quiénes Somos";
         content = "<h3>ARC_CLXN</h3><p>Somos un clan enfocado en la excelencia y el reclutamiento de los mejores usuarios.</p>";
@@ -119,8 +119,6 @@ window.openInfoPage = function(type) {
 document.addEventListener('DOMContentLoaded', function () {
     updateCountdown();
     setInterval(updateCountdown, 1000);
-
-    // (Código de audio eliminado)
 
     const newThreadButton = document.getElementById('newThreadButton');
     const newThreadModalContent = document.getElementById('newThreadModalContent');
@@ -169,14 +167,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     let insigniaVerificado = thread.verificado ? '<i class="fas fa-check-circle insignia-verificado"></i>' : '';
                     let formattedLikeCount = formatLikeCount(thread.likeCount || 0);
                     
+                    // AQUI AGREGAMOS EL BOTON DE COMENTARIOS
                     newThread.innerHTML = `
                         <div class="thread-date">${thread.displayDate}</div>
                         <h2>${thread.title} ${insigniaVerificado}</h2>
                         <p><strong>Categoría:</strong> ${thread.category}</p>
                         <p>${thread.description}</p>
-                        <button class="like-button ${isLiked ? 'liked' : ''}" data-thread-id="${key}" data-like-count="${thread.likeCount || 0}">
-                          <i class="fas fa-heart"></i> ${formattedLikeCount}
-                        </button>
+                        
+                        <div class="thread-actions">
+                            <button class="like-button ${isLiked ? 'liked' : ''}" data-thread-id="${key}" data-like-count="${thread.likeCount || 0}">
+                                <i class="fas fa-heart"></i> ${formattedLikeCount}
+                            </button>
+                            
+                            <button class="comment-button" onclick="alert('Sistema de comentarios próximamente...')">
+                                <i class="far fa-comment"></i> 0
+                            </button>
+                        </div>
                     `;
                     threadContainer.appendChild(newThread);
                 }

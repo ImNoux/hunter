@@ -1,15 +1,20 @@
-/* --- ESTILOS BASE --- */
-body {
-    font-family: Arial, sans-serif;
+/* --- 1. RESETEO GLOBAL Y CORRECCIÓN DE ANCHO (SOLUCIÓN MÓVIL) --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
     margin: 0;
     padding: 0;
+    overflow-x: hidden; /* Evita el scroll horizontal */
+    font-family: Arial, sans-serif;
     background: linear-gradient(to bottom, #0f4c75, #3282b8, #bbe1fa);
     color: #333;
     position: relative;
-    overflow-x: hidden;
 }
 
-/* --- EFECTO DE NIEVE --- */
+/* --- 2. EFECTO DE NIEVE --- */
 .snowflake {
     position: absolute;
     top: -10px;
@@ -34,7 +39,7 @@ body {
 .snowflake:nth-child(8n) { animation-duration: 13s; left: 80%; }
 .snowflake:nth-child(9n) { animation-duration: 7s; left: 90%; }
 
-/* --- HEADER --- */
+/* --- 3. HEADER --- */
 header {
     background: linear-gradient(to right, #d32f2f, #388e3c);
     color: white;
@@ -45,12 +50,17 @@ header {
     justify-content: space-between; /* Distribuye: Izquierda - Centro - Derecha */
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    
+    /* Asegura ancho completo */
+    width: 100% !important;
+    margin: 0 !important;
 }
 
 header h1 {
     margin: 0;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     animation: christmasLights 2s infinite;
+    font-size: 1.5em; /* Ajuste para que quepa bien en móviles */
 }
 
 @keyframes christmasLights {
@@ -61,7 +71,7 @@ header h1 {
     100% { color: #d32f2f; }
 }
 
-/* --- ESTILOS PARA EL MENÚ (TOGGLE) --- */
+/* --- 4. ESTILOS DEL MENÚ (IZQUIERDA) --- */
 .header-actions {
     display: flex;
     gap: 10px;
@@ -71,7 +81,8 @@ header h1 {
 .menu-container {
     position: relative;
     display: inline-block;
-  margin-left: -15px;
+    /* Ajuste para pegar al borde izquierdo */
+    margin-left: -15px; 
 }
 
 .menu-btn {
@@ -92,7 +103,7 @@ header h1 {
 .menu-dropdown {
     display: none; /* Oculto por defecto */
     position: absolute;
-    left: 0; /* Alineado a la IZQUIERDA del botón */
+    left: 0;
     top: 100%;
     background-color: #f9f9f9;
     min-width: 160px;
@@ -100,12 +111,10 @@ header h1 {
     z-index: 1002;
     border-radius: 4px;
     overflow: hidden;
-    
-    /* CAMBIO: Texto centrado */
-    text-align: center;
+    text-align: center; /* CENTRADO */
 }
 
-/* CLASE QUE ACTIVA EL MENÚ (Usada por JS) */
+/* Clase para activar menú con JS */
 .show {
     display: block !important;
 }
@@ -116,9 +125,7 @@ header h1 {
     text-decoration: none;
     display: block;
     border-bottom: 1px solid #eee;
-    
-    /* CAMBIO: Asegurar que el link también centre el contenido */
-    text-align: center;
+    text-align: center; /* CENTRADO */
 }
 
 .menu-dropdown a:hover {
@@ -126,7 +133,7 @@ header h1 {
     color: #d32f2f;
 }
 
-/* --- ANIMACIONES Y ELEMENTOS DECORATIVOS --- */
+/* --- 5. ANIMACIONES Y DECORACIÓN --- */
 #countdown-container {
     display: flex;
     align-items: center;
@@ -135,6 +142,7 @@ header h1 {
     font-size: 1.2em;
     color: #ffeb3b;
     font-weight: bold;
+    flex-wrap: wrap; /* Para que se ajuste en pantallas pequeñas */
 }
 
 .puppy {
@@ -152,8 +160,11 @@ header h1 {
 
 #countdown { text-align: center; }
 
-/* --- BOTÓN Y MODAL DE NUEVO HILO --- */
-#newThreadButtonContainer { position: relative; }
+/* --- 6. BOTÓN Y MODAL NUEVO HILO (DERECHA) --- */
+#newThreadButtonContainer { 
+    position: relative; 
+    /* Ajuste opcional si quieres pegarlo más a la derecha: margin-right: -10px; */
+}
 
 #newThreadButton {
     background-color: #ffeb3b;
@@ -194,7 +205,7 @@ header h1 {
     cursor: pointer;
 }
 
-/* --- CONTENIDO PRINCIPAL --- */
+/* --- 7. CONTENIDO PRINCIPAL --- */
 main { padding: 20px; }
 
 .thread-container {
@@ -214,7 +225,8 @@ main { padding: 20px; }
     border: 2px solid #d32f2f;
     padding: 15px;
     margin-bottom: 20px;
-    width: 80%;
+    width: 90%; /* Ancho ajustado para móviles */
+    max-width: 600px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     position: relative;
 }
@@ -223,9 +235,10 @@ main { padding: 20px; }
     color: #388e3c;
     display: flex;
     align-items: center;
+    flex-wrap: wrap; /* Si el título es muy largo, baja */
 }
 
-/* --- FORMULARIOS --- */
+/* --- 8. FORMULARIOS --- */
 form label {
     display: block;
     margin-bottom: 5px;
@@ -253,7 +266,7 @@ form button {
 
 form button:hover { background-color: #fdd835; }
 
-/* --- PAGINACIÓN --- */
+/* --- 9. PAGINACIÓN --- */
 #pagination-container {
     display: flex;
     justify-content: center;
@@ -288,13 +301,17 @@ form button:hover { background-color: #fdd835; }
     color: #777;
 }
 
-/* --- FOOTER --- */
+/* --- 10. FOOTER --- */
 footer {
     text-align: center;
     padding: 20px;
     background: linear-gradient(to right, #388e3c, #d32f2f);
     color: white;
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    
+    /* Asegura ancho completo */
+    width: 100% !important;
+    margin: 0 !important;
 }
 
 footer .version {
@@ -303,7 +320,7 @@ footer .version {
     margin-top: 5px;
 }
 
-/* --- LIKE BUTTON & SEARCH --- */
+/* --- 11. OTROS ELEMENTOS --- */
 .like-button {
     background-color: transparent;
     border: none;

@@ -257,7 +257,6 @@
             </div>
         </div>
     </div>
-
     <div id="reportSuccessModal" class="modal-overlay" style="z-index: 7500;">
         <div class="modal-content">
             <div class="check-circle-icon">
@@ -267,20 +266,14 @@
             <p style="color:#888; font-size:0.9em; line-height:1.4;">
                 Mientras procesamos su caso, le sugerimos avanzar con estas otras medidas.
             </p>
+            
             <div class="report-option-list">
                 <div class="report-list-item" onclick="openBlockConfirmModal()">
                     <span class="text-danger"><i class="fas fa-ban icon-danger"></i> Bloquear a <span id="reportSuccessUser">Usuario</span></span>
                     <i class="fas fa-chevron-right"></i>
                 </div>
-                <div class="report-list-item">
-                    <span><i class="far fa-life-ring" style="margin-right:10px;"></i> Obtener ayuda</span>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
-                <div class="report-list-item">
-                    <span><i class="fas fa-info-circle" style="margin-right:10px;"></i> Más información</span>
-                    <i class="fas fa-chevron-right"></i>
-                </div>
             </div>
+
             <button onclick="closeModal('reportSuccessModal')" class="btn-modal btn-modal-submit" style="margin-top:20px;">Cerrar</button>
         </div>
     </div>
@@ -319,7 +312,8 @@
 
     <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 6.0: Flujo de Reportes Completo.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
-  <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">
+    
+    <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">
         <div class="info-content" style="max-width: 300px; padding: 20px;">
             <h3>Confirmación</h3>
             <p id="confirmText">¿Estás seguro?</p>
@@ -366,7 +360,6 @@
         };
 
         window.onclick = function(event) {
-            // IDs de todos los modales para cerrar al tocar el fondo oscuro
             const ids = ['reportModal', 'adminModal', 'profileOptionsModal', 'accountInfoModal', 'loginErrorModal', 'reportSuccessModal', 'blockConfirmModal', 'finalThanksModal', 'confirmModal', 'updatesModal', 'contactModal'];
             ids.forEach(id => { if (event.target == document.getElementById(id)) document.getElementById(id).style.display = "none"; });
             

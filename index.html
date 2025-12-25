@@ -3,169 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reclutamientos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://www.gstatic.com/firebasejs/9.2.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.2.0/firebase-database.js"></script>
+    <title>Comunidad ARC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❄</div>
-    <div class="snowflake">❅</div><div class="snowflake">❄</div><div class="snowflake">❅</div>
 
     <header>
-        <div class="menu-container">
-            <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i> Menú</button>
-            <div id="menuDropdown" class="menu-dropdown">
-                <a href="#" onclick="openModal('updatesModal')">Actualizaciones</a>
-                <a href="#" onclick="openModal('aboutModal')">Quiénes somos</a>
-                <a href="#" onclick="openModal('contactModal')">Contactos</a>
+        <div class="header-top">
+            <div class="menu-container">
+                <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+                <div id="menuDropdown" class="menu-dropdown">
+                    <a id="menuLogin" href="#" onclick="openModal('loginModal')">Iniciar Sesión</a>
+                    <a id="menuLogout" href="#" onclick="logoutSystem()" style="display: none; color: #ff4d4d;">Cerrar Sesión</a>
+                    <a href="#" onclick="openModal('updatesModal')">Actualizaciones</a>
+                    <a href="#" onclick="openModal('contactModal')">Contactos</a>
+                    
+                    <a href="#" onclick="openAdminPanel()" id="btnAdminPanel" style="display: none; color: #ff4d4d; border-top: 1px solid #444;">
+                        <i class="fas fa-shield-alt"></i> Panel Admin
+                    </a>
+                </div>
             </div>
+            <h1 onclick="changeSection('Home')">COMUNIDAD ARC</h1>
+            <div style="width: 40px;"></div>
         </div>
-
-        <h1>COMUNIDAD ARC</h1>
-
-        <div id="newThreadButtonContainer">
-            <button id="newThreadButton">+ Nuevo</button>
-            
-            <div class="modal-content" id="newThreadModalContent">
-                <span class="close-button" onclick="closeModal('newThreadModalContent')">&times;</span>
-                <h2>Crear Nuevo Hilo</h2>
-                <form id="newThreadForm">
-                    <label for="category">Categoría:</label>
-                    <input type="text" id="category" name="category" value="Hunter" readonly><br><br>
-                    <label for="title">Título:</label>
-                    <input type="text" id="title" name="title" placeholder="ej. usuario de roblox" required><br><br>
-                    <label for="description">Descripción:</label>
-                    <input type="text" id="description" name="description" placeholder="ej. @ig de quien te reclutó" required><br><br>
-                    <button type="submit">Publicar Hilo</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="commentsModal" class="modal-overlay">
-            <div class="comments-content">
-                <span class="close-button" onclick="closeModal('commentsModal')">&times;</span>
-                <h3 id="commentsTitle">Comentarios</h3>
-                <div id="commentsList"><p style="text-align:center; color:#777;">Cargando...</p></div>
-                <form id="commentForm">
-                    <input type="text" id="usernameInput" placeholder="Tu Nombre" required autocomplete="off" maxlength="15">
-                    <input type="text" id="commentInput" placeholder="Escribe..." required autocomplete="off">
-                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                </form>
-            </div>
-        </div>
-
-        <div id="updatesModal" class="modal-overlay">
-            <div class="info-content">
-                <span class="close-button" onclick="closeModal('updatesModal')">&times;</span>
-                <h2>Actualizaciones</h2>
-                <h3>v1.3.1</h3>
-                <ul>
-                    <li>Menú corregido (Modales).</li>
-                    <li>Sistema de comentarios y vistas.</li>
-                    <li>Diseño adaptable a móviles.</li>
-                </ul>
-                <button class="close-btn-bottom" onclick="closeModal('updatesModal')">Cerrar</button>
-            </div>
-        </div>
-
-        <div id="aboutModal" class="modal-overlay">
-            <div class="info-content">
-                <span class="close-button" onclick="closeModal('aboutModal')">&times;</span>
-                <h2>Quiénes Somos</h2>
-                <h3>ARC_CLXN</h3>
-                <p>Somos un equipo dedicado a encontrar los mejores talentos en la comunidad de Roblox.</p>
-                <p>Nuestro objetivo es crear una comunidad competitiva y sana.</p>
-                <button class="close-btn-bottom" onclick="closeModal('aboutModal')">Cerrar</button>
-            </div>
-        </div>
-
-        <div id="contactModal" class="modal-overlay">
-            <div class="info-content">
-                <span class="close-button" onclick="closeModal('contactModal')">&times;</span>
-                <h2>Contactos</h2>
-                <h3>Redes Sociales</h3>
-                <p><i class="fab fa-instagram"></i> Instagram: @arc_clxn</p>
-                <p><i class="fab fa-discord"></i> Discord: Servidor Oficial</p>
-                <button class="close-btn-bottom" onclick="closeModal('contactModal')">Cerrar</button>
-            </div>
-        </div>
-
     </header>
 
-    <input type="text" id="searchInput" placeholder="Buscar por título...">
-
-    <div id="countdown-container">
-        <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
-        <div id="countdown">Cargando...</div>
-        <img src="https://media0.giphy.com/media/v1.Y2lkPTZjMDliOTUydmtyb2czeTRwbDcyNXBwZWk0ZXg4c2RvMzdudW0yejl2MjIyOGZ0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/5aeKTXAsQpD83c4xpW/giphy.gif" alt="Perrito bailando" class="puppy">
+    <div id="searchContainer">
+        <div class="search-box-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" placeholder="Buscar usuarios o posts...">
+        </div>
     </div>
 
-    <main>
-        <div class="thread-container">
-            <p id="noThreadsMessage">No hay hilos aún. Sé el primero.</p>
+    <main class="thread-container">
+        </main>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" id="nav-home" onclick="changeSection('Home')">
+            <i class="fas fa-home"></i>
         </div>
-        <div id="pagination-container"></div>
-    </main>
+        <div class="nav-item" id="nav-search" onclick="changeSection('Busqueda')">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="nav-item" id="nav-add" onclick="openModal('newThreadModalContent')">
+            <i class="fas fa-plus-circle add-btn"></i>
+        </div>
+        <div class="nav-item" id="nav-activity" onclick="changeSection('Activity')">
+            <i class="fas fa-heart"></i>
+        </div>
+        <div class="nav-item" id="nav-profile" onclick="openMyProfile()">
+            <i class="fas fa-user"></i>
+        </div>
+    </nav>
 
-    <footer>
-        <p><a href="https://www.instagram.com/arc_clxn?igsh=djhzazNnbmFzOXIy">ARC_CLXN</a> &copy; 2025. Todos los derechos reservados.</p>
-        <p class="version">v1.3.1</p>
-    </footer>
+    <div id="newThreadModalContent" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('newThreadModalContent')">&times;</span>
+            <h2>Nueva Publicación</h2>
+            <form id="newThreadForm">
+                <input type="text" id="title" placeholder="Título..." required maxlength="50">
+                <select id="categorySelect">
+                    <option value="Creator">Creator</option>
+                    <option value="Elite">Elite</option>
+                    <option value="Mentor">Mentor</option>
+                    <option value="Designer">Designer</option>
+                    <option value="Top Model">Top Model</option>
+                    <option value="Cheerleader">Cheerleader</option>
+                    <option value="Hunter">Hunter</option>
+                    <option value="Moon & Sun">Moon & Sun</option>
+                </select>
+                <textarea id="description" placeholder="¿Qué estás pensando?" required></textarea>
+                
+                <label for="imageFile" class="upload-btn-gray">
+                    <i class="fas fa-images"></i> Agregar imágenes
+                </label>
+                <input type="file" id="imageFile" accept="image/*" multiple style="display:none;">
+                <span id="fileName" style="font-size:0.8em; color:#00a2ff;"></span>
+                
+                <button type="submit" id="submitBtn">PUBLICAR</button>
+            </form>
+        </div>
+    </div>
 
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content small-modal">
+            <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
+            <h2>Iniciar Sesión</h2>
+            <input type="text" id="loginUser" placeholder="Usuario">
+            <input type="password" id="loginPin" placeholder="PIN (4 dígitos)" maxlength="4">
+            <button onclick="loginSystem()">ENTRAR</button>
+            <p class="switch-auth" onclick="openModal('registerModal')">¿No tienes cuenta? Regístrate</p>
+        </div>
+    </div>
+
+    <div id="registerModal" class="modal-overlay">
+        <div class="modal-content small-modal">
+            <span class="close-modal" onclick="closeModal('registerModal')">&times;</span>
+            <h2>Crear Cuenta</h2>
+            <input type="text" id="regUser" placeholder="Nombre de usuario">
+            <input type="password" id="regPin" placeholder="Crea un PIN (4 dígitos)" maxlength="4">
+            <button onclick="registerSystem()">REGISTRARSE</button>
+            <p class="switch-auth" onclick="openModal('loginModal')">¿Ya tienes cuenta? Entra aquí</p>
+        </div>
+    </div>
+
+    <div id="commentsModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('commentsModal')">&times;</span>
+            <h3>Comentarios</h3>
+            <div id="commentsList" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 15px;"></div>
+            <form id="commentForm" style="display:flex; gap:5px;">
+                <input type="text" id="commentInput" placeholder="Escribe un comentario..." required style="flex:1;">
+                <button type="submit" style="width:auto; padding:0 15px;"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <div id="editProfileModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('editProfileModal')">&times;</span>
+            <h3>Editar Perfil</h3>
+            <div style="text-align:center; margin-bottom:15px;">
+                <img id="editAvatarPreview" src="" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
+                <label for="avatarUpload" style="display:block; color:#00a2ff; cursor:pointer; font-size:0.9em; margin-top:5px;">Cambiar foto</label>
+            </div>
+            <input type="text" id="editNameInput" placeholder="Nombre visible">
+            <input type="text" id="editHandleInput" placeholder="Usuario (@handle)">
+            <input type="text" id="editStatusInput" placeholder="Estado / Rol corto (ej. Creador)">
+            <textarea id="editBioInput" placeholder="Biografía..."></textarea>
+            <button id="saveProfileBtn" onclick="saveProfileChanges()">GUARDAR CAMBIOS</button>
+        </div>
+    </div>
+
+    <div id="updatesModal" class="modal-overlay">
+        <div class="info-content">
+            <span class="close-modal" onclick="closeModal('updatesModal')">&times;</span>
+            <h3>Actualizaciones</h3>
+            <p>Versión 4.4: Mejoras visuales en listas.</p>
+        </div>
+    </div>
+
+    <div id="contactModal" class="modal-overlay">
+        <div class="info-content">
+            <span class="close-modal" onclick="closeModal('contactModal')">&times;</span>
+            <h3>Contacto</h3>
+            <p>Instagram: arc_clxn</p>
+        </div>
+    </div>
+
+    <div id="confirmModal" class="modal-overlay" style="z-index: 5000;">
+        <div class="info-content" style="max-width: 300px; padding: 20px;">
+            <h3>Confirmación</h3>
+            <p id="confirmText">¿Estás seguro?</p>
+            <div style="display:flex; justify-content:center; gap:10px;">
+                <button onclick="closeModal('confirmModal')" style="background:#333; color:white; border:none; padding:8px 20px; border-radius:4px;">No</button>
+                <button id="confirmActionBtn" style="background:#ff4d4d; color:white; border:none; padding:8px 20px; border-radius:4px;">Sí</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reportModal" class="modal-overlay" style="z-index: 5000;">
+        <div class="info-content" style="max-width: 400px; padding: 20px; text-align: center;">
+            <h3>Reportar</h3>
+            <p id="reportTargetName" style="color:#00a2ff; font-weight:bold; margin-bottom:15px;"></p>
+            <label style="display:block; margin:10px 0; text-align:left; color:#ccc;">Selecciona el motivo:</label>
+            <select id="reportReasonSelect" style="width:100%; padding:10px; margin-bottom:20px; background:#1e1f22; color:white; border:1px solid #444; border-radius:5px;">
+                <option value="Spam">Spam o Publicidad</option>
+                <option value="Acoso">Acoso o Insultos</option>
+                <option value="Inapropiado">Contenido Inapropiado (+18)</option>
+                <option value="Odio">Discurso de Odio</option>
+                <option value="Suplantacion">Suplantación de Identidad</option>
+                <option value="Estafa">Estafa / Scam</option>
+                <option value="Otro">Otro motivo</option>
+            </select>
+            <div style="display:flex; justify-content:space-between; gap: 10px;">
+                <button onclick="document.getElementById('reportModal').style.display='none'" style="background:#444;">Cancelar</button>
+                <button onclick="submitReportAction()" style="background:#cc0000;">ENVIAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal-overlay">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+            <span class="close-modal" onclick="closeModal('adminModal')">&times;</span>
+            <h3 style="color: #ff4d4d; border-bottom: 1px solid #444; padding-bottom: 10px;">
+                <i class="fas fa-user-shield"></i> Panel de Moderación
+            </h3>
+            <div id="adminReportsList">
+                <p style="text-align:center; color:#777;">Cargando reportes...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="userListModal" class="modal-overlay" style="z-index: 6000;">
+        <div class="modal-content" style="padding: 0; height: 70vh; display: flex; flex-direction: column; overflow: hidden; background:#1a1a1a;">
+            
+            <div class="modal-tabs-header">
+                <div class="modal-tab" id="tab-following" onclick="switchListTab('following')">
+                    Siguiendo <span id="count-following" style="font-size:0.8em; color:#777;"></span>
+                </div>
+                <div class="modal-tab" id="tab-followers" onclick="switchListTab('followers')">
+                    Seguidores <span id="count-followers" style="font-size:0.8em; color:#777;"></span>
+                </div>
+                <span onclick="document.getElementById('userListModal').style.display='none'" class="close-list-btn">&times;</span>
+            </div>
+
+            <div style="padding: 10px; background: #1a1a1a;">
+                <input type="text" id="userListSearch" placeholder="Buscar..." style="margin: 0; border-radius: 8px; background: #2a2a2a; border:none; color:white;">
+            </div>
+
+            <div id="userListContainer" style="flex: 1; overflow-y: auto; padding: 0 10px;"></div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+    <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
+    
     <script type="module" src="script.js"></script>
+
     <script>
-        // --- FUNCIONES DE INTERFAZ (UI) ---
-
-        // 1. Alternar Menú
-        function toggleMenu() {
-            document.getElementById("menuDropdown").classList.toggle("show");
+        function toggleMenu() { document.getElementById("menuDropdown").classList.toggle("show"); }
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+        window.openModal = (id) => { 
+            document.getElementById("menuDropdown").classList.remove('show');
+            document.getElementById(id).style.display = 'block'; 
         }
-
-        // 2. Función Universal para Abrir Modales
-        window.openModal = function(modalId) {
-            // Cerrar menú si está abierto
-            const dropdown = document.getElementById("menuDropdown");
-            if (dropdown.classList.contains('show')) {
-                dropdown.classList.remove('show');
-            }
-            // Mostrar el modal
-            document.getElementById(modalId).style.display = 'block';
-        }
-
-        // 3. Función Universal para Cerrar Modales
-        window.closeModal = function(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // 4. Cerrar al hacer clic fuera
-        window.onclick = function(event) {
-            // Cerrar menú
-            if (document.querySelector('.menu-btn')) {
-                if (!event.target.matches('.menu-btn') && !event.target.matches('.fa-bars')) {
-                    var dropdowns = document.getElementsByClassName("menu-dropdown");
-                    for (var i = 0; i < dropdowns.length; i++) {
-                        var openDropdown = dropdowns[i];
-                        if (openDropdown.classList.contains('show')) {
-                            openDropdown.classList.remove('show');
-                        }
-                    }
+        document.getElementById('imageFile').onchange = function() {
+            if(this.files && this.files.length > 0) {
+                if(this.files.length > 1) {
+                    document.getElementById('fileName').textContent = `${this.files.length} imágenes seleccionadas`;
+                } else {
+                    document.getElementById('fileName').textContent = this.files[0].name;
                 }
             }
-            // Cerrar modales si se hace clic en el fondo oscuro
-            if (event.target.classList.contains('modal-overlay')) {
-                event.target.style.display = "none";
-            }
+        };
+        window.onclick = function(event) {
+            const rModal = document.getElementById('reportModal');
+            const aModal = document.getElementById('adminModal');
+            const uModal = document.getElementById('userListModal');
+            if (event.target == rModal) rModal.style.display = "none";
+            if (event.target == aModal) aModal.style.display = "none";
+            if (event.target == uModal) uModal.style.display = "none";
         }
-        
-        window.toggleMenu = toggleMenu;
     </script>
 </body>
 </html>

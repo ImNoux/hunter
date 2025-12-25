@@ -72,16 +72,25 @@
             <form id="newThreadForm">
                 <input type="text" id="title" placeholder="Título..." required maxlength="50" style="background:transparent; border:none; border-bottom:1px solid #333; border-radius:0; font-size:1.2em; padding:10px 0;">
                 
-                <select id="categorySelect" style="margin-top:15px;">
-                    <option value="Creator">Creator</option>
-                    <option value="Elite">Elite</option>
-                    <option value="Mentor">Mentor</option>
-                    <option value="Designer">Designer</option>
-                    <option value="Top Model">Top Model</option>
-                    <option value="Cheerleader">Cheerleader</option>
-                    <option value="Hunter">Hunter</option>
-                    <option value="Moon & Sun">Moon & Sun</option>
-                </select>
+                <div class="custom-dropdown-container">
+                    <input type="hidden" id="categorySelect" value="Creator">
+                    
+                    <div class="dropdown-trigger" onclick="toggleCustomDropdown('catOptions')">
+                        <span id="catDisplay">Creator</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+
+                    <div id="catOptions" class="dropdown-options">
+                        <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Creator', 'catOptions')">Creator</div>
+                        <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Elite', 'catOptions')">Elite</div>
+                        <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Mentor', 'catOptions')">Mentor</div>
+                        <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Designer', 'catOptions')">Designer</div>
+                        <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Top Model', 'catOptions')">Top Model</div>
+                        <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Cheerleader', 'catOptions')">Cheerleader</div>
+                        <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Hunter', 'catOptions')">Hunter</div>
+                        <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Moon & Sun', 'catOptions')">Moon & Sun</div>
+                    </div>
+                </div>
 
                 <textarea id="description" placeholder="¿Qué estás pensando?" required style="background:transparent; border:none; border-bottom:1px solid #333; border-radius:0; min-height:150px; font-size:1em; margin-top:15px;"></textarea>
                 
@@ -213,15 +222,26 @@
             <h3>Reportar</h3>
             <p id="reportTargetName" style="color:#00a2ff; font-weight:bold; margin-bottom:15px;"></p>
             <label style="display:block; margin:10px 0; text-align:left; color:#ccc;">Selecciona el motivo:</label>
-            <select id="reportReasonSelect" style="width:100%; padding:10px; margin-bottom:20px; background:#1e1f22; color:white; border:1px solid #444; border-radius:5px;">
-                <option value="Spam">Spam o Publicidad</option>
-                <option value="Acoso">Acoso o Insultos</option>
-                <option value="Inapropiado">Contenido Inapropiado (+18)</option>
-                <option value="Odio">Discurso de Odio</option>
-                <option value="Suplantacion">Suplantación de Identidad</option>
-                <option value="Estafa">Estafa / Scam</option>
-                <option value="Otro">Otro motivo</option>
-            </select>
+            
+            <div class="custom-dropdown-container" style="margin-top: 5px; margin-bottom: 20px;">
+                <input type="hidden" id="reportReasonSelect" value="Spam">
+                
+                <div class="dropdown-trigger" onclick="toggleCustomDropdown('repOptions')">
+                    <span id="repDisplay">Spam o Publicidad</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+
+                <div id="repOptions" class="dropdown-options">
+                    <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Spam', 'repOptions')">Spam o Publicidad</div>
+                    <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Acoso', 'repOptions')">Acoso o Insultos</div>
+                    <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Inapropiado', 'repOptions')">Contenido Inapropiado (+18)</div>
+                    <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Odio', 'repOptions')">Discurso de Odio</div>
+                    <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Suplantacion', 'repOptions')">Suplantación de Identidad</div>
+                    <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Estafa', 'repOptions')">Estafa / Scam</div>
+                    <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Otro', 'repOptions')">Otro motivo</div>
+                </div>
+            </div>
+
             <div style="display:flex; justify-content:space-between; gap: 10px;">
                 <button onclick="document.getElementById('reportModal').style.display='none'" style="background:#444;">Cancelar</button>
                 <button onclick="submitReportAction()" style="background:#cc0000;">ENVIAR</button>
@@ -229,7 +249,7 @@
         </div>
     </div>
 
-    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 4.9: Botón flotante y diseño mejorado.</p></div></div>
+    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 5.1: Menús personalizados.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
     
     <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">
@@ -263,9 +283,29 @@
                 else { document.getElementById('fileName').textContent = this.files[0].name; }
             }
         };
+        
+        // --- LÓGICA DE DROPDOWNS PERSONALIZADOS ---
+        window.toggleCustomDropdown = function(id) {
+            document.querySelectorAll('.dropdown-options').forEach(el => {
+                if(el.id !== id) el.classList.remove('show');
+            });
+            document.getElementById(id).classList.toggle('show');
+        };
+
+        window.selectCustomOption = function(inputId, displayId, value, menuId) {
+            document.getElementById(inputId).value = value;
+            document.getElementById(displayId).innerText = value;
+            document.getElementById(menuId).classList.remove('show');
+        };
+
         window.onclick = function(event) {
             const ids = ['reportModal', 'adminModal', 'profileOptionsModal', 'accountInfoModal'];
             ids.forEach(id => { if (event.target == document.getElementById(id)) document.getElementById(id).style.display = "none"; });
+            
+            // Cerrar dropdowns si se toca fuera
+            if (!event.target.closest('.custom-dropdown-container')) {
+                document.querySelectorAll('.dropdown-options.show').forEach(el => el.classList.remove('show'));
+            }
         }
     </script>
 </body>

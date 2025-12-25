@@ -390,7 +390,6 @@ function renderFullProfile(container) {
         }
     }
     
-    // MENÚ 3 PUNTOS
     const threeDotsHTML = !isMe ? `<button class="profile-menu-btn" onclick="openProfileOptions('${target}')"><i class="fas fa-ellipsis-v"></i></button>` : '';
 
     const statsHTML = !isBanned && !isBlockedByMe ? `
@@ -678,13 +677,12 @@ window.registerSystem = async function() {
             return showToast("Ya existe ese usuario", "error");
         }
 
-        // DETECTAR UBICACIÓN POR IP
         let userLocation = "Desconocida";
         try {
             const res = await fetch('https://ipapi.co/json/');
             const data = await res.json();
             if (data.city && data.country_name) {
-                userLocation = `${data.city}, ${data.country_name}`; // Ej: Quito, Ecuador
+                userLocation = `${data.city}, ${data.country_name}`; 
             }
         } catch (err) {
             console.log("No se pudo obtener ubicación IP");
@@ -697,7 +695,7 @@ window.registerSystem = async function() {
             registeredAt: Date.now(), 
             followersCount: 0, 
             followingCount: 0,
-            location: userLocation // Guardamos la ubicación
+            location: userLocation
         });
         
         localStorage.setItem('savedRobloxUser', u);
@@ -726,12 +724,14 @@ window.loginSystem = async function() {
     } catch(e) { showToast("Error de red", "error"); }
 };
 
-window.logoutSystem = () => showConfirm("¿Cerrar sesión?", () => { 
-    localStorage.clear(); 
-    window.location.reload(); 
-});
+window.logoutSystem = function() {
+    showConfirm("¿Cerrar sesión?", () => { 
+        localStorage.clear(); 
+        window.location.reload(); 
+    });
+};
 
-// --- FUNCIONES RESTANTES (EDIT, LIKE, BLOCK...) ---
+// --- FUNCIONES RESTANTES ---
 window.openEditProfileModal = function() {
     const d = allUsersMap[localStorage.getItem('savedRobloxUser')] || {};
     document.getElementById('editAvatarPreview').src = d.avatar || DEFAULT_AVATAR;
@@ -799,6 +799,23 @@ window.reportPost = function(postKey, authorName) {
     userBeingReported = authorName;
     postBeingReported = postKey; 
     openReportModal(authorName, true);
+};
+
+function openReportModal(target, isPost = false) {
+    const myUser = localStorage.getItem('savedRobloxUser');
+    if (!myUser) return showToast("Inicia sesión primero", "error");
+    if (myUser === target) return showToast("No puedes reportarte", "error");
+    const nameLabel = document.getElementById('reportTargetName');
+    if(nameLabel) nameLabel.innerText = isPost ? `Reportando publicación de: ${target}` : `Reportando a: ${target}`;
+    document.getElementById('reportModal').style.display = 'block';
+}
+
+window.submitReportAction = function() {
+    const reason = document.getElementById('reportReasonSelect').value;
+    const myUser = localStorage.getItem('savedRobloxUser');
+    if (!userBeingReported) return;
+    const reportData = { reportedUser: userBeingReported, reportedBy: myUser, reason: reason, timestamp: Date.now(), status: 'pending', postId: postBeingReported };
+    push(ref(db, 'reports'), reportData).then(() => { showToast("Reporte enviado.", "success"); document.getElementById('reportModal').style.display = 'none'; userBeingReported = ''; postBeingReported = null; }).catch(() => showToast("Error", "error"));
 };
 
 window.banUser = function(targetUser) {

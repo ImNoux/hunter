@@ -103,6 +103,16 @@
         </div>
     </div>
 
+    <div id="loginErrorModal" class="modal-overlay" style="z-index: 9000;">
+        <div class="info-content" style="max-width: 320px; padding: 25px; text-align: center;">
+            <h3 style="margin-top:0; font-size:1.2rem;">Contraseña incorrecta</h3>
+            <p style="color:#ccc; font-size:0.95em; line-height:1.4; margin: 15px 0 25px 0;">
+                La contraseña que has escrito no es correcta. Vuelve a intentarlo.
+            </p>
+            <button onclick="closeModal('loginErrorModal')" style="background:none; border:none; color:#0095f6; font-weight:700; font-size:1rem; width:100%; padding:10px; border-top:1px solid #333;">ACEPTAR</button>
+        </div>
+    </div>
+
     <div id="loginModal" class="modal-overlay">
         <div class="modal-content small-modal">
             <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
@@ -221,16 +231,15 @@
         <div class="info-content" style="max-width: 400px; padding: 20px; text-align: center;">
             <h3>Reportar</h3>
             <p id="reportTargetName" style="color:#00a2ff; font-weight:bold; margin-bottom:15px;"></p>
+            
             <label style="display:block; margin:10px 0; text-align:left; color:#ccc;">Selecciona el motivo:</label>
             
             <div class="custom-dropdown-container" style="margin-top: 5px; margin-bottom: 20px;">
                 <input type="hidden" id="reportReasonSelect" value="Spam">
-                
                 <div class="dropdown-trigger" onclick="toggleCustomDropdown('repOptions')">
                     <span id="repDisplay">Spam o Publicidad</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
-
                 <div id="repOptions" class="dropdown-options">
                     <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Spam', 'repOptions')">Spam o Publicidad</div>
                     <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Acoso', 'repOptions')">Acoso o Insultos</div>
@@ -249,10 +258,68 @@
         </div>
     </div>
 
-    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 5.2: Botones y Listas Premium.</p></div></div>
+    <div id="reportSuccessModal" class="modal-overlay" style="z-index: 7500;">
+        <div class="modal-content">
+            <div class="check-circle-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3>Gracias por denunciar esta cuenta</h3>
+            <p style="color:#888; font-size:0.9em; line-height:1.4;">
+                Mientras procesamos su caso, le sugerimos avanzar con estas otras medidas.
+            </p>
+            <div class="report-option-list">
+                <div class="report-list-item" onclick="openBlockConfirmModal()">
+                    <span class="text-danger"><i class="fas fa-ban icon-danger"></i> Bloquear a <span id="reportSuccessUser">Usuario</span></span>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="report-list-item">
+                    <span><i class="far fa-life-ring" style="margin-right:10px;"></i> Obtener ayuda</span>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="report-list-item">
+                    <span><i class="fas fa-info-circle" style="margin-right:10px;"></i> Más información</span>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+            <button onclick="closeModal('reportSuccessModal')" class="btn-modal btn-modal-submit" style="margin-top:20px;">Cerrar</button>
+        </div>
+    </div>
+
+    <div id="blockConfirmModal" class="modal-overlay" style="z-index: 8000;">
+        <div class="modal-content" style="text-align: center;">
+            <img id="blockAvatarPreview" src="" style="width:70px; height:70px; border-radius:50%; margin-bottom:15px;">
+            <h3 style="margin:0 0 10px 0;">¿Bloquear a <span id="blockTargetUser">Usuario</span>?</h3>
+            <p style="color:#888; font-size:0.9em; margin-bottom:25px;">
+                Puedes desbloquear al usuario cuando cuando quieras.
+            </p>
+            <div style="display:flex; align-items:start; gap:15px; text-align:left; margin-bottom:30px; color:#ccc;">
+                <i class="far fa-eye-slash" style="font-size:1.5em; margin-top:2px;"></i>
+                <span style="font-size:0.95em;">No podrás ver nuevas publicaciones que haga.</span>
+            </div>
+            <button onclick="performBlockAction()" class="btn-block-blue">Bloquear</button>
+            <button onclick="performBlockAndReportAction()" class="btn-text-blue">Bloquear y denunciar</button>
+            <button onclick="closeModal('blockConfirmModal')" style="background:none; border:none; color:#777; margin-top:15px;">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="finalThanksModal" class="modal-overlay" style="z-index: 8500;">
+        <div class="info-content" style="padding-bottom:0; overflow:hidden;">
+            <div style="padding: 40px 20px;">
+                <div class="check-circle-icon check-circle-success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 style="font-size:1.3rem; margin-bottom:15px;">Gracias por denunciar este perfil</h3>
+                <p style="color:#888; font-size:0.95em; line-height:1.5;">
+                    Tus comentarios son importantes para ayudarnos a lograr que la comunidad de ARC siga siendo un lugar seguro.
+                </p>
+            </div>
+            <button class="bottom-link-blue" onclick="closeAllReportModals()">Mostrar perfil</button>
+        </div>
+    </div>
+
+    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 6.0: Flujo de Reportes Completo.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
-    
-    <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">
+  <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">
         <div class="info-content" style="max-width: 300px; padding: 20px;">
             <h3>Confirmación</h3>
             <p id="confirmText">¿Estás seguro?</p>
@@ -299,7 +366,8 @@
         };
 
         window.onclick = function(event) {
-            const ids = ['reportModal', 'adminModal', 'profileOptionsModal', 'accountInfoModal'];
+            // IDs de todos los modales para cerrar al tocar el fondo oscuro
+            const ids = ['reportModal', 'adminModal', 'profileOptionsModal', 'accountInfoModal', 'loginErrorModal', 'reportSuccessModal', 'blockConfirmModal', 'finalThanksModal', 'confirmModal', 'updatesModal', 'contactModal'];
             ids.forEach(id => { if (event.target == document.getElementById(id)) document.getElementById(id).style.display = "none"; });
             
             // Cerrar dropdowns si se toca fuera

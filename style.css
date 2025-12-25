@@ -120,8 +120,8 @@ h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.
 .modal-content h2, .modal-content h3 { font-size: 1.4rem; margin-bottom: 20px; font-weight: 700; color: #fff; }
 .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; color: #777; cursor: pointer; background: #2a2a2a; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .close-modal:hover { background: #444; color: #fff; }
-input, textarea, select { width: 100%; padding: 15px; margin: 8px 0; background: #262626; border: 1px solid #3a3a3a; border-radius: 14px; color: white; font-family: inherit; font-size: 0.95em; outline: none; transition: all 0.2s; appearance: none; }
-input:focus, textarea:focus, select:focus { border-color: #0095f6; background: #2d2d2d; }
+input, textarea { width: 100%; padding: 15px; margin: 8px 0; background: #262626; border: 1px solid #3a3a3a; border-radius: 14px; color: white; font-family: inherit; font-size: 0.95em; outline: none; transition: all 0.2s; appearance: none; }
+input:focus, textarea:focus { border-color: #0095f6; background: #2d2d2d; }
 textarea { resize: none; height: 100px; font-family: sans-serif; }
 .upload-btn-gray { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; background-color: #262626; border: 2px dashed #444; border-radius: 14px; color: #aaa; cursor: pointer; margin: 10px 0; font-weight: 500; transition: all 0.2s; }
 .upload-btn-gray:hover { border-color: #0095f6; color: #fff; background-color: #2d2d2d; }
@@ -185,7 +185,7 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .btn-small-follow:active { transform: scale(0.95); opacity: 0.9; }
 
 /* =========================================
-   DROPDOWNS PERSONALIZADOS
+   DROPDOWNS PERSONALIZADOS (NUEVO)
    ========================================= */
 .custom-dropdown-container { position: relative; width: 100%; margin-top: 15px; margin-bottom: 15px; }
 .dropdown-trigger {
@@ -204,19 +204,6 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .dropdown-option:last-child { border-bottom: none; }
 .dropdown-option:hover { background: #333; color: #fff; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* =========================================
-   MODAL ACTIONS (BOTONES ELEGANTES)
-   ========================================= */
-.modal-actions { display: flex; gap: 15px; margin-top: 25px; }
-.btn-modal {
-    flex: 1; padding: 12px; border-radius: 50px; /* Redonditos */
-    border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
-    transition: transform 0.1s, opacity 0.2s;
-}
-.btn-modal-cancel { background-color: transparent; border: 1px solid #333; color: #ccc; }
-.btn-modal-submit { background-color: #4A6BFF; color: white; box-shadow: 0 4px 15px rgba(74, 107, 255, 0.3); } /* Azul Vibrante */
-.btn-modal:active { transform: scale(0.97); opacity: 0.9; }
 
 /* =========================================
    OTROS
@@ -240,3 +227,68 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .mini-action-menu div { padding: 10px; font-size: 0.9em; color: #fff; cursor: pointer; }
 .mini-action-menu div:hover { background: #333; }
 .status-pill { position: absolute; top: -8px; left: -5px; background: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.7em; color: #ccc; }
+/* =========================================
+   ESTILOS NUEVOS (FLUJO INSTAGRAM)
+   ========================================= */
+
+/* Círculo con Checkmark (Verde o Transparente) */
+.check-circle-icon {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    border: 2px solid #fff; /* Por defecto borde blanco */
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px auto;
+    font-size: 24px; color: #fff;
+}
+.check-circle-success {
+    border-color: transparent;
+    background-color: transparent; /* O verde si prefieres: #00e676 */
+}
+.check-circle-success i { color: #00e676; font-size: 40px; } /* Check verde grande */
+
+/* Lista de opciones en Modal Reporte */
+.report-option-list {
+    display: flex; flex-direction: column;
+    width: 100%; text-align: left;
+    margin-top: 20px;
+}
+.report-list-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    color: #fff; font-size: 1rem;
+}
+.report-list-item:last-child { border-bottom: none; }
+.report-list-item i { font-size: 0.9em; color: #777; }
+
+/* Texto Rojo (Para Bloquear) */
+.text-danger { color: #ff4d4d !important; font-weight: 600; }
+
+/* Icono Bloquear en la lista */
+.icon-danger { color: #ff4d4d !important; font-size: 1.2rem; margin-right: 10px; }
+
+/* Botón grande azul (Bloquear) */
+.btn-block-blue {
+    width: 100%; padding: 15px;
+    background-color: #4A6BFF; color: white;
+    border: none; border-radius: 12px;
+    font-weight: 700; font-size: 1rem;
+    margin-bottom: 10px; cursor: pointer;
+}
+
+/* Botón de texto (Bloquear y Denunciar) */
+.btn-text-blue {
+    background: none; border: none;
+    color: #4A6BFF; font-weight: 600; font-size: 0.95rem;
+    cursor: pointer; padding: 10px;
+}
+
+/* Link inferior (Mostrar perfil) */
+.bottom-link-blue {
+    display: block; width: 100%; text-align: center;
+    color: #0095f6; font-weight: 600; padding: 15px;
+    border-top: 1px solid #333;
+    background: none; cursor: pointer;
+    margin-top: 20px;
+}

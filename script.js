@@ -23,7 +23,7 @@ const verifiedRef = ref(db, 'verified');
 let searchTerm = ''; 
 let currentSection = 'Home'; 
 let viewingUserProfile = ''; 
-let viewingSinglePostId = null; // Para Deep Linking de posts
+let viewingSinglePostId = null; 
 let allThreadsData = []; 
 let verifiedUsersList = []; 
 let allUsersMap = {}; 
@@ -31,6 +31,7 @@ let myFollowingList = [];
 let myBlockedList = []; 
 let userBeingReported = ''; 
 let postBeingReported = null;
+let lastScrollTop = 0; // Para la animación del menú
 window.showToast = function(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if(!container) return;
@@ -79,12 +80,10 @@ function formatCount(num) {
     return num;
 }
 
-// FORMATO DE FECHA (7 DÍAS / AÑO)
 function formatTimeAgo(timestamp) {
     if (!timestamp) return "";
     const now = Date.now();
     const diff = Math.floor((now - timestamp) / 1000); 
-
     if (diff < 60) return "hace un momento";
     const minutes = Math.floor(diff / 60);
     if (minutes < 60) return `${minutes} min`;
@@ -98,7 +97,6 @@ function formatTimeAgo(timestamp) {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     const currentYear = new Date().getFullYear();
-
     if (year === currentYear) { return `${day}/${month}`; } 
     else { return `${day}/${month}/${year}`; }
 }
@@ -112,28 +110,41 @@ window.getUserId = function() {
     return userId;
 }
 
+// --- ANIMACIÓN DE SCROLL (OCULTAR BARRAS) ---
+window.addEventListener("scroll", function() {
+    let st = window.pageYOffset || document.documentElement.scrollTop;
+    if (st > lastScrollTop && st > 60) {
+        // Bajando: Ocultar
+        document.getElementById("mainHeader").classList.add("scroll-hide");
+        document.getElementById("mainBottomNav").classList.add("scroll-hide");
+        document.getElementById("floatingAddBtn").classList.add("scroll-hide");
+        document.getElementById("searchContainer").classList.add("scroll-hide");
+    } else {
+        // Subiendo: Mostrar
+        document.getElementById("mainHeader").classList.remove("scroll-hide");
+        document.getElementById("mainBottomNav").classList.remove("scroll-hide");
+        document.getElementById("floatingAddBtn").classList.remove("scroll-hide");
+        document.getElementById("searchContainer").classList.remove("scroll-hide");
+    }
+    lastScrollTop = st <= 0 ? 0 : st;
+}, false);
+
 function initFirebaseListener() {
     onValue(usersRef, (snap) => { 
         allUsersMap = snap.val() || {}; 
         const myUser = localStorage.getItem('savedRobloxUser');
-        
-        // Check Baneo
         if (myUser && allUsersMap[myUser] && allUsersMap[myUser].isBanned === true) {
             showToast("Tu cuenta ha sido suspendida", "error");
             localStorage.clear();
             setTimeout(() => { window.location.reload(); }, 3000);
             return;
         }
-
-        // Check Admin
         const btnAdmin = document.getElementById('btnAdminPanel');
         if(btnAdmin) {
             if(myUser && allUsersMap[myUser] && allUsersMap[myUser].role === 'admin') {
                 btnAdmin.style.display = 'block';
             } else { btnAdmin.style.display = 'none'; }
         }
-
-        // Listas
         if (myUser && allUsersMap[myUser]) {
             myFollowingList = allUsersMap[myUser].following ? Object.keys(allUsersMap[myUser].following) : [];
             myBlockedList = allUsersMap[myUser].blocked ? Object.keys(allUsersMap[myUser].blocked) : [];
@@ -157,7 +168,7 @@ function initFirebaseListener() {
     });
 }
 
-// LOGIN CON ACTUALIZACIÓN DE DATOS (IP)
+// LOGIN SEGURO CON IP
 window.loginSystem = async function() {
     const u = document.getElementById('loginUser').value.trim();
     const p = document.getElementById('loginPin').value.trim();
@@ -174,7 +185,6 @@ window.loginSystem = async function() {
                 return showToast("Cuenta suspendida", "error"); 
             }
             if (userData.pin == p) {
-                // Actualizar datos faltantes
                 const updates = {};
                 let needsUpdate = false;
                 if (!userData.location) {
@@ -196,23 +206,31 @@ window.loginSystem = async function() {
                 localStorage.setItem('savedRobloxUser', u);
                 localStorage.setItem('userId', 'res_' + u);
                 window.location.reload();
-            } else { showToast("PIN incorrecto", "error"); btn.innerText = originalText; btn.disabled = false; }
+            } else { 
+                showToast("Contraseña incorrecta", "error"); 
+                btn.innerText = originalText; btn.disabled = false; 
+            }
         } else { showToast("Usuario no encontrado", "error"); btn.innerText = originalText; btn.disabled = false; }
     } catch(e) { showToast("Error conexión", "error"); btn.innerText = originalText; btn.disabled = false; }
 };
 
-// REGISTRO CON IP
+// REGISTRO BLINDADO
 window.registerSystem = async function() {
     const u = document.getElementById('regUser').value.trim();
     const p = document.getElementById('regPin').value.trim();
-    if(p.length < 4) return showToast("PIN muy corto", "error");
     
+    if(p.length < 4) return showToast("PIN muy corto", "error");
+    if(u.length < 3) return showToast("Usuario muy corto", "error");
+
     const btn = document.querySelector('#registerModal button');
     btn.innerText = "Registrando..."; btn.disabled = true;
 
     try {
         const s = await get(child(usersRef, u));
-        if (s.exists()) { btn.innerText = "REGISTRARSE"; btn.disabled = false; return showToast("Usuario ya existe", "error"); }
+        if (s.exists()) { btn.innerText = "REGISTRARSE"; btn.disabled = false; return showToast("ID de usuario en uso", "error"); }
+
+        const isHandleTaken = Object.values(allUsersMap).some(user => user.customHandle && user.customHandle.toLowerCase() === u.toLowerCase());
+        if (isHandleTaken) { btn.innerText = "REGISTRARSE"; btn.disabled = false; return showToast("Este nombre de usuario (@) ya existe", "error"); }
 
         let userLocation = "Desconocida";
         try {
@@ -242,7 +260,6 @@ window.changeSection = function(sectionName) {
         viewingUserProfile = ''; 
     }
     
-    // Limpiar vista de post único si salgo de Home
     if (sectionName !== 'Home') viewingSinglePostId = null;
 
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -260,17 +277,8 @@ window.changeSection = function(sectionName) {
     if(sectionName === 'Home') window.scrollTo(0,0);
 };
 
-window.openMyProfile = function() {
-    viewingUserProfile = ''; 
-    localStorage.removeItem('lastVisitedProfile'); 
-    changeSection('Perfil'); 
-};
-
-window.openFullProfile = (u) => { 
-    viewingUserProfile = u; 
-    localStorage.setItem('lastVisitedProfile', u); 
-    changeSection('Perfil'); 
-};
+window.openMyProfile = function() { viewingUserProfile = ''; localStorage.removeItem('lastVisitedProfile'); changeSection('Perfil'); };
+window.openFullProfile = (u) => { viewingUserProfile = u; localStorage.setItem('lastVisitedProfile', u); changeSection('Perfil'); };
 
 function renderCurrentView() {
     const container = document.querySelector('.thread-container');
@@ -286,6 +294,8 @@ function renderCurrentView() {
     }
     renderPostList(container, false);
 }
+
+// --- POSTS ---
 window.updateImageCounter = function(carousel) {
     const width = carousel.offsetWidth;
     const currentIndex = Math.round(carousel.scrollLeft / width) + 1;
@@ -297,13 +307,11 @@ window.updateImageCounter = function(carousel) {
 function renderThread(key, thread, container) {
     const div = document.createElement('div');
     div.className = 'thread';
-    
     const authorName = thread.username || "Desconocido";
     const authorData = allUsersMap[authorName] || {};
     const myUser = localStorage.getItem('savedRobloxUser');
     const isVerified = authorName && verifiedUsersList.includes(authorName.toLowerCase());
     const verifiedIconHTML = isVerified ? '<i class="fas fa-check-circle verified-icon"></i>' : '';
-    
     const isMe = (myUser === authorName);
     const isFollowing = myFollowingList.includes(authorName);
     const timeAgo = formatTimeAgo(thread.timestamp);
@@ -321,9 +329,7 @@ function renderThread(key, thread, container) {
         </div>`;
     }
 
-    let optionsMenuHTML = '';
-    // Menú de opciones siempre visible (para compartir)
-    optionsMenuHTML = `
+    let optionsMenuHTML = `
     <div class="post-header-right">
         <button class="options-btn" onclick="togglePostOptions('${key}')"><i class="fas fa-ellipsis-h"></i></button>
         <div id="opts-${key}" class="post-options-dropdown">
@@ -402,6 +408,8 @@ window.addEventListener('click', function(e) {
         document.querySelectorAll('.post-options-dropdown.show').forEach(el => el.classList.remove('show'));
     }
 });
+
+// --- PERFIL ---
 window.toggleMiniMenu = function(element) {
     document.querySelectorAll('.mini-action-menu.show').forEach(el => {
         if(el !== element.querySelector('.mini-action-menu')) el.classList.remove('show');
@@ -446,7 +454,6 @@ function renderFullProfile(container) {
     
     let actionButtons = '';
     if (isMe) {
-        // COMPARTIR LLAMA A COPY PROFILE
         actionButtons = `
             <button onclick="openEditProfileModal()" class="btn-profile-secondary">Editar perfil</button>
             <button onclick="copyProfileUrl('${target}')" class="btn-profile-secondary">Compartir perfil</button>
@@ -466,7 +473,6 @@ function renderFullProfile(container) {
         }
     }
     
-    // BOTÓN 3 PUNTOS SOLO SI ES OTRO
     const threeDotsHTML = !isMe ? `<button class="profile-menu-btn" onclick="openProfileOptions('${target}')"><i class="fas fa-ellipsis-v"></i></button>` : '';
 
     const statsHTML = !isBanned && !isBlockedByMe ? `
@@ -504,10 +510,20 @@ function renderFullProfile(container) {
         container.innerHTML += '<p style="text-align:center; padding:40px; color:#777;">Has bloqueado a este usuario.</p>';
     }
 }
+
+// --- LISTAS Y FILTRADO ---
 function renderPostList(container, isSearch) {
-    // Si estamos viendo un solo post (Deep Link)
     if (viewingSinglePostId) {
-        container.innerHTML = `<button onclick="viewingSinglePostId = null; renderCurrentView()" style="background:none; color:#00a2ff; border:none; padding:10px; cursor:pointer; width:100%; text-align:left; margin-bottom:10px;"><i class="fas fa-arrow-left"></i> Ver todas las publicaciones</button>`;
+        const postEntry = allThreadsData.find(x => x[0] === viewingSinglePostId);
+        if (postEntry) {
+            const author = postEntry[1].username;
+            container.innerHTML = `
+                <button onclick="openFullProfile('${author}')" style="background:none; color:#00a2ff; border:none; padding:10px 0; cursor:pointer; width:100%; text-align:left; margin-bottom:10px; font-size:1em; display:flex; align-items:center; gap:8px;">
+                    <i class="fas fa-arrow-left"></i> Ver más de @${author}
+                </button>`;
+        } else {
+            container.innerHTML = `<button onclick="window.location.reload()" style="background:none; color:#ff4d4d; border:none; padding:10px;">Publicación no encontrada. Ir al inicio.</button>`;
+        }
     }
 
     const filtered = allThreadsData.filter(([k, t]) => {
@@ -527,34 +543,46 @@ function renderPostList(container, isSearch) {
     if (filtered.length) {
         filtered.forEach(([k, t]) => renderThread(k, t, container));
     } else {
-        if (viewingSinglePostId) container.innerHTML += '<p style="text-align:center; padding:40px; color:#777;">Publicación no encontrada.</p>';
-        else container.innerHTML += '<p style="text-align:center; padding:20px; color:#777;">Sin resultados.</p>';
+        if (!viewingSinglePostId) container.innerHTML += '<p style="text-align:center; padding:20px; color:#777;">Sin resultados.</p>';
     }
 }
 
 function renderUserSearch(container) {
     if (!searchTerm) { container.innerHTML = '<p style="text-align:center; color:#777; margin-top:20px;">Busca personas...</p>'; return; }
     const term = searchTerm.toLowerCase();
+    
     const myUser = localStorage.getItem('savedRobloxUser');
     const amIAdmin = allUsersMap[myUser]?.role === 'admin';
+
     Object.keys(allUsersMap).filter(u => 
-        u.toLowerCase().includes(term) || (allUsersMap[u].displayName && allUsersMap[u].displayName.toLowerCase().includes(term))
+        u.toLowerCase().includes(term) || 
+        (allUsersMap[u].displayName && allUsersMap[u].displayName.toLowerCase().includes(term))
     ).forEach(username => {
         const uData = allUsersMap[username];
+        
         let topText = uData.customHandle || username; 
         let bottomText = uData.displayName || username; 
+        
         let avatar = uData.avatar || DEFAULT_AVATAR;
         const isVerified = verifiedUsersList.includes(username.toLowerCase());
         const verifIcon = isVerified ? '<i class="fas fa-check-circle verified-icon"></i>' : '';
+
         if (uData.isBanned === true) {
             if (amIAdmin) topText += " (BANEADO)";
             else { topText = "Usuario Eliminado"; bottomText = ""; avatar = DEFAULT_AVATAR; }
         }
         if (myBlockedList.includes(username)) topText += " (Bloqueado)";
+
         const div = document.createElement('div');
         div.className = 'user-search-result';
         div.onclick = () => openFullProfile(username);
-        div.innerHTML = `<img src="${avatar}" class="user-search-avatar"><div class="user-search-info"><h4 style="margin:0; color:#fff;">${topText} ${verifIcon}</h4><p style="color:#a8a8a8; margin:0;">${bottomText}</p></div>`;
+        div.innerHTML = `
+            <img src="${avatar}" class="user-search-avatar">
+            <div class="user-search-info">
+                <h4 style="margin:0; color:#fff;">${topText} ${verifIcon}</h4>
+                <p style="color:#a8a8a8; margin:0;">${bottomText}</p>
+            </div>
+        `;
         container.appendChild(div);
     });
 }
@@ -574,13 +602,20 @@ function renderActivity(container) {
         });
     } else { container.innerHTML += '<p style="text-align:center; padding:40px; color:#555;">Sin actividad.</p>'; }
 }
+// --- SISTEMA DE LISTAS (PÁGINA COMPLETA) ---
 let currentListUser = '';
 let currentActiveTab = '';
 
 window.openListModal = function(initialTab, targetUser) {
     currentListUser = targetUser;
-    document.getElementById('userListModal').style.display = 'block';
+    const page = document.getElementById('userListPage');
+    page.style.display = 'flex';
+    document.getElementById('listPageTitle').innerText = targetUser;
     switchListTab(initialTab);
+};
+
+window.closeUserListPage = function() {
+    document.getElementById('userListPage').style.display = 'none';
 };
 
 window.switchListTab = function(tabName) {
@@ -599,21 +634,27 @@ window.switchListTab = function(tabName) {
     container.innerHTML = ''; 
 
     if (tabName === 'followers' && targetData.privateFollowers === true && currentListUser !== myUser) {
-        container.innerHTML = '<p style="text-align:center; padding:30px; color:#777;">La lista de seguidores de este perfil es privada.</p>';
+        container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">La lista de seguidores es privada.</p>';
         return;
     }
 
     const listObj = tabName === 'followers' ? targetData.followers : targetData.following;
     const listArray = listObj ? Object.keys(listObj) : [];
+    
     window.currentRenderedList = listArray;
     document.getElementById('userListSearch').value = ""; 
+    
     renderUserListInModal(listArray);
 };
 
 function renderUserListInModal(userArray) {
     const container = document.getElementById('userListContainer');
     container.innerHTML = '';
-    if (userArray.length === 0) { container.innerHTML = '<p style="text-align:center; padding:20px; color:#555;">Lista vacía.</p>'; return; }
+    
+    if (userArray.length === 0) {
+        container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">Lista vacía.</p>';
+        return;
+    }
 
     userArray.forEach(username => {
         const uData = allUsersMap[username] || {};
@@ -630,20 +671,30 @@ function renderUserListInModal(userArray) {
 
         const div = document.createElement('div');
         div.className = 'user-list-item';
-        div.innerHTML = `<div class="user-list-info" onclick="openFullProfile('${username}'); document.getElementById('userListModal').style.display='none'"><img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar"><div class="user-list-texts"><span class="user-list-name">${uData.customHandle || username} ${verifIcon}</span><span class="user-list-handle">${uData.displayName || username}</span></div></div>${btnHTML}`;
+        div.innerHTML = `
+            <div class="user-list-info" onclick="closeUserListPage(); openFullProfile('${username}')">
+                <img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar">
+                <div class="user-list-texts">
+                    <span class="user-list-name">${uData.customHandle || username} ${verifIcon}</span>
+                    <span class="user-list-handle">${uData.displayName || username}</span>
+                </div>
+            </div>
+            ${btnHTML}
+        `;
         container.appendChild(div);
     });
 }
+
 // --- SWIPE LOGIC ---
 let touchStartX = 0;
 let touchEndX = 0;
-const listModal = document.getElementById('userListModal'); 
-if(listModal) {
-    listModal.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
-    listModal.addEventListener('touchend', e => { 
+const listPage = document.getElementById('userListPage'); 
+if(listPage) {
+    listPage.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+    listPage.addEventListener('touchend', e => { 
         touchEndX = e.changedTouches[0].screenX;
-        if (touchEndX < touchStartX - 50 && currentActiveTab === 'followers') switchListTab('following');
-        if (touchEndX > touchStartX + 50 && currentActiveTab === 'following') switchListTab('followers');
+        if (touchEndX < touchStartX - 50 && currentActiveTab === 'following') switchListTab('followers');
+        if (touchEndX > touchStartX + 50 && currentActiveTab === 'followers') switchListTab('following');
     });
 }
 
@@ -667,21 +718,74 @@ document.getElementById('userListSearch').oninput = function(e) {
     renderUserListInModal(filtered);
 };
 
+// --- NUEVA PUBLICACIÓN (PÁGINA COMPLETA) ---
+window.openNewThreadPage = function() {
+    const user = localStorage.getItem('savedRobloxUser');
+    if(!user) return showToast("Inicia sesión", "error");
+    document.getElementById('newThreadPage').style.display = 'flex';
+};
+
+window.closeNewThreadPage = function() {
+    document.getElementById('newThreadPage').style.display = 'none';
+};
+
+window.submitNewThread = async function() {
+    const user = localStorage.getItem('savedRobloxUser');
+    if(!user) return showToast("Inicia sesión", "error");
+    
+    const btn = document.getElementById('submitBtnHeader');
+    btn.disabled = true; btn.innerText = "Subiendo...";
+    
+    let imgs = [];
+    const files = document.getElementById('imageFile').files;
+    for (let i = 0; i < files.length; i++) {
+        const fd = new FormData();
+        fd.append('file', files[i]);
+        fd.append('upload_preset', 'comunidad_arc');
+        try {
+            const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: fd });
+            const data = await res.json();
+            imgs.push(data.secure_url);
+        } catch(err) { console.error(err); }
+    }
+    
+    const post = { 
+        title: document.getElementById('title').value, 
+        description: document.getElementById('description').value, 
+        category: document.getElementById('categorySelect').value, 
+        username: user, 
+        images: imgs, 
+        image: imgs.length > 0 ? imgs[0] : "", 
+        timestamp: Date.now(), 
+        likeCount: 0 
+    };
+    
+    await push(threadsRef, post);
+    
+    // Reset Form
+    document.getElementById('newThreadForm').reset();
+    document.getElementById('fileName').textContent = "";
+    closeNewThreadPage();
+    showToast("Publicado", "success");
+    btn.disabled = false; btn.innerText = "Publicar";
+    changeSection('Home');
+};
+
 // --- OPCIONES DE PERFIL Y DEEP LINKS ---
 let currentProfileTarget = '';
 
 window.openProfileOptions = function(targetUser) {
     currentProfileTarget = targetUser;
-    // Mostrar botones peligrosos porque solo se abre para otros usuarios
+    const myUser = localStorage.getItem('savedRobloxUser');
+    const isMe = (targetUser === myUser);
     const dangerItems = document.querySelectorAll('#profileOptionsModal .sheet-item.danger');
-    dangerItems.forEach(el => el.style.display = 'block');
+    dangerItems.forEach(el => el.style.display = isMe ? 'none' : 'block');
     document.getElementById('profileOptionsModal').style.display = 'block';
 };
 
 window.confirmBlockUser = function() { closeModal('profileOptionsModal'); blockUser(currentProfileTarget); };
 window.confirmReportUser = function() { closeModal('profileOptionsModal'); reportUser(currentProfileTarget); };
 
-// COPIAR PERFIL (Genera: tusitio.com/#profile_usuario)
 window.copyProfileUrl = function(target) {
     const userToCopy = target || currentProfileTarget;
     const url = `${window.location.origin}${window.location.pathname}#profile_${userToCopy}`;
@@ -691,18 +795,19 @@ window.copyProfileUrl = function(target) {
     });
 };
 
-// COPIAR POST (Genera: tusitio.com/#post_id)
 window.copyPostLink = function(key) {
     const link = `${window.location.origin}${window.location.pathname}#post_${key}`;
     navigator.clipboard.writeText(link).then(() => showToast("Enlace de publicación copiado", "success"));
 };
 
-// --- INFO DE CUENTA ---
+// --- INFO DE CUENTA (PÁGINA COMPLETA) ---
 window.showAccountInfo = function() {
     closeModal('profileOptionsModal');
     const uData = allUsersMap[currentProfileTarget] || {};
+    
     document.getElementById('infoAvatar').src = uData.avatar || DEFAULT_AVATAR;
     document.getElementById('infoUsername').innerText = uData.displayName || currentProfileTarget;
+    
     let dateStr = "Desconocida";
     if (uData.registeredAt) {
         const date = new Date(uData.registeredAt);
@@ -711,10 +816,11 @@ window.showAccountInfo = function() {
     }
     document.getElementById('infoDate').innerText = dateStr;
     document.getElementById('infoLocation').innerText = uData.location || "Ubicación no disponible"; 
-    document.getElementById('accountInfoModal').style.display = 'block';
+    
+    document.getElementById('accountInfoPage').style.display = 'flex';
 };
 
-// --- RESTO DE FUNCIONES (Edit, Block, etc.) ---
+// --- RESTO DE FUNCIONES ---
 window.openEditProfileModal = function() {
     const d = allUsersMap[localStorage.getItem('savedRobloxUser')] || {};
     document.getElementById('editAvatarPreview').src = d.avatar || DEFAULT_AVATAR;
@@ -731,17 +837,25 @@ window.saveProfileChanges = async function() {
     const ud = allUsersMap[myUser] || {};
     const now = Date.now();
     const gap = 15 * 24 * 60 * 60 * 1000; 
+    
     if (ud.lastProfileUpdate && (now - ud.lastProfileUpdate < gap)) {
         const left = Math.ceil((gap - (now - ud.lastProfileUpdate)) / (1000*60*60*24));
         const newName = document.getElementById('editNameInput').value;
         const newHandle = document.getElementById('editHandleInput').value;
         if (newName !== ud.displayName || newHandle !== ud.customHandle) return showToast(`Espera ${left} días para cambiar tus nombres.`, "error");
     }
+
+    const newHandleInput = document.getElementById('editHandleInput').value.trim();
+    if (newHandleInput !== ud.customHandle) {
+        const isTaken = Object.values(allUsersMap).some(user => user.customHandle && user.customHandle.toLowerCase() === newHandleInput.toLowerCase());
+        if (isTaken) return showToast("Este usuario (@) ya está en uso", "error");
+    }
+
     const btn = document.getElementById('saveProfileBtn');
     btn.innerText = "Guardando...";
     const updates = {
         [`users/${myUser}/displayName`]: document.getElementById('editNameInput').value,
-        [`users/${myUser}/customHandle`]: document.getElementById('editHandleInput').value,
+        [`users/${myUser}/customHandle`]: newHandleInput,
         [`users/${myUser}/bio`]: document.getElementById('editBioInput').value,
         [`users/${myUser}/status`]: document.getElementById('editStatusInput').value,
         [`users/${myUser}/lastProfileUpdate`]: now
@@ -844,7 +958,9 @@ if(avatarInput) {
         const user = localStorage.getItem('savedRobloxUser');
         if(!user || this.files.length === 0) return;
         showToast("Subiendo...", "info");
-        const formData = new FormData(); formData.append('file', this.files[0]); formData.append('upload_preset', 'comunidad_arc');
+        const formData = new FormData();
+        formData.append('file', this.files[0]);
+        formData.append('upload_preset', 'comunidad_arc');
         try {
             const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: formData });
             const data = await res.json();
@@ -879,23 +995,6 @@ window.openComments = (key) => {
         document.getElementById('commentInput').value = '';
     };
 };
-
-const form = document.getElementById('newThreadForm');
-if(form) {
-    form.onsubmit = async (e) => {
-        e.preventDefault(); const user = localStorage.getItem('savedRobloxUser');
-        if(!user) return showToast("Inicia sesión", "error");
-        const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = "Subiendo...";
-        let imgs = []; const files = document.getElementById('imageFile').files;
-        for (let i = 0; i < files.length; i++) {
-            const fd = new FormData(); fd.append('file', files[i]); fd.append('upload_preset', 'comunidad_arc');
-            try { const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: fd });
-            const data = await res.json(); imgs.push(data.secure_url); } catch(err) {}
-        }
-        await push(threadsRef, { title: document.getElementById('title').value, description: document.getElementById('description').value, category: document.getElementById('categorySelect').value, username: user, images: imgs, image: imgs.length>0?imgs[0]:"", timestamp: Date.now(), displayDate: "", likeCount: 0 });
-        form.reset(); document.getElementById('fileName').textContent = ""; closeModal('newThreadModalContent'); showToast("Publicado", "success"); btn.disabled = false; btn.innerText = "PUBLICAR"; changeSection('Home');
-    };
-}
 document.addEventListener('DOMContentLoaded', () => {
     initFirebaseListener();
     const user = localStorage.getItem('savedRobloxUser');
@@ -904,19 +1003,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('menuLogout').style.display = 'block'; 
     }
 
-    // --- DETECTOR DE ENLACES COMPARTIDOS ---
     const hash = window.location.hash;
-
     if (hash.startsWith('#profile_')) {
-        // Enlace de Perfil
         viewingUserProfile = hash.replace('#profile_', '');
         currentSection = 'Perfil';
     } else if (hash.startsWith('#post_')) {
-        // Enlace de Publicación
         viewingSinglePostId = hash.replace('#post_', '');
         currentSection = 'Home';
     } else {
-        // Carga normal
         const lastSection = localStorage.getItem('lastSection') || 'Home';
         if (lastSection === 'Perfil') {
             const savedProfile = localStorage.getItem('lastVisitedProfile');

@@ -120,8 +120,8 @@ h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.
 .modal-content h2, .modal-content h3 { font-size: 1.4rem; margin-bottom: 20px; font-weight: 700; color: #fff; }
 .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; color: #777; cursor: pointer; background: #2a2a2a; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .close-modal:hover { background: #444; color: #fff; }
-input, textarea { width: 100%; padding: 15px; margin: 8px 0; background: #262626; border: 1px solid #3a3a3a; border-radius: 14px; color: white; font-family: inherit; font-size: 0.95em; outline: none; transition: all 0.2s; appearance: none; }
-input:focus, textarea:focus { border-color: #0095f6; background: #2d2d2d; }
+input, textarea, select { width: 100%; padding: 15px; margin: 8px 0; background: #262626; border: 1px solid #3a3a3a; border-radius: 14px; color: white; font-family: inherit; font-size: 0.95em; outline: none; transition: all 0.2s; appearance: none; }
+input:focus, textarea:focus, select:focus { border-color: #0095f6; background: #2d2d2d; }
 textarea { resize: none; height: 100px; font-family: sans-serif; }
 .upload-btn-gray { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; background-color: #262626; border: 2px dashed #444; border-radius: 14px; color: #aaa; cursor: pointer; margin: 10px 0; font-weight: 500; transition: all 0.2s; }
 .upload-btn-gray:hover { border-color: #0095f6; color: #fff; background-color: #2d2d2d; }
@@ -185,7 +185,7 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .btn-small-follow:active { transform: scale(0.95); opacity: 0.9; }
 
 /* =========================================
-   DROPDOWNS PERSONALIZADOS (NUEVO)
+   DROPDOWNS PERSONALIZADOS
    ========================================= */
 .custom-dropdown-container { position: relative; width: 100%; margin-top: 15px; margin-bottom: 15px; }
 .dropdown-trigger {
@@ -204,6 +204,19 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .dropdown-option:last-child { border-bottom: none; }
 .dropdown-option:hover { background: #333; color: #fff; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* =========================================
+   MODAL ACTIONS (BOTONES ELEGANTES)
+   ========================================= */
+.modal-actions { display: flex; gap: 15px; margin-top: 25px; }
+.btn-modal {
+    flex: 1; padding: 12px; border-radius: 50px; /* Redonditos */
+    border: none; font-size: 1rem; font-weight: 600; cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+}
+.btn-modal-cancel { background-color: transparent; border: 1px solid #333; color: #ccc; }
+.btn-modal-submit { background-color: #4A6BFF; color: white; box-shadow: 0 4px 15px rgba(74, 107, 255, 0.3); } /* Azul Vibrante */
+.btn-modal:active { transform: scale(0.97); opacity: 0.9; }
 
 /* =========================================
    OTROS

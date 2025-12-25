@@ -242,14 +242,14 @@
                 </div>
             </div>
 
-            <div style="display:flex; justify-content:space-between; gap: 10px;">
-                <button onclick="document.getElementById('reportModal').style.display='none'" style="background:#444;">Cancelar</button>
-                <button onclick="submitReportAction()" style="background:#cc0000;">ENVIAR</button>
+            <div class="modal-actions">
+                <button onclick="document.getElementById('reportModal').style.display='none'" class="btn-modal btn-modal-cancel">Cancelar</button>
+                <button onclick="submitReportAction()" class="btn-modal btn-modal-submit">ENVIAR</button>
             </div>
         </div>
     </div>
 
-    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 5.1: Menús personalizados.</p></div></div>
+    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 5.2: Botones y Listas Premium.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
     
     <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">

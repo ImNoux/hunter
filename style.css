@@ -83,6 +83,7 @@ h1 {
     width: 50px; height: 50px; display: flex; 
     align-items: center; justify-content: center; border-radius: 50%;
 }
+.nav-item.active { color: #fff; }
 .nav-item:active { transform: scale(0.9); opacity: 0.7; }
 .add-btn { color: #fff; font-size: 1.8rem; } 
 
@@ -116,34 +117,14 @@ h1 {
 }
 
 /* CONTENEDOR NOMBRE + TIEMPO */
-.username-row {
-    display: flex;
-    align-items: baseline; /* Alinea el texto por la base */
-    gap: 6px; /* Espacio entre nombre y tiempo */
-}
-
-.username-styled {
-    color: #fff; font-weight: 600; font-size: 0.95em;
-    cursor: pointer;
-}
-
-/* ESTILO DEL TIEMPO AL LADO DEL NOMBRE */
-.post-time-inline {
-    color: #777;
-    font-size: 0.9em;
-    font-weight: normal;
-}
+.username-row { display: flex; align-items: baseline; gap: 6px; }
+.username-styled { color: #fff; font-weight: 600; font-size: 0.95em; cursor: pointer; }
+.post-time-inline { color: #777; font-size: 0.9em; font-weight: normal; }
 
 .user-rank-styled { color: #a8a8a8; font-size: 0.9em; font-weight: normal; }
 .verified-icon { color: #0095f6; font-size: 0.85em; margin-left: 2px; }
 
-/* Menú 3 puntos a la derecha */
-.post-header-right { 
-    margin-left: auto; 
-    position: relative; 
-    margin-top: -5px; 
-}
-
+.post-header-right { margin-left: auto; position: relative; margin-top: -5px; }
 .options-btn { color: #a8a8a8; padding: 5px; font-size: 1.1em; background:none; border:none; cursor:pointer;}
 
 .thread h3 { color: #fff; font-size: 1em; margin: 0 0 5px 0; font-weight: 600; }
@@ -178,14 +159,8 @@ h1 {
 }
 .user-search-avatar { width: 44px; height: 44px; border-radius: 50%; margin-right: 12px; }
 
-.activity-item { 
-    display: flex; align-items: center; padding: 12px 15px; 
-    border-bottom: 1px solid #262626; gap: 12px;
-}
-.activity-avatar { 
-    width: 44px; height: 44px; min-width: 44px; 
-    border-radius: 50%; object-fit: cover; border: 1px solid #333;
-}
+.activity-item { display: flex; align-items: center; padding: 12px 15px; border-bottom: 1px solid #262626; gap: 12px; }
+.activity-avatar { width: 44px; height: 44px; min-width: 44px; border-radius: 50%; object-fit: cover; border: 1px solid #333; }
 .activity-text { font-size: 0.95em; color: #ccc; }
 .activity-text strong { color: white; font-weight: 600; cursor: pointer; }
 
@@ -198,6 +173,15 @@ h1 {
     border-bottom: 1px solid #262626;
     text-align: center;
     display: flex; flex-direction: column; align-items: center;
+    position: relative; /* OBLIGATORIO PARA LOS 3 PUNTOS */
+}
+
+/* BOTÓN 3 PUNTOS PERFIL */
+.profile-menu-btn {
+    position: absolute; top: 15px; right: 15px;
+    background: none; border: none; color: #fff;
+    font-size: 1.3rem; cursor: pointer; z-index: 100;
+    padding: 10px;
 }
 
 .profile-top-section {
@@ -234,14 +218,22 @@ h1 {
 .p-stat span { display: block; font-weight: 700; font-size: 1.1em; color: white; }
 .p-stat label { font-size: 0.85em; color: #888; }
 
-.profile-action-buttons { width: 100%; margin-bottom: 10px; }
-.profile-action-buttons button {
-    width: 100%; background-color: #fff; color: #000;
-    border-radius: 8px; padding: 8px 0; font-weight: 600; font-size: 0.95em;
+/* Botones Grandes Perfil */
+.profile-action-buttons {
+    display: flex; gap: 10px; width: 100%;
+    margin-bottom: 10px; padding: 0 15px;
+}
+.btn-profile-primary {
+    flex: 1; background-color: #0095f6; color: white;
+    font-weight: 600; border-radius: 8px; padding: 8px 0; border: none; cursor:pointer;
+}
+.btn-profile-secondary {
+    flex: 1; background-color: #363636; color: white;
+    font-weight: 600; border-radius: 8px; padding: 8px 0; border: none; cursor:pointer;
 }
 
 /* =========================================
-   8. MODALES
+   8. MODALES Y MENÚS FLOTANTES
    ========================================= */
 .modal-overlay {
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -256,33 +248,34 @@ h1 {
 .small-modal { max-width: 350px; }
 .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #fff; }
 
-input, textarea, select {
-    width: 100%; padding: 12px; margin: 8px 0;
-    background: #121212; border: 1px solid #363636; border-radius: 8px;
-    color: white; font-family: inherit;
+/* BOTTOM SHEET (MENU PERFIL) */
+.bottom-sheet-content {
+    position: absolute; bottom: 0; left: 0; width: 100%;
+    background-color: #262626; border-top-left-radius: 16px; border-top-right-radius: 16px;
+    padding: 10px 0; animation: slideUpSheet 0.3s ease-out;
 }
-button {
-    width: 100%; padding: 12px; background: #fff;
-    color: #000; border: none; border-radius: 8px;
-    font-weight: 600; cursor: pointer; margin-top: 10px;
-}
-button:hover { opacity: 0.9; }
+@keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.bottom-sheet-handle { width: 40px; height: 4px; background-color: #555; border-radius: 2px; margin: 5px auto 15px auto; }
+.sheet-item { padding: 15px 20px; font-size: 1em; color: #fff; cursor: pointer; border-bottom: 1px solid #333; text-align: left; }
+.sheet-item:active { background-color: #333; }
+.sheet-item.danger { color: #ff4d4d; font-weight: 600; }
+.sheet-divider { height: 5px; background-color: #1a1a1a; border-top: 1px solid #333; border-bottom: 1px solid #333; }
+
+/* MODAL INFO CUENTA */
+.info-row { display: flex; align-items: center; padding: 15px 0; text-align: left; border-bottom: 1px solid #333; }
+.info-row i { font-size: 1.5em; width: 40px; text-align: center; color: #fff; }
+.info-text { display: flex; flex-direction: column; }
+.info-text span { font-size: 1em; color: #fff; font-weight: 500; }
+.info-text label { font-size: 0.85em; color: #888; margin-top: 3px; }
 
 /* =========================================
    9. LISTA DE USUARIOS (SEGUIDORES)
    ========================================= */
-.user-list-item { 
-    display: flex; align-items: center; justify-content: space-between; 
-    padding: 10px 15px; 
-}
+.user-list-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; }
 .user-list-info { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; }
 .user-list-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
 .user-list-texts { display: flex; flex-direction: column; justify-content: center; }
-
-.user-list-name { 
-    font-weight: 600; font-size: 14px; color: #fff; 
-    display: flex; align-items: center; gap: 4px;
-}
+.user-list-name { font-weight: 600; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 4px; }
 .user-list-handle { color: #a8a8a8; font-size: 13px; margin-top: 2px; }
 
 .btn-small-follow {
@@ -297,7 +290,7 @@ button:hover { opacity: 0.9; }
 .btn-small-follow:active { transform: scale(0.96); opacity: 0.9; }
 
 /* =========================================
-   10. OTROS
+   10. OTROS ELEMENTOS
    ========================================= */
 .modal-tabs-header { display: flex; background: #000; border-bottom: 1px solid #262626; position: relative; }
 .modal-tab { flex: 1; text-align: center; padding: 14px 0; color: #777; font-weight: 600; cursor: pointer; font-size: 0.95em; -webkit-user-select: none; user-select: none; }
@@ -329,6 +322,5 @@ button:hover { opacity: 0.9; }
 .mini-action-menu div:hover { background: #333; }
 
 .status-pill { position: absolute; top: -8px; left: -5px; background: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.7em; color: #ccc; }
-.time-display { font-size: 0.8em; color: #777; margin-right: 5px; }
 .upload-btn-gray { display: block; text-align: center; padding: 10px; border: 1px dashed #555; border-radius: 6px; color: #aaa; margin: 10px 0; cursor: pointer; }
 .switch-auth { text-align: center; font-size: 0.85em; color: #0095f6; margin-top: 10px; cursor: pointer; text-decoration: underline; }

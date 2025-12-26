@@ -1,3 +1,13 @@
+html, body {
+    /* Esto bloquea el refresco nativo del navegador */
+    overscroll-behavior-y: contain;
+    
+    /* Asegura que funcione suave en el celular */
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+}
+
 /* =========================================
    PARTE 1: ESTILOS BASE Y PRINCIPALES
    ========================================= */

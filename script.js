@@ -34,7 +34,7 @@ let userBeingReported = '';
 let postBeingReported = null;
 let lastScrollTop = 0; 
 
-// VARIABLES NUEVAS
+// VARIABLES UI & UX
 let isSkeletonShown = false;
 let pullStartY = 0;
 let isPulling = false;
@@ -54,29 +54,24 @@ window.requestNotificationPermission = async function() {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
             showToast("Permiso concedido. Configurando...", "info");
-            // TU CLAVE VAPID AQUÍ:
-            const currentToken = await getToken(messaging, { 
-                vapidKey: 'BCZrmsGsGLv6cFEEvDXYHtY5gHqF7WW8WpaZpO7_DDfD-IPT-OGmiuDFMbCcbv4h--EOGHIWJWp1-Afi2AIks5k' 
-            });
-            if (currentToken) {
-                console.log("Token:", currentToken);
-                const user = localStorage.getItem('savedRobloxUser');
-                if (user) {
-                    await update(ref(db, `users/${user}`), { fcmToken: currentToken });
-                    showToast("¡Notificaciones activadas!", "success");
-                } else {
-                    showToast("Inicia sesión primero", "error");
-                }
-            } else {
-                showToast("Error al obtener token", "error");
+            // Registramos SW explícitamente para APK/PWA
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+                const currentToken = await getToken(messaging, { 
+                    vapidKey: 'BCZrmsGsGLv6cFEEvDXYHtY5gHqF7WW8WpaZpO7_DDfD-IPT-OGmiuDFMbCcbv4h--EOGHIWJWp1-Afi2AIks5k',
+                    serviceWorkerRegistration: registration
+                });
+                if (currentToken) {
+                    console.log("Token:", currentToken);
+                    const user = localStorage.getItem('savedRobloxUser');
+                    if (user) {
+                        await update(ref(db, `users/${user}`), { fcmToken: currentToken });
+                        showToast("¡Notificaciones Push activadas!", "success");
+                    } else { showToast("Inicia sesión para guardar config", "error"); }
+                } else { showToast("Error al obtener token", "error"); }
             }
-        } else {
-            showToast("Permiso denegado", "error");
-        }
-    } catch (error) {
-        console.error(error);
-        showToast("Error de configuración", "error");
-    }
+        } else { showToast("Permiso denegado", "error"); }
+    } catch (error) { console.error(error); showToast("Error de configuración", "error"); }
 };
 
 const messaging = getMessaging(app);
@@ -362,7 +357,6 @@ window.submitNewThread = async function() {
     const post = { title: document.getElementById('title').value, description: document.getElementById('description').value, category: document.getElementById('categorySelect').value, username: user, images: imgs, image: imgs.length > 0 ? imgs[0] : "", timestamp: Date.now(), likeCount: 0 };
     await push(threadsRef, post); document.getElementById('newThreadForm').reset(); document.getElementById('fileName').textContent = ""; closeNewThreadPage(); showToast("Publicado", "success"); btn.disabled = false; btn.innerText = "Publicar"; changeSection('Home');
 };
-
 // --- MENÚ DE AJUSTES (3 LÍNEAS) ---
 window.openProfileSettings = function() { document.getElementById('profileSettingsModal').style.display = 'block'; };
 
@@ -399,228 +393,45 @@ window.saveProfileChanges = async function() {
 };
 
 // --- FLUJO DE REPORTES ---
-window.blockUser = function(targetUser) { 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    if (!myUser) return; 
-    showConfirm(`¿Bloquear a ${targetUser}?`, () => { 
-        const updates = {}; 
-        updates[`users/${myUser}/blocked/${targetUser}`] = true; 
-        updates[`users/${myUser}/following/${targetUser}`] = null; 
-        updates[`users/${targetUser}/followers/${myUser}`] = null; 
-        update(ref(db), updates).then(() => { 
-            showToast("Bloqueado.", "success"); 
-            renderCurrentView(); 
-        }); 
-    }); 
-};
-
-window.unblockUser = function(targetUser) { 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    showConfirm(`¿Desbloquear a ${targetUser}?`, () => { 
-        set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { 
-            showToast("Desbloqueado.", "success"); 
-            renderCurrentView(); 
-        }); 
-    }); 
-};
-
-window.reportUser = function(targetUser) { 
-    userBeingReported = targetUser; 
-    postBeingReported = null; 
-    openReportModal(targetUser); 
-};
-
-window.reportPost = function(postKey, authorName) { 
-    userBeingReported = authorName; 
-    postBeingReported = postKey; 
-    openReportModal(authorName, true); 
-};
-
-function openReportModal(target, isPost = false) { 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    if (!myUser) return showToast("Inicia sesión primero", "error"); 
-    if (myUser === target) return showToast("No puedes reportarte", "error"); 
-    document.getElementById('reportTargetName').innerText = isPost ? `Reportando publicación de: ${target}` : `Reportando a: ${target}`; 
-    document.getElementById('reportModal').style.display = 'block'; 
-}
+window.blockUser = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) return; showConfirm(`¿Bloquear a ${targetUser}?`, () => { const updates = {}; updates[`users/${myUser}/blocked/${targetUser}`] = true; updates[`users/${myUser}/following/${targetUser}`] = null; updates[`users/${targetUser}/followers/${myUser}`] = null; update(ref(db), updates).then(() => { showToast("Bloqueado.", "success"); renderCurrentView(); }); }); };
+window.unblockUser = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); showConfirm(`¿Desbloquear a ${targetUser}?`, () => { set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { showToast("Desbloqueado.", "success"); renderCurrentView(); }); }); };
+window.reportUser = function(targetUser) { userBeingReported = targetUser; postBeingReported = null; openReportModal(targetUser); };
+window.reportPost = function(postKey, authorName) { userBeingReported = authorName; postBeingReported = postKey; openReportModal(authorName, true); };
+function openReportModal(target, isPost = false) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) return showToast("Inicia sesión primero", "error"); if (myUser === target) return showToast("No puedes reportarte", "error"); document.getElementById('reportTargetName').innerText = isPost ? `Reportando publicación de: ${target}` : `Reportando a: ${target}`; document.getElementById('reportModal').style.display = 'block'; }
 
 window.submitReportAction = function() {
-    const reason = document.getElementById('reportReasonSelect').value; 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    if (!userBeingReported) return;
-    
-    push(ref(db, 'reports'), { 
-        reportedUser: userBeingReported, 
-        reportedBy: myUser, 
-        reason: reason, 
-        timestamp: Date.now(), 
-        status: 'pending', 
-        postId: postBeingReported 
-    }).then(() => { 
+    const reason = document.getElementById('reportReasonSelect').value; const myUser = localStorage.getItem('savedRobloxUser'); if (!userBeingReported) return;
+    push(ref(db, 'reports'), { reportedUser: userBeingReported, reportedBy: myUser, reason: reason, timestamp: Date.now(), status: 'pending', postId: postBeingReported }).then(() => { 
         document.getElementById('reportModal').style.display = 'none';
         document.getElementById('reportSuccessUser').innerText = userBeingReported;
         document.getElementById('reportSuccessModal').style.display = 'block';
     });
 };
-
-window.openBlockConfirmModal = function() { 
-    closeModal('reportSuccessModal'); 
-    document.getElementById('blockTargetUser').innerText = userBeingReported; 
-    const targetData = allUsersMap[userBeingReported] || {}; 
-    document.getElementById('blockAvatarPreview').src = targetData.avatar || DEFAULT_AVATAR; 
-    document.getElementById('blockConfirmModal').style.display = 'block'; 
-};
-
-window.performBlockAction = function() { 
-    blockUserLogic(userBeingReported); 
-    closeModal('blockConfirmModal'); 
-    document.getElementById('finalThanksModal').style.display = 'block'; 
-};
-
-window.performBlockAndReportAction = function() { 
-    blockUserLogic(userBeingReported); 
-    closeModal('blockConfirmModal'); 
-    document.getElementById('finalThanksModal').style.display = 'block'; 
-};
-
-window.closeAllReportModals = function() { 
-    closeModal('finalThanksModal'); 
-    renderCurrentView(); 
-};
-
-function blockUserLogic(targetUser) { 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    if (!myUser) return; 
-    const updates = {}; 
-    updates[`users/${myUser}/blocked/${targetUser}`] = true; 
-    updates[`users/${myUser}/following/${targetUser}`] = null; 
-    updates[`users/${targetUser}/followers/${myUser}`] = null; 
-    update(ref(db), updates); 
-}
+window.openBlockConfirmModal = function() { closeModal('reportSuccessModal'); document.getElementById('blockTargetUser').innerText = userBeingReported; const targetData = allUsersMap[userBeingReported] || {}; document.getElementById('blockAvatarPreview').src = targetData.avatar || DEFAULT_AVATAR; document.getElementById('blockConfirmModal').style.display = 'block'; };
+window.performBlockAction = function() { blockUserLogic(userBeingReported); closeModal('blockConfirmModal'); document.getElementById('finalThanksModal').style.display = 'block'; };
+window.performBlockAndReportAction = function() { blockUserLogic(userBeingReported); closeModal('blockConfirmModal'); document.getElementById('finalThanksModal').style.display = 'block'; };
+window.closeAllReportModals = function() { closeModal('finalThanksModal'); renderCurrentView(); };
+function blockUserLogic(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) return; const updates = {}; updates[`users/${myUser}/blocked/${targetUser}`] = true; updates[`users/${myUser}/following/${targetUser}`] = null; updates[`users/${targetUser}/followers/${myUser}`] = null; update(ref(db), updates); }
 
 // --- ADMIN & INTERACCIONES ---
-window.banUser = function(targetUser) { 
-    showConfirm(`¿Banear cuenta?`, () => { 
-        update(ref(db), { [`users/${targetUser}/isBanned`]: true }).then(() => showToast("Usuario baneado.", "success")); 
-    }); 
-};
-
-window.unbanUser = function(targetUser) { 
-    showConfirm(`¿Restaurar cuenta?`, () => { 
-        update(ref(db), { [`users/${targetUser}/isBanned`]: null }).then(() => showToast("Usuario restaurado.", "success")); 
-    }); 
-};
-
-window.openAdminPanel = function() { 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    if (!allUsersMap[myUser] || allUsersMap[myUser].role !== 'admin') return showToast("Acceso denegado.", "error"); 
-    document.getElementById('adminModal').style.display = 'block'; 
-    get(child(ref(db), 'reports')).then((snapshot) => { 
-        const container = document.getElementById('adminReportsList'); 
-        if (snapshot.exists()) { 
-            container.innerHTML = ''; 
-            Object.entries(snapshot.val()).forEach(([key, r]) => { 
-                const div = document.createElement('div'); 
-                div.style.cssText = "background:#333; margin-bottom:10px; padding:10px; border-radius:8px; border:1px solid #555;"; 
-                div.innerHTML = `<div style="font-size:0.9em; color:#aaa;">Reportado: <b>${r.reportedUser}</b><br>Motivo: ${r.reason}</div><div style="margin-top:5px;"><button onclick="deleteReport('${key}')" style="background:#555; padding:5px;">Borrar</button> <button onclick="banUser('${r.reportedUser}')" style="background:#cc0000; padding:5px;">BANEAR</button></div>`; 
-                container.appendChild(div); 
-            }); 
-        } else { 
-            container.innerHTML = '<p style="text-align:center; color:#777;">Sin reportes.</p>'; 
-        } 
-    }); 
-};
-
-window.deleteReport = function(k) { 
-    set(ref(db, `reports/${k}`), null).then(() => { 
-        showToast("Borrado", "success"); 
-        window.openAdminPanel(); 
-    }); 
-};
-
-window.toggleFollow = function(target) { 
-    const me = localStorage.getItem('savedRobloxUser'); 
-    if(!me) { showToast("Regístrate", "error"); return; } 
-    if(me === target) return; 
-    const isFollowing = myFollowingList.includes(target); 
-    const updates = {}; 
-    if (isFollowing) { 
-        updates[`users/${me}/following/${target}`] = null; 
-        updates[`users/${target}/followers/${me}`] = null; 
-        updates[`users/${me}/followingCount`] = increment(-1); 
-        updates[`users/${target}/followersCount`] = increment(-1); 
-    } else { 
-        updates[`users/${me}/following/${target}`] = true; 
-        updates[`users/${target}/followers/${me}`] = true; 
-        updates[`users/${me}/followingCount`] = increment(1); 
-        updates[`users/${target}/followersCount`] = increment(1); 
-    } 
-    update(ref(db), updates); 
-    setTimeout(() => renderCurrentView(), 200); 
-};
-
-const searchIn = document.getElementById('searchInput'); 
-if(searchIn) searchIn.oninput = (e) => { 
-    searchTerm = e.target.value.trim(); 
-    renderCurrentView(); 
-};
-
-window.toggleLike = (k, c, b) => { 
-    const u = localStorage.getItem('savedRobloxUser'); 
-    if(!u) return showToast("Inicia sesión", "error"); 
-    const id = getUserId(); 
-    const isL = b.querySelector('i').classList.contains('fas'); 
-    update(ref(db), { [`threads/${k}/likeCount`]: isL ? c - 1 : c + 1, [`threads/${k}/likes/${id}`]: isL ? null : true }); 
-};
-
-const avatarInput = document.getElementById('avatarUpload'); 
-if(avatarInput) { 
-    avatarInput.onchange = async function() { 
-        const user = localStorage.getItem('savedRobloxUser'); 
-        if(!user || this.files.length === 0) return; 
-        showToast("Subiendo...", "info"); 
-        const formData = new FormData(); 
-        formData.append('file', this.files[0]); 
-        formData.append('upload_preset', 'comunidad_arc'); 
-        try { 
-            const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: formData }); 
-            const data = await res.json(); 
-            await update(ref(db, `users/${user}`), { avatar: data.secure_url }); 
-            document.getElementById('editAvatarPreview').src = data.secure_url; 
-            showToast("Actualizado", "success"); 
-        } catch(e) { showToast("Error", "error"); } 
-    }; 
-}
-
-window.openComments = (key) => { 
-    const modal = document.getElementById('commentsModal'); 
-    const list = document.getElementById('commentsList'); 
-    modal.style.display = 'block'; 
-    off(ref(db, `threads/${key}/comments`)); 
-    onValue(ref(db, `threads/${key}/comments`), (snap) => { 
-        list.innerHTML = ''; 
-        const data = snap.val(); 
-        if(data) Object.values(data).forEach(c => { 
-            const d = document.createElement('div'); 
-            d.innerHTML = `<strong>${c.username}:</strong> ${makeLinksClickable(c.text)}`; 
-            d.style.cssText = "padding:5px 0; border-bottom:1px solid #333;"; 
-            list.appendChild(d); 
-        }); else list.innerHTML = '<p style="text-align:center; color:#777;">Sin comentarios.</p>'; 
-    }); 
-    const cForm = document.getElementById('commentForm'); 
-    const newForm = cForm.cloneNode(true); 
-    cForm.parentNode.replaceChild(newForm, cForm); 
-    newForm.onsubmit = (e) => { 
-        e.preventDefault(); 
-        const u = localStorage.getItem('savedRobloxUser'); 
-        if(!u) return showToast("Inicia sesión", "error"); 
-        push(ref(db, `threads/${key}/comments`), { text: document.getElementById('commentInput').value, username: u, timestamp: Date.now() }); 
-        document.getElementById('commentInput').value = ''; 
-    }; 
-};
-
-// --- INICIALIZACIÓN ---
+window.banUser = function(targetUser) { showConfirm(`¿Banear cuenta?`, () => { update(ref(db), { [`users/${targetUser}/isBanned`]: true }).then(() => showToast("Usuario baneado.", "success")); }); };
+window.unbanUser = function(targetUser) { showConfirm(`¿Restaurar cuenta?`, () => { update(ref(db), { [`users/${targetUser}/isBanned`]: null }).then(() => showToast("Usuario restaurado.", "success")); }); };
+window.openAdminPanel = function() { const myUser = localStorage.getItem('savedRobloxUser'); if (!allUsersMap[myUser] || allUsersMap[myUser].role !== 'admin') return showToast("Acceso denegado.", "error"); document.getElementById('adminModal').style.display = 'block'; get(child(ref(db), 'reports')).then((snapshot) => { const container = document.getElementById('adminReportsList'); if (snapshot.exists()) { container.innerHTML = ''; Object.entries(snapshot.val()).forEach(([key, r]) => { const div = document.createElement('div'); div.style.cssText = "background:#333; margin-bottom:10px; padding:10px; border-radius:8px; border:1px solid #555;"; div.innerHTML = `<div style="font-size:0.9em; color:#aaa;">Reportado: <b>${r.reportedUser}</b><br>Motivo: ${r.reason}</div><div style="margin-top:5px;"><button onclick="deleteReport('${key}')" style="background:#555; padding:5px;">Borrar</button> <button onclick="banUser('${r.reportedUser}')" style="background:#cc0000; padding:5px;">BANEAR</button></div>`; container.appendChild(div); }); } else { container.innerHTML = '<p style="text-align:center; color:#777;">Sin reportes.</p>'; } }); };
+window.deleteReport = function(k) { set(ref(db, `reports/${k}`), null).then(() => { showToast("Borrado", "success"); window.openAdminPanel(); }); };
+window.toggleFollow = function(target) { const me = localStorage.getItem('savedRobloxUser'); if(!me) { showToast("Regístrate", "error"); return; } if(me === target) return; const isFollowing = myFollowingList.includes(target); const updates = {}; if (isFollowing) { updates[`users/${me}/following/${target}`] = null; updates[`users/${target}/followers/${me}`] = null; updates[`users/${me}/followingCount`] = increment(-1); updates[`users/${target}/followersCount`] = increment(-1); } else { updates[`users/${me}/following/${target}`] = true; updates[`users/${target}/followers/${me}`] = true; updates[`users/${me}/followingCount`] = increment(1); updates[`users/${target}/followersCount`] = increment(1); } update(ref(db), updates); setTimeout(() => renderCurrentView(), 200); };
+const searchIn = document.getElementById('searchInput'); if(searchIn) searchIn.oninput = (e) => { searchTerm = e.target.value.trim(); renderCurrentView(); };
+window.toggleLike = (k, c, b) => { const u = localStorage.getItem('savedRobloxUser'); if(!u) return showToast("Inicia sesión", "error"); const id = getUserId(); const isL = b.querySelector('i').classList.contains('fas'); update(ref(db), { [`threads/${k}/likeCount`]: isL ? c - 1 : c + 1, [`threads/${k}/likes/${id}`]: isL ? null : true }); };
+const avatarInput = document.getElementById('avatarUpload'); if(avatarInput) { avatarInput.onchange = async function() { const user = localStorage.getItem('savedRobloxUser'); if(!user || this.files.length === 0) return; showToast("Subiendo...", "info"); const formData = new FormData(); formData.append('file', this.files[0]); formData.append('upload_preset', 'comunidad_arc'); try { const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: formData }); const data = await res.json(); await update(ref(db, `users/${user}`), { avatar: data.secure_url }); document.getElementById('editAvatarPreview').src = data.secure_url; showToast("Actualizado", "success"); } catch(e) { showToast("Error", "error"); } }; }
+window.openComments = (key) => { const modal = document.getElementById('commentsModal'); const list = document.getElementById('commentsList'); modal.style.display = 'block'; off(ref(db, `threads/${key}/comments`)); onValue(ref(db, `threads/${key}/comments`), (snap) => { list.innerHTML = ''; const data = snap.val(); if(data) Object.values(data).forEach(c => { const d = document.createElement('div'); d.innerHTML = `<strong>${c.username}:</strong> ${makeLinksClickable(c.text)}`; d.style.cssText = "padding:5px 0; border-bottom:1px solid #333;"; list.appendChild(d); }); else list.innerHTML = '<p style="text-align:center; color:#777;">Sin comentarios.</p>'; }); const cForm = document.getElementById('commentForm'); const newForm = cForm.cloneNode(true); cForm.parentNode.replaceChild(newForm, cForm); newForm.onsubmit = (e) => { e.preventDefault(); const u = localStorage.getItem('savedRobloxUser'); if(!u) return showToast("Inicia sesión", "error"); push(ref(db, `threads/${key}/comments`), { text: document.getElementById('commentInput').value, username: u, timestamp: Date.now() }); document.getElementById('commentInput').value = ''; }; };
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. REGISTRAR SW (Push)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./firebase-messaging-sw.js')
+        .then((registration) => { console.log('Service Worker registrado:', registration.scope); })
+        .catch((err) => { console.log('Fallo al registrar Service Worker:', err); });
+    }
+
+    // 2. FIREBASE
     initFirebaseListener();
     const user = localStorage.getItem('savedRobloxUser');
     if(user) { 
@@ -672,4 +483,3 @@ document.addEventListener('DOMContentLoaded', () => {
         window.changeSection(currentSection);
     }
 });
-                                     

@@ -1,16 +1,22 @@
+/* =========================================
+   BLOQUEAR REFRESCO NATIVO (CRUCIAL)
+   ========================================= */
 html, body {
     /* Esto bloquea el refresco nativo del navegador */
     overscroll-behavior-y: contain;
-    
+
     /* Asegura que funcione suave en el celular */
     overflow-y: auto;
     width: 100%;
     height: 100%;
+    margin: 0; padding: 0;
+    background-color: #000; /* FONDO NEGRO SÓLIDO */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #e1e1e1;
+    min-height: 100vh; 
+    display: flex; flex-direction: column; 
+    overflow-x: hidden;
 }
-
-/* =========================================
-   PARTE 1: ESTILOS BASE Y PRINCIPALES
-   ========================================= */
 
 /* 1. RESET Y CONFIGURACIÓN BÁSICA */
 *, *::before, *::after { 
@@ -23,15 +29,6 @@ html, body {
 input, textarea { 
     -webkit-user-select: text !important; 
     user-select: text !important; 
-}
-
-html, body {
-    width: 100%; margin: 0; padding: 0; overflow-x: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    color: #e1e1e1;
-    background-color: #000; /* FONDO NEGRO SÓLIDO (Limpio) */
-    min-height: 100vh; 
-    display: flex; flex-direction: column; 
 }
 
 /* 2. HEADER (BARRA SUPERIOR) */
@@ -99,7 +96,6 @@ h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.
 .like-button.liked { color: #ff3040; }
 .like-button.liked i { animation: pop 0.3s; }
 @keyframes pop { 50% { transform: scale(1.3); } }
-
 /* 5. BUSCADOR */
 #searchContainer { padding: 10px; max-width: 600px; margin: 0 auto; width: 100%; transition: transform 0.3s ease-in-out; }
 #searchContainer.scroll-hide { transform: translateY(-100%); opacity: 0; }
@@ -112,9 +108,6 @@ h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.
 .activity-avatar { width: 44px; height: 44px; min-width: 44px; border-radius: 50%; object-fit: cover; border: 1px solid #333; }
 .activity-text { font-size: 0.95em; color: #ccc; }
 .activity-text strong { color: white; font-weight: 600; cursor: pointer; }
-/* =========================================
-   PARTE 2: COMPONENTES Y MODALES
-   ========================================= */
 
 /* 1. PERFIL */
 .profile-header-container { background: transparent; padding: 20px 15px 5px 15px; border-bottom: 1px solid #262626; text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; }
@@ -243,12 +236,56 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .mini-action-menu.show { display: flex; }
 .mini-action-menu div { padding: 10px; font-size: 0.9em; color: #fff; cursor: pointer; }
 .mini-action-menu div:hover { background: #333; }
-.status-pill { position: absolute; top: -8px; left: -5px; background: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.7em; color: #ccc; }
-/* =========================================
-   NUEVO: PULL TO REFRESH & SKELETON
-   ========================================= */
 
-/* Pull to Refresh Spinner */
+/* --- ESTILO TIPO NOTA DE INSTAGRAM (NUBE) --- */
+.status-pill {
+    position: absolute;
+    top: -20px; 
+    right: -35px; 
+    background-color: #ffffff;
+    color: #000000;
+    padding: 8px 16px;
+    border-radius: 25px; 
+    font-size: 0.9rem;
+    font-weight: 700; 
+    font-family: sans-serif;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    z-index: 20;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: notePop 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+    transform-origin: bottom left;
+}
+.status-pill::before {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 15px; 
+    width: 12px;
+    height: 12px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    z-index: 19;
+}
+.status-pill::after {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 4px;
+    width: 7px;
+    height: 7px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    z-index: 19;
+}
+@keyframes notePop {
+    0% { opacity: 0; transform: scale(0) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* NUEVO: PULL TO REFRESH & SKELETON */
 .pull-refresh-container {
     position: fixed;
     top: 60px; /* Debajo del header */
@@ -271,7 +308,6 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Notificación (Puntito Rojo) */
 .nav-badge {
     position: absolute;
     top: 10px;
@@ -283,8 +319,7 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
     border: 1px solid #000;
 }
 
-/* Skeleton Loading (Carga Elegante) */
-#skeletonLoader { display: none; padding: 15px; } /* Oculto por defecto, JS lo activa */
+#skeletonLoader { display: none; padding: 15px; }
 .skeleton-post { margin-bottom: 30px; }
 .sk-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .sk-avatar { width: 38px; height: 38px; border-radius: 50%; background: #262626; }
@@ -293,7 +328,6 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .sk-text.short { width: 60%; }
 .sk-img { width: 100%; height: 250px; background: #262626; border-radius: 8px; margin-top: 10px; }
 
-/* Animación de brillo (Shimmer) */
 .sk-avatar, .sk-name, .sk-text, .sk-img {
     position: relative; overflow: hidden;
 }

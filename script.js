@@ -1,5 +1,6 @@
 import { initializeApp } from "https://esm.sh/firebase/app";
 import { getDatabase, ref, push, onValue, query, orderByChild, update, off, get, child, set, increment } from "https://esm.sh/firebase/database";
+import { getMessaging, getToken, onMessage } from "https://esm.sh/firebase/messaging"; 
 
 const DEFAULT_AVATAR = "https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg";
 
@@ -33,96 +34,57 @@ let userBeingReported = '';
 let postBeingReported = null;
 let lastScrollTop = 0; 
 
-// VARIABLES NUEVAS (UI & UX)
+// VARIABLES NUEVAS
 let isSkeletonShown = false;
 let pullStartY = 0;
 let isPulling = false;
 const pullThreshold = 150; 
 const refreshContainer = document.getElementById('pullToRefresh');
-//PART 2//
-// --- CONTROL DE UI (OCULTAR HEADER/NAV) ---
+// --- CONTROL UI ---
 window.toggleMainUI = function(show) {
     const display = show ? '' : 'none';
     const elements = ['mainHeader', 'mainBottomNav', 'floatingAddBtn', 'searchContainer'];
     elements.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = display; });
 };
 
-// --- SKELETON LOADING (Animación de carga) ---
-function toggleSkeleton(show) {
-    const sk = document.getElementById('skeletonLoader');
-    const real = document.getElementById('realContentContainer'); // Ojo: Usamos el contenedor interno
-    if (show) {
-        if(sk) sk.style.display = 'block';
-        if(real) real.style.display = 'none';
-        isSkeletonShown = true;
-    } else {
-        if(sk) sk.style.display = 'none';
-        if(real) real.style.display = 'block';
-        isSkeletonShown = false;
-    }
-}
-
-// --- PULL TO REFRESH (Gesto Táctil) ---
-window.addEventListener('touchstart', (e) => {
-    if (window.scrollY === 0 && currentSection === 'Home') {
-        pullStartY = e.touches[0].clientY;
-        isPulling = true;
-    }
-}, { passive: true });
-
-window.addEventListener('touchmove', (e) => {
-    if (!isPulling) return;
-    const y = e.touches[0].clientY;
-    const diff = y - pullStartY;
-    
-    if (diff > 0 && window.scrollY === 0) {
-        // Resistencia visual al arrastrar
-        if (diff < pullThreshold) {
-            if(refreshContainer) refreshContainer.style.height = `${diff / 2.5}px`; 
+// --- PUSH NOTIFICATIONS ---
+window.requestNotificationPermission = async function() {
+    const messaging = getMessaging(app);
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            showToast("Permiso concedido. Configurando...", "info");
+            // TU CLAVE VAPID AQUÍ:
+            const currentToken = await getToken(messaging, { 
+                vapidKey: 'BCZrmsGsGLv6cFEEvDXYHtY5gHqF7WW8WpaZpO7_DDfD-IPT-OGmiuDFMbCcbv4h--EOGHIWJWp1-Afi2AIks5k' 
+            });
+            if (currentToken) {
+                console.log("Token:", currentToken);
+                const user = localStorage.getItem('savedRobloxUser');
+                if (user) {
+                    await update(ref(db, `users/${user}`), { fcmToken: currentToken });
+                    showToast("¡Notificaciones activadas!", "success");
+                } else {
+                    showToast("Inicia sesión primero", "error");
+                }
+            } else {
+                showToast("Error al obtener token", "error");
+            }
+        } else {
+            showToast("Permiso denegado", "error");
         }
-    } else {
-        isPulling = false;
-        if(refreshContainer) refreshContainer.style.height = '0px';
+    } catch (error) {
+        console.error(error);
+        showToast("Error de configuración", "error");
     }
-}, { passive: true });
+};
 
-window.addEventListener('touchend', () => {
-    if (!isPulling) return;
-    isPulling = false;
-    
-    if (refreshContainer && refreshContainer.offsetHeight > 40) {
-        performRefresh();
-    } else {
-        if(refreshContainer) refreshContainer.style.height = '0px';
-    }
+const messaging = getMessaging(app);
+onMessage(messaging, (payload) => {
+    showToast(`🔔 ${payload.notification.title}: ${payload.notification.body}`, "info");
 });
 
-function performRefresh() {
-    if(refreshContainer) refreshContainer.style.height = '50px'; 
-    if (currentSection === 'Home') toggleSkeleton(true);
-    
-    // Simular carga y mezclar feed
-    setTimeout(() => {
-        if (allThreadsData.length > 0) {
-            allThreadsData = shuffleArray(allThreadsData);
-        }
-        renderCurrentView();
-        
-        if(refreshContainer) refreshContainer.style.height = '0px';
-        toggleSkeleton(false);
-        showToast("Actualizado", "success");
-    }, 1200);
-}
-
 // --- UTILIDADES ---
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
-
 window.showToast = function(message, type = 'info') {
     const container = document.getElementById('toastContainer'); if(!container) return;
     const toast = document.createElement('div'); toast.className = `toast ${type}`;
@@ -160,13 +122,12 @@ window.addEventListener("scroll", function() {
     elements.forEach(id => { const el = document.getElementById(id); if(el) { if(hide) el.classList.add("scroll-hide"); else el.classList.remove("scroll-hide"); } });
     lastScrollTop = st <= 0 ? 0 : st;
 }, false);
-//PART 3//
 function initFirebaseListener() {
-    // 1. USUARIOS & NOTIFICACIONES
+    // 1. USUARIOS
     onValue(usersRef, (snap) => { 
         allUsersMap = snap.val() || {}; 
         
-        // CORRECCIÓN DE ENLACES (Deep Linking cuando llegan los datos)
+        // Deep Linking (Corrección: Esperar datos)
         const hash = window.location.hash;
         if (hash === '#my_info') { 
             const me = localStorage.getItem('savedRobloxUser'); 
@@ -182,30 +143,25 @@ function initFirebaseListener() {
         }
 
         const myUser = localStorage.getItem('savedRobloxUser');
-        
-        // Admin Panel Visibilidad
         const btnAdmin = document.getElementById('btnAdminPanel');
         if(btnAdmin) btnAdmin.style.display = (myUser && allUsersMap[myUser] && allUsersMap[myUser].role === 'admin') ? 'block' : 'none';
         
         if (myUser && allUsersMap[myUser]) {
             if (allUsersMap[myUser].isBanned === true) { showToast("Cuenta suspendida", "error"); localStorage.clear(); setTimeout(() => { window.location.reload(); }, 3000); return; }
-            
             myFollowingList = allUsersMap[myUser].following ? Object.keys(allUsersMap[myUser].following) : [];
             myBlockedList = allUsersMap[myUser].blocked ? Object.keys(allUsersMap[myUser].blocked) : [];
-            
-            // VERIFICAR NOTIFICACIONES (PUNTITO ROJO)
             checkNotifications(allUsersMap[myUser]);
         }
         if (allThreadsData.length > 0) renderCurrentView(); 
     });
 
-    // 2. FEED & SHUFFLE
+    // 2. FEED
     onValue(query(threadsRef), (snap) => {
         const data = snap.val();
         if (data) {
             const rawArray = Object.entries(data);
             if (allThreadsData.length === 0) {
-                // Primera carga: Mostrar Skeleton y mezclar
+                // PRIMERA CARGA: MOSTRAR SKELETON Y MEZCLAR
                 toggleSkeleton(true);
                 setTimeout(() => {
                     allThreadsData = shuffleArray(rawArray);
@@ -213,11 +169,9 @@ function initFirebaseListener() {
                     renderCurrentView();
                 }, 800); 
             } else {
-                // Actualizaciones en tiempo real: Mantener orden, actualizar likes
+                // ACTUALIZACIÓN: Mantener orden, actualizar datos
                 const newMap = new Map(Object.entries(data));
                 allThreadsData = allThreadsData.map(item => newMap.has(item[0]) ? [item[0], newMap.get(item[0])] : item);
-                
-                // Si hay posts nuevos de verdad, ponerlos al inicio
                 if (rawArray.length > allThreadsData.length) {
                      const currentKeys = new Set(allThreadsData.map(i => i[0]));
                      const newPosts = rawArray.filter(i => !currentKeys.has(i[0]));
@@ -230,7 +184,6 @@ function initFirebaseListener() {
             renderCurrentView();
         }
         
-        // Deep link de post
         const hash = window.location.hash;
         if (hash.startsWith('#post_')) { viewingSinglePostId = hash.replace('#post_', ''); currentSection = 'Home'; renderCurrentView(); }
     });
@@ -238,68 +191,89 @@ function initFirebaseListener() {
     onValue(verifiedRef, (snap) => { const data = snap.val(); verifiedUsersList = data ? Object.keys(data).map(n => n.toLowerCase()) : []; renderCurrentView(); });
 }
 
-// FUNCIÓN DE NOTIFICACIONES
 function checkNotifications(myData) {
     const badge = document.getElementById('activityBadge');
     if (!badge) return;
-    
-    // Compara seguidores actuales con la última vez que revisaste
     const lastFollowerCount = parseInt(localStorage.getItem('lastFollowerCount') || 0);
-    
-    if (myData.followersCount > lastFollowerCount) {
-        badge.style.display = 'block'; // Mostrar punto rojo
+    if (myData.followersCount > lastFollowerCount) badge.style.display = 'block'; 
+    else badge.style.display = 'none';
+}
+// --- SKELETON LOADING ---
+function toggleSkeleton(show) {
+    const sk = document.getElementById('skeletonLoader');
+    const real = document.getElementById('realContentContainer');
+    if (show) {
+        if(sk) sk.style.display = 'block';
+        if(real) real.style.display = 'none';
+        isSkeletonShown = true;
     } else {
-        badge.style.display = 'none';
+        if(sk) sk.style.display = 'none';
+        if(real) real.style.display = 'block';
+        isSkeletonShown = false;
     }
 }
-//PART 4.1//
+
+// --- PULL TO REFRESH ---
+window.addEventListener('touchstart', (e) => { if (window.scrollY === 0 && currentSection === 'Home') { pullStartY = e.touches[0].clientY; isPulling = true; } }, { passive: true });
+window.addEventListener('touchmove', (e) => {
+    if (!isPulling) return;
+    const y = e.touches[0].clientY; const diff = y - pullStartY;
+    if (diff > 0 && window.scrollY === 0) {
+        if (diff < pullThreshold) if(refreshContainer) refreshContainer.style.height = `${diff / 2.5}px`; 
+    } else { isPulling = false; if(refreshContainer) refreshContainer.style.height = '0px'; }
+}, { passive: true });
+window.addEventListener('touchend', () => {
+    if (!isPulling) return; isPulling = false;
+    if (refreshContainer && refreshContainer.offsetHeight > 40) performRefresh(); else if(refreshContainer) refreshContainer.style.height = '0px';
+});
+
+function performRefresh() {
+    if(refreshContainer) refreshContainer.style.height = '50px'; 
+    if (currentSection === 'Home') toggleSkeleton(true);
+    setTimeout(() => {
+        if (allThreadsData.length > 0) allThreadsData = shuffleArray(allThreadsData);
+        renderCurrentView();
+        if(refreshContainer) refreshContainer.style.height = '0px';
+        toggleSkeleton(false);
+        showToast("Actualizado", "success");
+    }, 1200);
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; }
+    return array;
+}
+
+// --- RENDERIZADO ---
 window.changeSection = function(sectionName) {
     currentSection = sectionName; localStorage.setItem('lastSection', sectionName);
     if(sectionName !== 'Perfil') { localStorage.removeItem('lastVisitedProfile'); viewingUserProfile = ''; }
     if (sectionName !== 'Home') viewingSinglePostId = null;
-    
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     const sc = document.getElementById('searchContainer');
-    
-    toggleMainUI(true); // Siempre mostrar UI al navegar secciones principales
-
+    toggleMainUI(true);
     if(sectionName === 'Busqueda') { document.getElementById('nav-search').classList.add('active'); if(sc) sc.style.display = 'block'; }
     else { if(sc) sc.style.display = 'none'; const map = { Home: 'nav-home', Activity: 'nav-activity', Perfil: 'nav-profile' }; if(map[sectionName]) document.getElementById(map[sectionName]).classList.add('active'); }
-    
-    // SI ENTRAMOS A ACTIVIDAD, LIMPIAR NOTIFICACIÓN
     if (sectionName === 'Activity') {
-        const badge = document.getElementById('activityBadge');
-        if(badge) badge.style.display = 'none';
-        
+        const badge = document.getElementById('activityBadge'); if(badge) badge.style.display = 'none';
         const me = localStorage.getItem('savedRobloxUser');
-        if (me && allUsersMap[me]) {
-            localStorage.setItem('lastFollowerCount', allUsersMap[me].followersCount || 0);
-        }
+        if (me && allUsersMap[me]) localStorage.setItem('lastFollowerCount', allUsersMap[me].followersCount || 0);
     }
-    
-    renderCurrentView(); 
-    if(sectionName === 'Home') window.scrollTo(0,0);
+    renderCurrentView(); if(sectionName === 'Home') window.scrollTo(0,0);
 };
 
 window.openMyProfile = function() { viewingUserProfile = ''; localStorage.removeItem('lastVisitedProfile'); changeSection('Perfil'); };
 window.openFullProfile = (u) => { viewingUserProfile = u; localStorage.setItem('lastVisitedProfile', u); changeSection('Perfil'); };
 
 function renderCurrentView() {
-    // USAMOS EL CONTENEDOR INTERNO PARA SKELETON
     const container = document.getElementById('realContentContainer'); 
-    if(!container) return; 
-    container.innerHTML = '';
-    
-    // Si skeleton está activo y no hay datos, esperar
+    if(!container) return; container.innerHTML = '';
     if (isSkeletonShown && allThreadsData.length === 0) return;
-
     if (currentSection === 'Activity') return renderActivity(container);
     if (currentSection === 'Perfil') return renderFullProfile(container);
     if (currentSection === 'Busqueda') { renderUserSearch(container); if (searchTerm) renderPostList(container, true); return; }
-    
     renderPostList(container, false);
 }
-
 window.updateImageCounter = function(carousel) { const width = carousel.offsetWidth; const currentIndex = Math.round(carousel.scrollLeft / width) + 1; const totalImages = carousel.childElementCount; const badge = carousel.parentElement.querySelector('.image-counter-badge'); if(badge) badge.innerText = `${currentIndex}/${totalImages}`; };
 
 function renderThread(key, thread, container) {
@@ -326,8 +300,6 @@ function renderFullProfile(container) { const target = viewingUserProfile || loc
 
 function renderPostList(container, isSearch) {
     if (viewingSinglePostId) { const postEntry = allThreadsData.find(x => x[0] === viewingSinglePostId); if (postEntry) { const author = postEntry[1].username; container.innerHTML = `<button onclick="openFullProfile('${author}')" style="background:none; color:#00a2ff; border:none; padding:10px 0; cursor:pointer; width:100%; text-align:left; margin-bottom:10px; font-size:1em; display:flex; align-items:center; gap:8px;"><i class="fas fa-arrow-left"></i> Ver más de @${author}</button>`; } else container.innerHTML = `<button onclick="window.location.reload()" style="background:none; color:#ff4d4d; border:none; padding:10px;">Publicación no encontrada. Ir al inicio.</button>`; }
-    
-    // (allThreadsData YA ESTÁ MEZCLADO POR SHUFFLEARRAY)
     const filtered = allThreadsData.filter(([k, t]) => { if (viewingSinglePostId) return k === viewingSinglePostId; const author = allUsersMap[t.username]; if (author && author.isBanned === true) return false; if (myBlockedList.includes(t.username)) return false; if (!isSearch) return true; const term = searchTerm.toLowerCase(); const tUser = t.username || ""; const tTitle = t.title || ""; return tTitle.toLowerCase().includes(term) || tUser.toLowerCase().includes(term); });
     if (filtered.length) filtered.forEach(([k, t]) => renderThread(k, t, container)); else if (!viewingSinglePostId) container.innerHTML += '<p style="text-align:center; padding:20px; color:#777;">Sin resultados.</p>';
 }
@@ -335,7 +307,6 @@ function renderPostList(container, isSearch) {
 function renderUserSearch(container) { if (!searchTerm) { container.innerHTML = '<p style="text-align:center; color:#777; margin-top:20px;">Busca personas...</p>'; return; } const term = searchTerm.toLowerCase(); const myUser = localStorage.getItem('savedRobloxUser'); const amIAdmin = allUsersMap[myUser]?.role === 'admin'; Object.keys(allUsersMap).filter(u => u.toLowerCase().includes(term) || (allUsersMap[u].displayName && allUsersMap[u].displayName.toLowerCase().includes(term))).forEach(username => { const uData = allUsersMap[username]; let topText = uData.customHandle || username; let bottomText = uData.displayName || username; let avatar = uData.avatar || DEFAULT_AVATAR; const isVerified = verifiedUsersList.includes(username.toLowerCase()); const verifIcon = isVerified ? '<i class="fas fa-check-circle verified-icon"></i>' : ''; if (uData.isBanned === true) { if (amIAdmin) topText += " (BANEADO)"; else { topText = "Usuario Eliminado"; bottomText = ""; avatar = DEFAULT_AVATAR; } } if (myBlockedList.includes(username)) topText += " (Bloqueado)"; const div = document.createElement('div'); div.className = 'user-search-result'; div.onclick = () => openFullProfile(username); div.innerHTML = `<img src="${avatar}" class="user-search-avatar"><div class="user-search-info"><h4 style="margin:0; color:#fff;">${topText} ${verifIcon}</h4><p style="color:#a8a8a8; margin:0;">${bottomText}</p></div>`; container.appendChild(div); }); }
 
 function renderActivity(container) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) { container.innerHTML = '<p style="text-align:center; padding:30px;">Inicia sesión.</p>'; return; } container.innerHTML = '<h3 style="padding:15px; border-bottom:1px solid #333;">Actividad</h3>'; const myData = allUsersMap[myUser]; if (myData?.followers) Object.keys(myData.followers).forEach(f => { const fd = allUsersMap[f] || {}; const div = document.createElement('div'); div.className = 'activity-item'; div.innerHTML = `<img src="${fd.avatar || DEFAULT_AVATAR}" class="activity-avatar"> <div class="activity-text"><strong>${f}</strong> te siguió.</div>`; container.appendChild(div); }); else container.innerHTML += '<p style="text-align:center; padding:40px; color:#555;">Sin actividad.</p>'; }
-//PART 4.2//
 // LOGIN & REGISTRO
 window.loginSystem = async function() {
     const u = document.getElementById('loginUser').value.trim(); const p = document.getElementById('loginPin').value.trim();
@@ -391,7 +362,7 @@ window.submitNewThread = async function() {
     const post = { title: document.getElementById('title').value, description: document.getElementById('description').value, category: document.getElementById('categorySelect').value, username: user, images: imgs, image: imgs.length > 0 ? imgs[0] : "", timestamp: Date.now(), likeCount: 0 };
     await push(threadsRef, post); document.getElementById('newThreadForm').reset(); document.getElementById('fileName').textContent = ""; closeNewThreadPage(); showToast("Publicado", "success"); btn.disabled = false; btn.innerText = "Publicar"; changeSection('Home');
 };
-//PARTE 5//
+
 // --- MENÚ DE AJUSTES (3 LÍNEAS) ---
 window.openProfileSettings = function() { document.getElementById('profileSettingsModal').style.display = 'block'; };
 
@@ -428,37 +399,227 @@ window.saveProfileChanges = async function() {
 };
 
 // --- FLUJO DE REPORTES ---
-window.blockUser = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) return; showConfirm(`¿Bloquear a ${targetUser}?`, () => { const updates = {}; updates[`users/${myUser}/blocked/${targetUser}`] = true; updates[`users/${myUser}/following/${targetUser}`] = null; updates[`users/${targetUser}/followers/${myUser}`] = null; update(ref(db), updates).then(() => { showToast("Bloqueado.", "success"); renderCurrentView(); }); }); };
-window.unblockUser = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); showConfirm(`¿Desbloquear a ${targetUser}?`, () => { set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { showToast("Desbloqueado.", "success"); renderCurrentView(); }); }); };
-window.reportUser = function(targetUser) { userBeingReported = targetUser; postBeingReported = null; openReportModal(targetUser); };
-window.reportPost = function(postKey, authorName) { userBeingReported = authorName; postBeingReported = postKey; openReportModal(authorName, true); };
-function openReportModal(target, isPost = false) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) return showToast("Inicia sesión primero", "error"); if (myUser === target) return showToast("No puedes reportarte", "error"); document.getElementById('reportTargetName').innerText = isPost ? `Reportando publicación de: ${target}` : `Reportando a: ${target}`; document.getElementById('reportModal').style.display = 'block'; }
+window.blockUser = function(targetUser) { 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    if (!myUser) return; 
+    showConfirm(`¿Bloquear a ${targetUser}?`, () => { 
+        const updates = {}; 
+        updates[`users/${myUser}/blocked/${targetUser}`] = true; 
+        updates[`users/${myUser}/following/${targetUser}`] = null; 
+        updates[`users/${targetUser}/followers/${myUser}`] = null; 
+        update(ref(db), updates).then(() => { 
+            showToast("Bloqueado.", "success"); 
+            renderCurrentView(); 
+        }); 
+    }); 
+};
+
+window.unblockUser = function(targetUser) { 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    showConfirm(`¿Desbloquear a ${targetUser}?`, () => { 
+        set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { 
+            showToast("Desbloqueado.", "success"); 
+            renderCurrentView(); 
+        }); 
+    }); 
+};
+
+window.reportUser = function(targetUser) { 
+    userBeingReported = targetUser; 
+    postBeingReported = null; 
+    openReportModal(targetUser); 
+};
+
+window.reportPost = function(postKey, authorName) { 
+    userBeingReported = authorName; 
+    postBeingReported = postKey; 
+    openReportModal(authorName, true); 
+};
+
+function openReportModal(target, isPost = false) { 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    if (!myUser) return showToast("Inicia sesión primero", "error"); 
+    if (myUser === target) return showToast("No puedes reportarte", "error"); 
+    document.getElementById('reportTargetName').innerText = isPost ? `Reportando publicación de: ${target}` : `Reportando a: ${target}`; 
+    document.getElementById('reportModal').style.display = 'block'; 
+}
 
 window.submitReportAction = function() {
-    const reason = document.getElementById('reportReasonSelect').value; const myUser = localStorage.getItem('savedRobloxUser'); if (!userBeingReported) return;
-    push(ref(db, 'reports'), { reportedUser: userBeingReported, reportedBy: myUser, reason: reason, timestamp: Date.now(), status: 'pending', postId: postBeingReported }).then(() => { 
+    const reason = document.getElementById('reportReasonSelect').value; 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    if (!userBeingReported) return;
+    
+    push(ref(db, 'reports'), { 
+        reportedUser: userBeingReported, 
+        reportedBy: myUser, 
+        reason: reason, 
+        timestamp: Date.now(), 
+        status: 'pending', 
+        postId: postBeingReported 
+    }).then(() => { 
         document.getElementById('reportModal').style.display = 'none';
         document.getElementById('reportSuccessUser').innerText = userBeingReported;
         document.getElementById('reportSuccessModal').style.display = 'block';
     });
 };
-window.openBlockConfirmModal = function() { closeModal('reportSuccessModal'); document.getElementById('blockTargetUser').innerText = userBeingReported; const targetData = allUsersMap[userBeingReported] || {}; document.getElementById('blockAvatarPreview').src = targetData.avatar || DEFAULT_AVATAR; document.getElementById('blockConfirmModal').style.display = 'block'; };
-window.performBlockAction = function() { blockUserLogic(userBeingReported); closeModal('blockConfirmModal'); document.getElementById('finalThanksModal').style.display = 'block'; };
-window.performBlockAndReportAction = function() { blockUserLogic(userBeingReported); closeModal('blockConfirmModal'); document.getElementById('finalThanksModal').style.display = 'block'; };
-window.closeAllReportModals = function() { closeModal('finalThanksModal'); renderCurrentView(); };
-function blockUserLogic(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) return; const updates = {}; updates[`users/${myUser}/blocked/${targetUser}`] = true; updates[`users/${myUser}/following/${targetUser}`] = null; updates[`users/${targetUser}/followers/${myUser}`] = null; update(ref(db), updates); }
+
+window.openBlockConfirmModal = function() { 
+    closeModal('reportSuccessModal'); 
+    document.getElementById('blockTargetUser').innerText = userBeingReported; 
+    const targetData = allUsersMap[userBeingReported] || {}; 
+    document.getElementById('blockAvatarPreview').src = targetData.avatar || DEFAULT_AVATAR; 
+    document.getElementById('blockConfirmModal').style.display = 'block'; 
+};
+
+window.performBlockAction = function() { 
+    blockUserLogic(userBeingReported); 
+    closeModal('blockConfirmModal'); 
+    document.getElementById('finalThanksModal').style.display = 'block'; 
+};
+
+window.performBlockAndReportAction = function() { 
+    blockUserLogic(userBeingReported); 
+    closeModal('blockConfirmModal'); 
+    document.getElementById('finalThanksModal').style.display = 'block'; 
+};
+
+window.closeAllReportModals = function() { 
+    closeModal('finalThanksModal'); 
+    renderCurrentView(); 
+};
+
+function blockUserLogic(targetUser) { 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    if (!myUser) return; 
+    const updates = {}; 
+    updates[`users/${myUser}/blocked/${targetUser}`] = true; 
+    updates[`users/${myUser}/following/${targetUser}`] = null; 
+    updates[`users/${targetUser}/followers/${myUser}`] = null; 
+    update(ref(db), updates); 
+}
 
 // --- ADMIN & INTERACCIONES ---
-window.banUser = function(targetUser) { showConfirm(`¿Banear cuenta?`, () => { update(ref(db), { [`users/${targetUser}/isBanned`]: true }).then(() => showToast("Usuario baneado.", "success")); }); };
-window.unbanUser = function(targetUser) { showConfirm(`¿Restaurar cuenta?`, () => { update(ref(db), { [`users/${targetUser}/isBanned`]: null }).then(() => showToast("Usuario restaurado.", "success")); }); };
-window.openAdminPanel = function() { const myUser = localStorage.getItem('savedRobloxUser'); if (!allUsersMap[myUser] || allUsersMap[myUser].role !== 'admin') return showToast("Acceso denegado.", "error"); document.getElementById('adminModal').style.display = 'block'; get(child(ref(db), 'reports')).then((snapshot) => { const container = document.getElementById('adminReportsList'); if (snapshot.exists()) { container.innerHTML = ''; Object.entries(snapshot.val()).forEach(([key, r]) => { const div = document.createElement('div'); div.style.cssText = "background:#333; margin-bottom:10px; padding:10px; border-radius:8px; border:1px solid #555;"; div.innerHTML = `<div style="font-size:0.9em; color:#aaa;">Reportado: <b>${r.reportedUser}</b><br>Motivo: ${r.reason}</div><div style="margin-top:5px;"><button onclick="deleteReport('${key}')" style="background:#555; padding:5px;">Borrar</button> <button onclick="banUser('${r.reportedUser}')" style="background:#cc0000; padding:5px;">BANEAR</button></div>`; container.appendChild(div); }); } else { container.innerHTML = '<p style="text-align:center; color:#777;">Sin reportes.</p>'; } }); };
-window.deleteReport = function(k) { set(ref(db, `reports/${k}`), null).then(() => { showToast("Borrado", "success"); window.openAdminPanel(); }); };
-window.toggleFollow = function(target) { const me = localStorage.getItem('savedRobloxUser'); if(!me) { showToast("Regístrate", "error"); return; } if(me === target) return; const isFollowing = myFollowingList.includes(target); const updates = {}; if (isFollowing) { updates[`users/${me}/following/${target}`] = null; updates[`users/${target}/followers/${me}`] = null; updates[`users/${me}/followingCount`] = increment(-1); updates[`users/${target}/followersCount`] = increment(-1); } else { updates[`users/${me}/following/${target}`] = true; updates[`users/${target}/followers/${me}`] = true; updates[`users/${me}/followingCount`] = increment(1); updates[`users/${target}/followersCount`] = increment(1); } update(ref(db), updates); setTimeout(() => renderCurrentView(), 200); };
-const searchIn = document.getElementById('searchInput'); if(searchIn) searchIn.oninput = (e) => { searchTerm = e.target.value.trim(); renderCurrentView(); };
-window.toggleLike = (k, c, b) => { const u = localStorage.getItem('savedRobloxUser'); if(!u) return showToast("Inicia sesión", "error"); const id = getUserId(); const isL = b.querySelector('i').classList.contains('fas'); update(ref(db), { [`threads/${k}/likeCount`]: isL ? c - 1 : c + 1, [`threads/${k}/likes/${id}`]: isL ? null : true }); };
-const avatarInput = document.getElementById('avatarUpload'); if(avatarInput) { avatarInput.onchange = async function() { const user = localStorage.getItem('savedRobloxUser'); if(!user || this.files.length === 0) return; showToast("Subiendo...", "info"); const formData = new FormData(); formData.append('file', this.files[0]); formData.append('upload_preset', 'comunidad_arc'); try { const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: formData }); const data = await res.json(); await update(ref(db, `users/${user}`), { avatar: data.secure_url }); document.getElementById('editAvatarPreview').src = data.secure_url; showToast("Actualizado", "success"); } catch(e) { showToast("Error", "error"); } }; }
-window.openComments = (key) => { const modal = document.getElementById('commentsModal'); const list = document.getElementById('commentsList'); modal.style.display = 'block'; off(ref(db, `threads/${key}/comments`)); onValue(ref(db, `threads/${key}/comments`), (snap) => { list.innerHTML = ''; const data = snap.val(); if(data) Object.values(data).forEach(c => { const d = document.createElement('div'); d.innerHTML = `<strong>${c.username}:</strong> ${makeLinksClickable(c.text)}`; d.style.cssText = "padding:5px 0; border-bottom:1px solid #333;"; list.appendChild(d); }); else list.innerHTML = '<p style="text-align:center; color:#777;">Sin comentarios.</p>'; }); const cForm = document.getElementById('commentForm'); const newForm = cForm.cloneNode(true); cForm.parentNode.replaceChild(newForm, cForm); newForm.onsubmit = (e) => { e.preventDefault(); const u = localStorage.getItem('savedRobloxUser'); if(!u) return showToast("Inicia sesión", "error"); push(ref(db, `threads/${key}/comments`), { text: document.getElementById('commentInput').value, username: u, timestamp: Date.now() }); document.getElementById('commentInput').value = ''; }; };
-//PARTE 6//
+window.banUser = function(targetUser) { 
+    showConfirm(`¿Banear cuenta?`, () => { 
+        update(ref(db), { [`users/${targetUser}/isBanned`]: true }).then(() => showToast("Usuario baneado.", "success")); 
+    }); 
+};
+
+window.unbanUser = function(targetUser) { 
+    showConfirm(`¿Restaurar cuenta?`, () => { 
+        update(ref(db), { [`users/${targetUser}/isBanned`]: null }).then(() => showToast("Usuario restaurado.", "success")); 
+    }); 
+};
+
+window.openAdminPanel = function() { 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    if (!allUsersMap[myUser] || allUsersMap[myUser].role !== 'admin') return showToast("Acceso denegado.", "error"); 
+    document.getElementById('adminModal').style.display = 'block'; 
+    get(child(ref(db), 'reports')).then((snapshot) => { 
+        const container = document.getElementById('adminReportsList'); 
+        if (snapshot.exists()) { 
+            container.innerHTML = ''; 
+            Object.entries(snapshot.val()).forEach(([key, r]) => { 
+                const div = document.createElement('div'); 
+                div.style.cssText = "background:#333; margin-bottom:10px; padding:10px; border-radius:8px; border:1px solid #555;"; 
+                div.innerHTML = `<div style="font-size:0.9em; color:#aaa;">Reportado: <b>${r.reportedUser}</b><br>Motivo: ${r.reason}</div><div style="margin-top:5px;"><button onclick="deleteReport('${key}')" style="background:#555; padding:5px;">Borrar</button> <button onclick="banUser('${r.reportedUser}')" style="background:#cc0000; padding:5px;">BANEAR</button></div>`; 
+                container.appendChild(div); 
+            }); 
+        } else { 
+            container.innerHTML = '<p style="text-align:center; color:#777;">Sin reportes.</p>'; 
+        } 
+    }); 
+};
+
+window.deleteReport = function(k) { 
+    set(ref(db, `reports/${k}`), null).then(() => { 
+        showToast("Borrado", "success"); 
+        window.openAdminPanel(); 
+    }); 
+};
+
+window.toggleFollow = function(target) { 
+    const me = localStorage.getItem('savedRobloxUser'); 
+    if(!me) { showToast("Regístrate", "error"); return; } 
+    if(me === target) return; 
+    const isFollowing = myFollowingList.includes(target); 
+    const updates = {}; 
+    if (isFollowing) { 
+        updates[`users/${me}/following/${target}`] = null; 
+        updates[`users/${target}/followers/${me}`] = null; 
+        updates[`users/${me}/followingCount`] = increment(-1); 
+        updates[`users/${target}/followersCount`] = increment(-1); 
+    } else { 
+        updates[`users/${me}/following/${target}`] = true; 
+        updates[`users/${target}/followers/${me}`] = true; 
+        updates[`users/${me}/followingCount`] = increment(1); 
+        updates[`users/${target}/followersCount`] = increment(1); 
+    } 
+    update(ref(db), updates); 
+    setTimeout(() => renderCurrentView(), 200); 
+};
+
+const searchIn = document.getElementById('searchInput'); 
+if(searchIn) searchIn.oninput = (e) => { 
+    searchTerm = e.target.value.trim(); 
+    renderCurrentView(); 
+};
+
+window.toggleLike = (k, c, b) => { 
+    const u = localStorage.getItem('savedRobloxUser'); 
+    if(!u) return showToast("Inicia sesión", "error"); 
+    const id = getUserId(); 
+    const isL = b.querySelector('i').classList.contains('fas'); 
+    update(ref(db), { [`threads/${k}/likeCount`]: isL ? c - 1 : c + 1, [`threads/${k}/likes/${id}`]: isL ? null : true }); 
+};
+
+const avatarInput = document.getElementById('avatarUpload'); 
+if(avatarInput) { 
+    avatarInput.onchange = async function() { 
+        const user = localStorage.getItem('savedRobloxUser'); 
+        if(!user || this.files.length === 0) return; 
+        showToast("Subiendo...", "info"); 
+        const formData = new FormData(); 
+        formData.append('file', this.files[0]); 
+        formData.append('upload_preset', 'comunidad_arc'); 
+        try { 
+            const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: formData }); 
+            const data = await res.json(); 
+            await update(ref(db, `users/${user}`), { avatar: data.secure_url }); 
+            document.getElementById('editAvatarPreview').src = data.secure_url; 
+            showToast("Actualizado", "success"); 
+        } catch(e) { showToast("Error", "error"); } 
+    }; 
+}
+
+window.openComments = (key) => { 
+    const modal = document.getElementById('commentsModal'); 
+    const list = document.getElementById('commentsList'); 
+    modal.style.display = 'block'; 
+    off(ref(db, `threads/${key}/comments`)); 
+    onValue(ref(db, `threads/${key}/comments`), (snap) => { 
+        list.innerHTML = ''; 
+        const data = snap.val(); 
+        if(data) Object.values(data).forEach(c => { 
+            const d = document.createElement('div'); 
+            d.innerHTML = `<strong>${c.username}:</strong> ${makeLinksClickable(c.text)}`; 
+            d.style.cssText = "padding:5px 0; border-bottom:1px solid #333;"; 
+            list.appendChild(d); 
+        }); else list.innerHTML = '<p style="text-align:center; color:#777;">Sin comentarios.</p>'; 
+    }); 
+    const cForm = document.getElementById('commentForm'); 
+    const newForm = cForm.cloneNode(true); 
+    cForm.parentNode.replaceChild(newForm, cForm); 
+    newForm.onsubmit = (e) => { 
+        e.preventDefault(); 
+        const u = localStorage.getItem('savedRobloxUser'); 
+        if(!u) return showToast("Inicia sesión", "error"); 
+        push(ref(db, `threads/${key}/comments`), { text: document.getElementById('commentInput').value, username: u, timestamp: Date.now() }); 
+        document.getElementById('commentInput').value = ''; 
+    }; 
+};
+
+// --- INICIALIZACIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
     initFirebaseListener();
     const user = localStorage.getItem('savedRobloxUser');
@@ -469,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hash = window.location.hash;
 
-    // --- LÓGICA DE INICIO (EVITA PARPADEO BLANCO/NEGRO) ---
+    // --- LOGICA DE INICIO (EVITA PARPADEO BLANCO/NEGRO) ---
     if (hash === '#my_info') {
         if (user) {
             toggleMainUI(false); 
@@ -511,3 +672,4 @@ document.addEventListener('DOMContentLoaded', () => {
         window.changeSection(currentSection);
     }
 });
+                                     

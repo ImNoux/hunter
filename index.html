@@ -10,6 +10,10 @@
 </head>
 <body>
 
+    <div id="pullToRefresh" class="pull-refresh-container">
+        <div class="spinner-border"></div>
+    </div>
+
     <header id="mainHeader">
         <div class="header-top">
             <div class="menu-container">
@@ -19,7 +23,6 @@
                     <a id="menuLogout" href="#" onclick="logoutSystem()" style="display: none; color: #ff4d4d;">Cerrar Sesión</a>
                     <a href="#" onclick="openModal('updatesModal')">Actualizaciones</a>
                     <a href="#" onclick="openModal('contactModal')">Contactos</a>
-                    
                     <a href="#" onclick="openAdminPanel()" id="btnAdminPanel" style="display: none; color: #ff4d4d; border-top: 1px solid #444;">
                         <i class="fas fa-shield-alt"></i> Panel Admin
                     </a>
@@ -38,9 +41,22 @@
     </div>
 
     <main class="thread-container" id="mainFeedContainer">
-        </main>
+        
+        <div id="skeletonLoader">
+            <div class="skeleton-post">
+                <div class="sk-header"><div class="sk-avatar"></div><div class="sk-name"></div></div>
+                <div class="sk-text"></div><div class="sk-text short"></div>
+                <div class="sk-img"></div>
+            </div>
+            <div class="skeleton-post">
+                <div class="sk-header"><div class="sk-avatar"></div><div class="sk-name"></div></div>
+                <div class="sk-text"></div><div class="sk-img"></div>
+            </div>
+        </div>
 
-    <button id="floatingAddBtn" class="floating-add-btn" onclick="openNewThreadPage()">
+        <div id="realContentContainer"></div>
+  </main>
+  <button id="floatingAddBtn" class="floating-add-btn" onclick="openNewThreadPage()">
         <i class="fas fa-plus"></i>
     </button>
 
@@ -51,10 +67,14 @@
         <div class="nav-item" id="nav-search" onclick="changeSection('Busqueda')">
             <i class="fas fa-search"></i>
         </div>
+        
         <div class="nav-item-spacer"></div>
-        <div class="nav-item" id="nav-activity" onclick="changeSection('Activity')">
+        
+        <div class="nav-item" id="nav-activity" onclick="changeSection('Activity')" style="position: relative;">
             <i class="fas fa-heart"></i>
+            <div id="activityBadge" class="nav-badge" style="display: none;"></div>
         </div>
+        
         <div class="nav-item" id="nav-profile" onclick="openMyProfile()">
             <i class="fas fa-user"></i>
         </div>
@@ -129,9 +149,8 @@
             <button onclick="registerSystem()">REGISTRARSE</button>
             <p class="switch-auth" onclick="openModal('loginModal')">¿Ya tienes cuenta? Entra aquí</p>
         </div>
-    </div>
-
-    <div id="commentsModal" class="modal-overlay">
+  </div>
+  <div id="commentsModal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('commentsModal')">&times;</span>
             <h3>Comentarios</h3>
@@ -345,7 +364,7 @@
         </div>
     </div>
 
-    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 7.0: Fix de UI y Navegación.</p></div></div>
+    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 7.0: Fix UI & Flow.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
     
     <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">

@@ -234,3 +234,62 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .mini-action-menu div { padding: 10px; font-size: 0.9em; color: #fff; cursor: pointer; }
 .mini-action-menu div:hover { background: #333; }
 .status-pill { position: absolute; top: -8px; left: -5px; background: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.7em; color: #ccc; }
+/* =========================================
+   NUEVO: PULL TO REFRESH & SKELETON
+   ========================================= */
+
+/* Pull to Refresh Spinner */
+.pull-refresh-container {
+    position: fixed;
+    top: 60px; /* Debajo del header */
+    left: 0;
+    width: 100%;
+    height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    transition: height 0.2s ease-out;
+    z-index: 900;
+}
+.spinner-border {
+    width: 25px; height: 25px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: #0095f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Notificación (Puntito Rojo) */
+.nav-badge {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    background-color: #ff3040;
+    border-radius: 50%;
+    border: 1px solid #000;
+}
+
+/* Skeleton Loading (Carga Elegante) */
+#skeletonLoader { display: none; padding: 15px; } /* Oculto por defecto, JS lo activa */
+.skeleton-post { margin-bottom: 30px; }
+.sk-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sk-avatar { width: 38px; height: 38px; border-radius: 50%; background: #262626; }
+.sk-name { width: 120px; height: 14px; background: #262626; border-radius: 4px; }
+.sk-text { width: 100%; height: 12px; background: #262626; margin-bottom: 8px; border-radius: 4px; }
+.sk-text.short { width: 60%; }
+.sk-img { width: 100%; height: 250px; background: #262626; border-radius: 8px; margin-top: 10px; }
+
+/* Animación de brillo (Shimmer) */
+.sk-avatar, .sk-name, .sk-text, .sk-img {
+    position: relative; overflow: hidden;
+}
+.sk-avatar::after, .sk-name::after, .sk-text::after, .sk-img::after {
+    content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }

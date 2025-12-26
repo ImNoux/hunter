@@ -5,17 +5,9 @@
 input, textarea { -webkit-user-select: text !important; user-select: text !important; }
 html, body { width: 100%; margin: 0; padding: 0; overflow-x: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #e1e1e1; background-color: #000; min-height: 100vh; display: flex; flex-direction: column; background-image: linear-gradient(rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0.9)), url('https://i.ibb.co/mrhC10fw/Line-Runner-Template-1.png'); background-size: cover; background-position: center; background-attachment: fixed; }
 
-/* =========================================
-   2. HEADER & ANIMACIÓN DE SCROLL
-   ========================================= */
-header {
-    background-color: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #262626;
-    padding: 0; position: sticky; top: 0; z-index: 1000;
-    height: 60px; display: flex; align-items: center; justify-content: center;
-    transition: transform 0.3s ease-in-out;
-}
+/* HEADER SCROLL */
+header { background-color: rgba(0, 0, 0, 0.9); border-bottom: 1px solid #262626; padding: 0; position: sticky; top: 0; z-index: 1000; height: 60px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s ease-in-out; }
 header.scroll-hide { transform: translateY(-100%); }
-
 .header-top { width: 100%; max-width: 600px; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; }
 h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.5rem; letter-spacing: 1px; cursor: pointer; }
 .menu-container { position: relative; }
@@ -25,38 +17,18 @@ h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.
 .menu-dropdown a { display: block; padding: 12px 15px; color: #f1f1f1; text-decoration: none; font-size: 0.95em; border-bottom: 1px solid #363636; }
 .menu-dropdown a:hover { background: #363636; }
 
-/* =========================================
-   3. BARRA INFERIOR & BOTÓN FLOTANTE
-   ========================================= */
-.bottom-nav {
-    position: fixed; bottom: 0; width: 100%; height: 60px;
-    background: #000; border-top: 1px solid #262626;
-    display: flex; justify-content: space-around; align-items: center;
-    z-index: 2000; padding-bottom: 5px; 
-    transition: transform 0.3s ease-in-out;
-}
+/* BOTTOM NAV & FLOATING BUTTON */
+.bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: #000; border-top: 1px solid #262626; display: flex; justify-content: space-around; align-items: center; z-index: 2000; padding-bottom: 5px; transition: transform 0.3s ease-in-out; }
 .bottom-nav.scroll-hide { transform: translateY(100%); }
-
 .nav-item { color: #777; font-size: 1.5rem; cursor: pointer; transition: transform 0.1s; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
 .nav-item.active { color: #fff; }
 .nav-item:active { transform: scale(0.9); opacity: 0.7; }
 .nav-item-spacer { width: 50px; }
-
-/* BOTÓN FLOTANTE (+) */
-.floating-add-btn {
-    position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-    width: 55px; height: 55px; background: #fff; color: #000;
-    border-radius: 50%; border: none; font-size: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2500;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: transform 0.3s ease-in-out;
-}
+.floating-add-btn { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 55px; height: 55px; background: #fff; color: #000; border-radius: 50%; border: none; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2500; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.3s ease-in-out; }
 .floating-add-btn:active { transform: translateX(-50%) scale(0.9); }
 .floating-add-btn.scroll-hide { transform: translate(-50%, 200%); }
 
-/* =========================================
-   4. CONTENT & POSTS
-   ========================================= */
+/* CONTENT & THREADS */
 .thread-container { flex: 1; width: 100%; max-width: 600px; margin: 0 auto; padding: 10px 0 80px 0; }
 .thread { background-color: transparent; border-bottom: 1px solid #262626; margin-bottom: 0; padding: 15px; }
 .post-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
@@ -77,9 +49,7 @@ h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.
 .like-button.liked i { animation: pop 0.3s; }
 @keyframes pop { 50% { transform: scale(1.3); } }
 
-/* =========================================
-   6. SEARCH
-   ========================================= */
+/* SEARCH */
 #searchContainer { padding: 10px; max-width: 600px; margin: 0 auto; width: 100%; transition: transform 0.3s ease-in-out; }
 #searchContainer.scroll-hide { transform: translateY(-100%); opacity: 0; }
 .search-box-wrapper { position: relative; width: 100%; }
@@ -92,11 +62,10 @@ h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.
 .activity-text { font-size: 0.95em; color: #ccc; }
 .activity-text strong { color: white; font-weight: 600; cursor: pointer; }
 
-/* =========================================
-   PERFIL
-   ========================================= */
+/* PROFILE */
 .profile-header-container { background: transparent; padding: 20px 15px 5px 15px; border-bottom: 1px solid #262626; text-align: center; display: flex; flex-direction: column; align-items: center; position: relative; }
 .profile-menu-btn { position: absolute; top: 20px; right: 15px; background: none; border: none; color: #fff; font-size: 1.2rem; cursor: pointer; z-index: 100; padding: 5px; }
+.profile-hamburger-btn { position: absolute; top: 20px; right: 15px; background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; z-index: 100; padding: 5px; }
 .profile-top-section { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; width: 100%; }
 .profile-avatar-big { width: 90px; height: 90px; border-radius: 50%; border: 2px solid #1a1a1a; object-fit: cover; margin-bottom: 10px; }
 .username-large { color: #fff; font-size: 1.3rem; font-weight: 700; margin-bottom: 2px; cursor: pointer; }
@@ -111,16 +80,14 @@ h1 { font-family: 'Luckiest Guy', cursive; color: #fff; margin: 0; font-size: 1.
 .btn-profile-primary { flex: 1; background-color: #0095f6; color: white; font-weight: 600; border-radius: 8px; padding: 8px 0; border: none; cursor:pointer; }
 .btn-profile-secondary { flex: 1; background-color: #363636; color: white; font-weight: 600; border-radius: 8px; padding: 8px 0; border: none; cursor:pointer; }
 
-/* =========================================
-   MODALES
-   ========================================= */
+/* MODALS */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 5000; }
 .modal-content, .info-content { background: #1c1c1c; width: 90%; max-width: 420px; margin: 0 auto; padding: 25px; border-radius: 24px; border: 1px solid #333; position: relative; top: 50%; transform: translateY(-50%); box-shadow: 0 15px 50px rgba(0,0,0,0.9); color: #fff; text-align: center; }
 .small-modal { max-width: 320px; padding: 30px 20px; }
 .modal-content h2, .modal-content h3 { font-size: 1.4rem; margin-bottom: 20px; font-weight: 700; color: #fff; }
 .close-modal { position: absolute; top: 20px; right: 20px; font-size: 24px; color: #777; cursor: pointer; background: #2a2a2a; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
 .close-modal:hover { background: #444; color: #fff; }
-input, textarea { width: 100%; padding: 15px; margin: 8px 0; background: #262626; border: 1px solid #3a3a3a; border-radius: 14px; color: white; font-family: inherit; font-size: 0.95em; outline: none; transition: all 0.2s; appearance: none; }
+input, textarea, select { width: 100%; padding: 15px; margin: 8px 0; background: #262626; border: 1px solid #3a3a3a; border-radius: 14px; color: white; font-family: inherit; font-size: 0.95em; outline: none; transition: all 0.2s; appearance: none; }
 input:focus, textarea:focus { border-color: #0095f6; background: #2d2d2d; }
 textarea { resize: none; height: 100px; font-family: sans-serif; }
 .upload-btn-gray { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; background-color: #262626; border: 2px dashed #444; border-radius: 14px; color: #aaa; cursor: pointer; margin: 10px 0; font-weight: 500; transition: all 0.2s; }
@@ -148,13 +115,8 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .info-text span { font-size: 1em; color: #fff; font-weight: 500; }
 .info-text label { font-size: 0.85em; color: #888; margin-top: 3px; }
 
-/* =========================================
-   PÁGINAS COMPLETAS (FULL SCREEN)
-   ========================================= */
-.full-screen-page {
-    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background-color: #000; z-index: 9000; flex-direction: column; overflow: hidden;
-}
+/* FULL SCREEN PAGES */
+.full-screen-page { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; z-index: 9000; flex-direction: column; overflow: hidden; }
 .page-header-top { display: flex; align-items: center; justify-content: space-between; height: 50px; padding: 0 15px; border-bottom: none; }
 .back-btn-page { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer; padding: 5px; }
 .page-header-top h3 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #fff; }
@@ -164,50 +126,51 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .page-list-container { flex: 1; overflow-y: auto; padding-bottom: 20px; }
 #userListSearch:focus { background: transparent !important; }
 
-/* =========================================
-   LISTAS Y BOTONES
-   ========================================= */
+/* LISTS & BUTTONS */
 .user-list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; width: 100%; }
 .user-list-info { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer; overflow: hidden; }
 .user-list-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid #262626; flex-shrink: 0; }
 .user-list-texts { display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
 .user-list-name { font-weight: 600; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-list-handle { color: #a8a8a8; font-size: 13px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-.btn-small-follow {
-    width: 110px; height: 36px; flex-shrink: 0; 
-    border-radius: 8px; /* Rectangulares redondeados */
-    font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; margin-left: 10px; padding: 0; transition: transform 0.1s, background-color 0.2s;
-}
+.btn-small-follow { width: 110px; height: 36px; flex-shrink: 0; border-radius: 8px; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 10px; padding: 0; transition: transform 0.1s, background-color 0.2s; }
 .btn-state-follow { background-color: #4A6BFF; color: white; border: none; }
 .btn-state-following { background-color: #262626; color: #e1e1e1; border: 1px solid #444; }
 .btn-small-follow:active { transform: scale(0.95); opacity: 0.9; }
+.btn-unblock { background-color: transparent; border: 1px solid #555; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; }
+.btn-unblock:active { background-color: #333; }
 
-/* =========================================
-   DROPDOWNS PERSONALIZADOS (NUEVO)
-   ========================================= */
+/* DROPDOWNS */
 .custom-dropdown-container { position: relative; width: 100%; margin-top: 15px; margin-bottom: 15px; }
-.dropdown-trigger {
-    width: 100%; padding: 15px; background: #1e1f22; color: #fff;
-    border: 1px solid #333; border-radius: 12px; font-size: 1rem;
-    cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;
-}
+.dropdown-trigger { width: 100%; padding: 15px; background: #1e1f22; color: #fff; border: 1px solid #333; border-radius: 12px; font-size: 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
 .dropdown-trigger:active { background: #262626; border-color: #0095f6; }
-.dropdown-options {
-    display: none; position: absolute; top: 105%; left: 0; width: 100%;
-    background: #262626; border: 1px solid #444; border-radius: 12px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 1000; overflow: hidden; max-height: 250px; overflow-y: auto;
-}
+.dropdown-options { display: none; position: absolute; top: 105%; left: 0; width: 100%; background: #262626; border: 1px solid #444; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 1000; overflow: hidden; max-height: 250px; overflow-y: auto; }
 .dropdown-options.show { display: block; animation: fadeIn 0.2s ease; }
 .dropdown-option { padding: 15px; color: #ccc; cursor: pointer; border-bottom: 1px solid #333; transition: background 0.2s; text-align: left; }
 .dropdown-option:last-child { border-bottom: none; }
 .dropdown-option:hover { background: #333; color: #fff; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* =========================================
-   OTROS
-   ========================================= */
+/* REPORT FLOW STYLES */
+.check-circle-icon { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; font-size: 24px; color: #fff; }
+.check-circle-success { border-color: transparent; background-color: transparent; }
+.check-circle-success i { color: #00e676; font-size: 40px; }
+.report-option-list { display: flex; flex-direction: column; width: 100%; text-align: left; margin-top: 20px; }
+.report-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #333; cursor: pointer; color: #fff; font-size: 1rem; }
+.report-list-item:last-child { border-bottom: none; }
+.report-list-item i { font-size: 0.9em; color: #777; }
+.text-danger { color: #ff4d4d !important; font-weight: 600; }
+.icon-danger { color: #ff4d4d !important; font-size: 1.2rem; margin-right: 10px; }
+.btn-block-blue { width: 100%; padding: 15px; background-color: #4A6BFF; color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; margin-bottom: 10px; cursor: pointer; }
+.btn-text-blue { background: none; border: none; color: #4A6BFF; font-weight: 600; font-size: 0.95rem; cursor: pointer; padding: 10px; }
+.bottom-link-blue { display: block; width: 100%; text-align: center; color: #0095f6; font-weight: 600; padding: 15px; border-top: 1px solid #333; background: none; cursor: pointer; margin-top: 20px; }
+.modal-actions { display: flex; gap: 15px; margin-top: 25px; }
+.btn-modal { flex: 1; padding: 12px; border-radius: 50px; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.1s, opacity 0.2s; }
+.btn-modal-cancel { background-color: transparent; border: 1px solid #333; color: #ccc; }
+.btn-modal-submit { background-color: #4A6BFF; color: white; box-shadow: 0 4px 15px rgba(74, 107, 255, 0.3); }
+.btn-modal:active { transform: scale(0.97); opacity: 0.9; }
+
+/* OTROS */
 .close-list-btn { position: absolute; right: 15px; top: 12px; font-size: 1.5em; cursor: pointer; color: #fff; z-index: 10; }
 .post-options-dropdown { display: none; position: absolute; top: 25px; right: 0; background: #262626; border-radius: 12px; width: 180px; box-shadow: 0 5px 20px rgba(0,0,0,0.8); z-index: 100; overflow: hidden; flex-direction: column; }
 .post-options-dropdown.show { display: flex; }
@@ -227,68 +190,3 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
 .mini-action-menu div { padding: 10px; font-size: 0.9em; color: #fff; cursor: pointer; }
 .mini-action-menu div:hover { background: #333; }
 .status-pill { position: absolute; top: -8px; left: -5px; background: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.7em; color: #ccc; }
-/* =========================================
-   ESTILOS NUEVOS (FLUJO INSTAGRAM)
-   ========================================= */
-
-/* Círculo con Checkmark (Verde o Transparente) */
-.check-circle-icon {
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    border: 2px solid #fff; /* Por defecto borde blanco */
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 20px auto;
-    font-size: 24px; color: #fff;
-}
-.check-circle-success {
-    border-color: transparent;
-    background-color: transparent; /* O verde si prefieres: #00e676 */
-}
-.check-circle-success i { color: #00e676; font-size: 40px; } /* Check verde grande */
-
-/* Lista de opciones en Modal Reporte */
-.report-option-list {
-    display: flex; flex-direction: column;
-    width: 100%; text-align: left;
-    margin-top: 20px;
-}
-.report-list-item {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 15px 0;
-    border-bottom: 1px solid #333;
-    cursor: pointer;
-    color: #fff; font-size: 1rem;
-}
-.report-list-item:last-child { border-bottom: none; }
-.report-list-item i { font-size: 0.9em; color: #777; }
-
-/* Texto Rojo (Para Bloquear) */
-.text-danger { color: #ff4d4d !important; font-weight: 600; }
-
-/* Icono Bloquear en la lista */
-.icon-danger { color: #ff4d4d !important; font-size: 1.2rem; margin-right: 10px; }
-
-/* Botón grande azul (Bloquear) */
-.btn-block-blue {
-    width: 100%; padding: 15px;
-    background-color: #4A6BFF; color: white;
-    border: none; border-radius: 12px;
-    font-weight: 700; font-size: 1rem;
-    margin-bottom: 10px; cursor: pointer;
-}
-
-/* Botón de texto (Bloquear y Denunciar) */
-.btn-text-blue {
-    background: none; border: none;
-    color: #4A6BFF; font-weight: 600; font-size: 0.95rem;
-    cursor: pointer; padding: 10px;
-}
-
-/* Link inferior (Mostrar perfil) */
-.bottom-link-blue {
-    display: block; width: 100%; text-align: center;
-    color: #0095f6; font-weight: 600; padding: 15px;
-    border-top: 1px solid #333;
-    background: none; cursor: pointer;
-    margin-top: 20px;
-}

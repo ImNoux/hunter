@@ -74,12 +74,10 @@
                 
                 <div class="custom-dropdown-container">
                     <input type="hidden" id="categorySelect" value="Creator">
-                    
                     <div class="dropdown-trigger" onclick="toggleCustomDropdown('catOptions')">
                         <span id="catDisplay">Creator</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
-
                     <div id="catOptions" class="dropdown-options">
                         <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Creator', 'catOptions')">Creator</div>
                         <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Elite', 'catOptions')">Elite</div>
@@ -133,9 +131,8 @@
             <button onclick="registerSystem()">REGISTRARSE</button>
             <p class="switch-auth" onclick="openModal('loginModal')">¿Ya tienes cuenta? Entra aquí</p>
         </div>
-    </div>
-
-    <div id="commentsModal" class="modal-overlay">
+  </div>
+  <div id="commentsModal" class="modal-overlay">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('commentsModal')">&times;</span>
             <h3>Comentarios</h3>
@@ -227,11 +224,64 @@
         </div>
     </div>
 
+    <div id="profileSettingsModal" class="modal-overlay" style="z-index: 6000;">
+        <div class="bottom-sheet-content">
+            <div class="bottom-sheet-handle"></div>
+            <div class="sheet-item" onclick="openBlockedPage()">
+                <i class="fas fa-ban" style="margin-right:10px; width:20px; text-align:center;"></i> 
+                Cuentas bloqueadas
+            </div>
+            <div class="sheet-item" onclick="openMyInfoPage()">
+                <i class="fas fa-info-circle" style="margin-right:10px; width:20px; text-align:center;"></i> 
+                Información de la cuenta
+            </div>
+            <div class="sheet-divider"></div>
+            <div class="sheet-item" onclick="closeModal('profileSettingsModal')">Cancelar</div>
+        </div>
+    </div>
+
+    <div id="blockedPage" class="full-screen-page">
+        <div class="page-header-top">
+            <button onclick="document.getElementById('blockedPage').style.display='none'" class="back-btn-page"><i class="fas fa-arrow-left"></i></button>
+            <h3>Cuentas bloqueadas</h3>
+            <div style="width: 30px;"></div>
+        </div>
+        <div id="blockedListContainer" class="page-list-container" style="padding:10px;"></div>
+    </div>
+
+    <div id="myInfoPage" class="full-screen-page" style="background:#000;">
+        <div class="page-header-top">
+            <button onclick="document.getElementById('myInfoPage').style.display='none'" class="back-btn-page"><i class="fas fa-arrow-left"></i></button>
+            <h3>Información de la cuenta</h3>
+            <div style="width: 30px;"></div>
+        </div>
+        <div style="padding: 20px; text-align: center;">
+            <img id="myInfoAvatar" src="" style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #333; margin-bottom: 15px;">
+            <h2 id="myInfoName" style="margin: 0 0 20px 0; font-size: 1.3rem;"></h2>
+            <p style="color: #888; font-size: 0.95em; margin-bottom: 30px; line-height: 1.5; padding: 0 10px;">
+                Esta es la información asociada a tu cuenta en Comunidad ARC.
+            </p>
+            <div class="info-row" style="background: #111; padding: 20px; border-radius: 12px; margin-bottom: 10px; border:none;">
+                <i class="far fa-calendar-alt" style="color: #666;"></i>
+                <div class="info-text">
+                    <span style="font-size: 0.9em; color: #888;">Fecha de unión</span>
+                    <label id="myInfoDate" style="color: #fff; font-size: 1.1em; margin-top: 5px; font-weight: 600;"></label>
+                </div>
+            </div>
+            <div class="info-row" style="background: #111; padding: 20px; border-radius: 12px; border:none;">
+                <i class="fas fa-map-marker-alt" style="color: #666;"></i>
+                <div class="info-text">
+                    <span style="font-size: 0.9em; color: #888;">Ubicación de la cuenta</span>
+                    <label id="myInfoLocation" style="color: #fff; font-size: 1.1em; margin-top: 5px; font-weight: 600;">Desconocida</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="reportModal" class="modal-overlay" style="z-index: 7000;">
         <div class="info-content" style="max-width: 400px; padding: 20px; text-align: center;">
             <h3>Reportar</h3>
             <p id="reportTargetName" style="color:#00a2ff; font-weight:bold; margin-bottom:15px;"></p>
-            
             <label style="display:block; margin:10px 0; text-align:left; color:#ccc;">Selecciona el motivo:</label>
             
             <div class="custom-dropdown-container" style="margin-top: 5px; margin-bottom: 20px;">
@@ -257,6 +307,7 @@
             </div>
         </div>
     </div>
+
     <div id="reportSuccessModal" class="modal-overlay" style="z-index: 7500;">
         <div class="modal-content">
             <div class="check-circle-icon">
@@ -266,14 +317,12 @@
             <p style="color:#888; font-size:0.9em; line-height:1.4;">
                 Mientras procesamos su caso, le sugerimos avanzar con estas otras medidas.
             </p>
-            
             <div class="report-option-list">
                 <div class="report-list-item" onclick="openBlockConfirmModal()">
                     <span class="text-danger"><i class="fas fa-ban icon-danger"></i> Bloquear a <span id="reportSuccessUser">Usuario</span></span>
                     <i class="fas fa-chevron-right"></i>
                 </div>
             </div>
-
             <button onclick="closeModal('reportSuccessModal')" class="btn-modal btn-modal-submit" style="margin-top:20px;">Cerrar</button>
         </div>
     </div>
@@ -310,7 +359,7 @@
         </div>
     </div>
 
-    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 6.0: Flujo de Reportes Completo.</p></div></div>
+    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 6.1: Menús y Bloqueo.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
     
     <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">
@@ -345,7 +394,6 @@
             }
         };
         
-        // --- LÓGICA DE DROPDOWNS PERSONALIZADOS ---
         window.toggleCustomDropdown = function(id) {
             document.querySelectorAll('.dropdown-options').forEach(el => {
                 if(el.id !== id) el.classList.remove('show');
@@ -360,10 +408,8 @@
         };
 
         window.onclick = function(event) {
-            const ids = ['reportModal', 'adminModal', 'profileOptionsModal', 'accountInfoModal', 'loginErrorModal', 'reportSuccessModal', 'blockConfirmModal', 'finalThanksModal', 'confirmModal', 'updatesModal', 'contactModal'];
+            const ids = ['reportModal', 'adminModal', 'profileOptionsModal', 'accountInfoModal', 'loginErrorModal', 'reportSuccessModal', 'blockConfirmModal', 'finalThanksModal', 'profileSettingsModal', 'confirmModal', 'updatesModal', 'contactModal'];
             ids.forEach(id => { if (event.target == document.getElementById(id)) document.getElementById(id).style.display = "none"; });
-            
-            // Cerrar dropdowns si se toca fuera
             if (!event.target.closest('.custom-dropdown-container')) {
                 document.querySelectorAll('.dropdown-options.show').forEach(el => el.classList.remove('show'));
             }

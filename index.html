@@ -41,7 +41,6 @@
     </div>
 
     <main class="thread-container" id="mainFeedContainer">
-        
         <div id="skeletonLoader">
             <div class="skeleton-post">
                 <div class="sk-header"><div class="sk-avatar"></div><div class="sk-name"></div></div>
@@ -53,7 +52,6 @@
                 <div class="sk-text"></div><div class="sk-img"></div>
             </div>
         </div>
-
         <div id="realContentContainer"></div>
     </main>
 
@@ -69,17 +67,16 @@
             <i class="fas fa-search"></i>
         </div>
         <div class="nav-item-spacer"></div>
-        
         <div class="nav-item" id="nav-activity" onclick="changeSection('Activity')" style="position: relative;">
             <i class="fas fa-heart"></i>
             <div id="activityBadge" class="nav-badge" style="display: none;"></div>
         </div>
-        
         <div class="nav-item" id="nav-profile" onclick="openMyProfile()">
             <i class="fas fa-user"></i>
         </div>
-  </nav>
-  <div id="newThreadPage" class="full-screen-page">
+    </nav>
+
+    <div id="newThreadPage" class="full-screen-page">
         <div class="page-header-top">
             <button onclick="closeNewThreadPage()" class="back-btn-page"><i class="fas fa-times"></i></button>
             <h3>Nueva Publicación</h3>
@@ -156,8 +153,8 @@
             </div>
         </div>
         <div id="userListContainer" class="page-list-container"></div>
-  </div>
-  <div id="accountInfoPage" class="full-screen-page" style="background:#000;">
+    </div>
+<div id="accountInfoPage" class="full-screen-page" style="background:#000;">
         <div class="page-header-top">
             <button onclick="closeAccountInfoPage()" class="back-btn-page"><i class="fas fa-arrow-left"></i></button>
             <h3>Información</h3><div style="width: 30px;"></div>
@@ -248,7 +245,7 @@
             </div>
         </div>
     </div>
-    
+
     <div id="reportSuccessModal" class="modal-overlay" style="z-index: 7500;">
         <div class="modal-content">
             <div class="check-circle-icon"><i class="fas fa-check"></i></div>
@@ -279,7 +276,26 @@
         </div>
     </div>
 
-    <div id="editProfileModal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick="closeModal('editProfileModal')">&times;</span><h3>Editar Perfil</h3><div style="text-align:center; margin-bottom:15px;"><img id="editAvatarPreview" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover;"><label for="avatarUpload" style="display:block; color:#00a2ff; cursor:pointer; margin-top:10px;">Cambiar foto</label></div><input type="text" id="editNameInput" placeholder="Nombre"><input type="text" id="editHandleInput" placeholder="Usuario"><textarea id="editBioInput" placeholder="Bio"></textarea><button id="saveProfileBtn" onclick="saveProfileChanges()">GUARDAR</button></div></div>
+    <div id="editProfileModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('editProfileModal')">&times;</span>
+            <h3>Editar Perfil</h3>
+            <div style="text-align:center; margin-bottom:15px;">
+                <img id="editAvatarPreview" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid #333;">
+                <label for="avatarUpload" style="display:block; color:#00a2ff; cursor:pointer; margin-top:10px; font-size:0.9em;">Cambiar foto</label>
+            </div>
+            <label style="color:#666; font-size:0.8em; margin-left:5px;">Nombre</label>
+            <input type="text" id="editNameInput" placeholder="Nombre visible">
+            <label style="color:#666; font-size:0.8em; margin-left:5px;">Usuario</label>
+            <input type="text" id="editHandleInput" placeholder="Usuario (@)">
+            <label style="color:#666; font-size:0.8em; margin-left:5px;">Estado / Rol</label>
+            <input type="text" id="editStatusInput" placeholder="Estado (ej. Creator...)">
+            <label style="color:#666; font-size:0.8em; margin-left:5px;">Biografía</label>
+            <textarea id="editBioInput" placeholder="Biografía..."></textarea>
+            <button id="saveProfileBtn" onclick="saveProfileChanges()">GUARDAR CAMBIOS</button>
+        </div>
+    </div>
+
     <div id="commentsModal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick="closeModal('commentsModal')">&times;</span><h3>Comentarios</h3><div id="commentsList" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 15px;"></div><form id="commentForm" style="display:flex; gap:5px;"><input type="text" id="commentInput" placeholder="Escribe..." required style="flex:1;"><button type="submit" style="width:auto; padding:0 15px;"><i class="fas fa-paper-plane"></i></button></form></div></div>
     <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 8.0: Push & Pull.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
@@ -288,7 +304,7 @@
 
     <div id="toastContainer" class="toast-container"></div>
     <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
-    
+
     <script type="module" src="script.js"></script>
 
     <script>

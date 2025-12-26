@@ -127,7 +127,6 @@ window.addEventListener("scroll", function() {
     lastScrollTop = st <= 0 ? 0 : st;
 }, false);
 
-// FIREBASE LISTENER
 function initFirebaseListener() {
     onValue(usersRef, (snap) => { 
         allUsersMap = snap.val() || {}; 
@@ -217,6 +216,7 @@ function renderCurrentView() {
     if (currentSection === 'Busqueda') { renderUserSearch(container); if (searchTerm) renderPostList(container, true); return; }
     renderPostList(container, false);
 }
+
 window.updateImageCounter = function(carousel) {
     const width = carousel.offsetWidth; const currentIndex = Math.round(carousel.scrollLeft / width) + 1;
     const totalImages = carousel.childElementCount; const badge = carousel.parentElement.querySelector('.image-counter-badge'); if(badge) badge.innerText = `${currentIndex}/${totalImages}`;
@@ -235,14 +235,11 @@ function renderThread(key, thread, container) {
     }
     
     let optionsMenuHTML = `<div class="post-header-right"><button class="options-btn" onclick="togglePostOptions('${key}')"><i class="fas fa-ellipsis-h"></i></button><div id="opts-${key}" class="post-options-dropdown"><div class="post-option-item" onclick="copyPostLink('${key}')"><span>Copiar enlace</span> <i class="fas fa-link"></i></div>${(!isMe && myUser) ? `<div class="post-option-item" onclick="reportPost('${key}', '${authorName}')"><span>Denunciar</span> <i class="fas fa-exclamation-circle" style="color:#ff4d4d;"></i></div><div class="post-option-item danger" onclick="blockUser('${authorName}')"><span>Bloquear</span> <i class="fas fa-user-slash"></i></div>` : ''}</div></div>`;
-    
     let mediaHTML = '';
     if(thread.images && thread.images.length > 1) mediaHTML = `<div class="media-wrapper"><div class="media-carousel" onscroll="updateImageCounter(this)">${thread.images.map(img => `<img src="${img}">`).join('')}</div><div class="image-counter-badge">1/${thread.images.length}</div></div>`;
     else if (thread.images && thread.images.length === 1) mediaHTML = `<img src="${thread.images[0]}" style="width:100%; margin-top:10px; border-radius:8px;">`;
     else if(thread.image) mediaHTML = `<img src="${thread.image}" style="width:100%; margin-top:10px; border-radius:8px;">`;
-    
     const userId = getUserId(); const likes = thread.likes || {}; const isLiked = likes[userId] ? 'liked' : ''; const commentCount = thread.comments ? Object.keys(thread.comments).length : 0;
-    
     div.innerHTML = `<div class="post-header">${avatarHTML}<div class="user-info-display"><div class="username-row"><span class="username-styled" onclick="openFullProfile('${authorName}')">${authorData.displayName || authorName}</span><span class="post-time-inline">${timeAgo}</span></div><div class="user-rank-styled" style="display:flex; flex-direction:column;"><span>${thread.category || "Miembro"}</span><span style="color:#00a2ff; font-size:0.9em; margin-top:2px;">@${authorData.customHandle || authorName} ${verifiedIconHTML}</span></div></div>${optionsMenuHTML}</div><h3 style="margin:5px 0;">${thread.title}</h3><p>${makeLinksClickable(thread.description)}</p>${mediaHTML}<div class="thread-actions"><button class="like-button ${isLiked}" onclick="toggleLike('${key}', ${thread.likeCount||0}, this)"><i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${formatCount(thread.likeCount)}</button><button onclick="openComments('${key}')"><i class="far fa-comment"></i> ${formatCount(commentCount)}</button></div>`;
     container.appendChild(div);
 }
@@ -251,6 +248,7 @@ window.togglePostOptions = function(key) { document.querySelectorAll('.post-opti
 window.addEventListener('click', function(e) { if (!e.target.closest('.post-header-right')) document.querySelectorAll('.post-options-dropdown.show').forEach(el => el.classList.remove('show')); });
 window.toggleMiniMenu = function(element) { document.querySelectorAll('.mini-action-menu.show').forEach(el => { if(el !== element.querySelector('.mini-action-menu')) el.classList.remove('show'); }); const menu = element.querySelector('.mini-action-menu'); if(menu) menu.classList.toggle('show'); }
 document.addEventListener('click', function(e) { if(!e.target.closest('.avatar-wrapper')) document.querySelectorAll('.mini-action-menu.show').forEach(el => el.classList.remove('show')); });
+
 function renderFullProfile(container) {
     const target = viewingUserProfile || localStorage.getItem('savedRobloxUser'); if (!target) return showToast("Inicia sesión", "error");
     const ud = allUsersMap[target] || {}; const myUser = localStorage.getItem('savedRobloxUser'); const isMe = target === myUser;
@@ -263,10 +261,7 @@ function renderFullProfile(container) {
     let actionButtons = '';
     if (isMe) actionButtons = `<button onclick="openEditProfileModal()" class="btn-profile-secondary">Editar perfil</button><button onclick="copyProfileUrl('${target}')" class="btn-profile-secondary">Compartir perfil</button>`;
     else { if (amIAdmin && isBanned) actionButtons = `<button onclick="unbanUser('${target}')" style="background:#00e676; width:100%; font-weight:bold; color:black; border-radius:8px; padding:8px;">DESBANEAR USUARIO</button>`; else if (!isBanned) { if (isBlockedByMe) actionButtons = `<button onclick="unblockUser('${target}')" class="btn-profile-secondary" style="width:100%;">Desbloquear</button>`; else actionButtons = `<button onclick="toggleFollow('${target}')" class="${btnClass}">${followBtnText}</button>${amIAdmin ? `<button onclick="banUser('${target}')" style="background:#500; width:40px; color:white; border-radius:8px; border:none;"><i class="fas fa-ban"></i></button>` : ''}`; } }
-    
-    // MENÚ SUPERIOR (3 LÍNEAS si soy yo, 3 PUNTOS si es otro)
     let topMenuHTML = ''; if (isMe) topMenuHTML = `<button class="profile-hamburger-btn" onclick="openProfileSettings()"><i class="fas fa-bars"></i></button>`; else topMenuHTML = `<button class="profile-menu-btn" onclick="openProfileOptions('${target}')"><i class="fas fa-ellipsis-v"></i></button>`;
-    
     const statsHTML = !isBanned && !isBlockedByMe ? `<div class="profile-stats-bar"><div class="p-stat" onclick="openListModal('following', '${target}')"><span>${formatCount(ud.followingCount)}</span><label>Siguiendo</label></div><div class="p-stat" onclick="openListModal('followers', '${target}')"><span>${formatCount(ud.followersCount)}</span><label>Seguidores</label></div></div>` : '';
     const header = document.createElement('div'); header.className = 'profile-header-container';
     header.innerHTML = `${topMenuHTML}<div class="profile-top-section"><div class="avatar-wrapper" style="cursor:default; position:relative;">${userStatus}<img src="${avatarToShow}" class="profile-avatar-big"></div><div class="username-large">${displayNameToShow}</div><div class="handle-large" onclick="copyToClipboard('@${handleToShow}')">@${handleToShow} ${verifiedIconHTML}</div></div><div class="profile-bio-section">${makeLinksClickable(bioToShow)}</div>${statsHTML}<div class="profile-action-buttons">${actionButtons}</div>`;
@@ -294,70 +289,297 @@ function renderUserSearch(container) {
 }
 
 function renderActivity(container) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) { container.innerHTML = '<p style="text-align:center; padding:30px;">Inicia sesión.</p>'; return; } container.innerHTML = '<h3 style="padding:15px; border-bottom:1px solid #333;">Actividad</h3>'; const myData = allUsersMap[myUser]; if (myData?.followers) Object.keys(myData.followers).forEach(f => { const fd = allUsersMap[f] || {}; const div = document.createElement('div'); div.className = 'activity-item'; div.innerHTML = `<img src="${fd.avatar || DEFAULT_AVATAR}" class="activity-avatar"> <div class="activity-text"><strong>${f}</strong> te siguió.</div>`; container.appendChild(div); }); else container.innerHTML += '<p style="text-align:center; padding:40px; color:#555;">Sin actividad.</p>'; }
+// ======================================================
+// PARTE 4.1: LISTAS DE USUARIOS Y PUBLICACIONES
+// ======================================================
+
 // --- SISTEMA DE LISTAS (PÁGINA COMPLETA) ---
-let currentListUser = ''; let currentActiveTab = '';
-window.openListModal = function(initialTab, targetUser) { currentListUser = targetUser; const page = document.getElementById('userListPage'); page.style.display = 'flex'; document.getElementById('listPageTitle').innerText = targetUser; switchListTab(initialTab); };
-window.closeUserListPage = function() { document.getElementById('userListPage').style.display = 'none'; };
-window.switchListTab = function(tabName) {
-    currentActiveTab = tabName; const myUser = localStorage.getItem('savedRobloxUser'); const targetData = allUsersMap[currentListUser] || {};
-    document.getElementById('tab-followers').classList.remove('active'); document.getElementById('tab-following').classList.remove('active'); document.getElementById(`tab-${tabName}`).classList.add('active');
-    document.getElementById('count-followers').innerText = formatCount(targetData.followersCount); document.getElementById('count-following').innerText = formatCount(targetData.followingCount);
-    const container = document.getElementById('userListContainer'); container.innerHTML = ''; 
-    if (tabName === 'followers' && targetData.privateFollowers === true && currentListUser !== myUser) { container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">La lista de seguidores es privada.</p>'; return; }
-    const listObj = tabName === 'followers' ? targetData.followers : targetData.following; const listArray = listObj ? Object.keys(listObj) : [];
-    window.currentRenderedList = listArray; document.getElementById('userListSearch').value = ""; renderUserListInModal(listArray);
+let currentListUser = ''; 
+let currentActiveTab = '';
+
+window.openListModal = function(initialTab, targetUser) { 
+    currentListUser = targetUser; 
+    const page = document.getElementById('userListPage'); 
+    page.style.display = 'flex'; 
+    document.getElementById('listPageTitle').innerText = targetUser; 
+    switchListTab(initialTab); 
 };
+
+window.closeUserListPage = function() { 
+    document.getElementById('userListPage').style.display = 'none'; 
+};
+
+window.switchListTab = function(tabName) {
+    currentActiveTab = tabName; 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    const targetData = allUsersMap[currentListUser] || {};
+    
+    document.getElementById('tab-followers').classList.remove('active'); 
+    document.getElementById('tab-following').classList.remove('active'); 
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    
+    document.getElementById('count-followers').innerText = formatCount(targetData.followersCount); 
+    document.getElementById('count-following').innerText = formatCount(targetData.followingCount);
+    
+    const container = document.getElementById('userListContainer'); 
+    container.innerHTML = ''; 
+    
+    if (tabName === 'followers' && targetData.privateFollowers === true && currentListUser !== myUser) { 
+        container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">La lista de seguidores es privada.</p>'; 
+        return; 
+    }
+    
+    const listObj = tabName === 'followers' ? targetData.followers : targetData.following; 
+    const listArray = listObj ? Object.keys(listObj) : [];
+    
+    window.currentRenderedList = listArray; 
+    document.getElementById('userListSearch').value = ""; 
+    renderUserListInModal(listArray);
+};
+
 function renderUserListInModal(userArray) {
-    const container = document.getElementById('userListContainer'); container.innerHTML = '';
-    if (userArray.length === 0) { container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">Lista vacía.</p>'; return; }
+    const container = document.getElementById('userListContainer'); 
+    container.innerHTML = '';
+    
+    if (userArray.length === 0) { 
+        container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">Lista vacía.</p>'; 
+        return; 
+    }
+    
     userArray.forEach(username => {
-        const uData = allUsersMap[username] || {}; const isVerified = verifiedUsersList.includes(username.toLowerCase()); const verifIcon = isVerified ? '<i class="fas fa-check-circle verified-icon"></i>' : '';
-        const iAmFollowing = myFollowingList.includes(username); const isMe = username === localStorage.getItem('savedRobloxUser');
-        let btnHTML = ''; if (!isMe) { if (iAmFollowing) btnHTML = `<button class="btn-small-follow btn-state-following" onclick="toggleFollowFromList('${username}')">Siguiendo</button>`; else btnHTML = `<button class="btn-small-follow btn-state-follow" onclick="toggleFollowFromList('${username}')">Seguir</button>`; }
-        const div = document.createElement('div'); div.className = 'user-list-item';
-        div.innerHTML = `<div class="user-list-info" onclick="closeUserListPage(); openFullProfile('${username}')"><img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar"><div class="user-list-texts"><span class="user-list-name">${uData.customHandle || username} ${verifIcon}</span><span class="user-list-handle">${uData.displayName || username}</span></div></div>${btnHTML}`;
+        const uData = allUsersMap[username] || {}; 
+        const isVerified = verifiedUsersList.includes(username.toLowerCase()); 
+        const verifIcon = isVerified ? '<i class="fas fa-check-circle verified-icon"></i>' : '';
+        const iAmFollowing = myFollowingList.includes(username); 
+        const isMe = username === localStorage.getItem('savedRobloxUser');
+        
+        let btnHTML = ''; 
+        if (!isMe) { 
+            if (iAmFollowing) btnHTML = `<button class="btn-small-follow btn-state-following" onclick="toggleFollowFromList('${username}')">Siguiendo</button>`; 
+            else btnHTML = `<button class="btn-small-follow btn-state-follow" onclick="toggleFollowFromList('${username}')">Seguir</button>`; 
+        }
+        
+        const div = document.createElement('div'); 
+        div.className = 'user-list-item';
+        div.innerHTML = `
+            <div class="user-list-info" onclick="closeUserListPage(); openFullProfile('${username}')">
+                <img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar">
+                <div class="user-list-texts">
+                    <span class="user-list-name">${uData.customHandle || username} ${verifIcon}</span>
+                    <span class="user-list-handle">${uData.displayName || username}</span>
+                </div>
+            </div>
+            ${btnHTML}
+        `;
         container.appendChild(div);
     });
 }
-let touchStartX = 0; let touchEndX = 0; const listPage = document.getElementById('userListPage'); if(listPage) { listPage.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }); listPage.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 50 && currentActiveTab === 'following') switchListTab('followers'); if (touchEndX > touchStartX + 50 && currentActiveTab === 'followers') switchListTab('following'); }); }
-window.toggleFollowFromList = function(target) { window.toggleFollow(target); setTimeout(() => { const term = document.getElementById('userListSearch').value.toLowerCase(); const filtered = window.currentRenderedList.filter(u => u.toLowerCase().includes(term)); renderUserListInModal(filtered); }, 200); };
-document.getElementById('userListSearch').oninput = function(e) { const term = e.target.value.toLowerCase(); const filtered = window.currentRenderedList.filter(u => { const ud = allUsersMap[u] || {}; const dName = ud.displayName || ""; return u.toLowerCase().includes(term) || dName.toLowerCase().includes(term); }); renderUserListInModal(filtered); };
 
-window.openNewThreadPage = function() { const user = localStorage.getItem('savedRobloxUser'); if(!user) return showToast("Inicia sesión", "error"); document.getElementById('newThreadPage').style.display = 'flex'; };
-window.closeNewThreadPage = function() { document.getElementById('newThreadPage').style.display = 'none'; };
-window.submitNewThread = async function() {
-    const user = localStorage.getItem('savedRobloxUser'); if(!user) return showToast("Inicia sesión", "error");
-    const btn = document.getElementById('submitBtnHeader'); btn.disabled = true; btn.innerText = "Subiendo...";
-    let imgs = []; const files = document.getElementById('imageFile').files;
-    for (let i = 0; i < files.length; i++) { const fd = new FormData(); fd.append('file', files[i]); fd.append('upload_preset', 'comunidad_arc'); try { const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: fd }); const data = await res.json(); imgs.push(data.secure_url); } catch(err) {} }
-    const post = { title: document.getElementById('title').value, description: document.getElementById('description').value, category: document.getElementById('categorySelect').value, username: user, images: imgs, image: imgs.length > 0 ? imgs[0] : "", timestamp: Date.now(), likeCount: 0 };
-    await push(threadsRef, post); document.getElementById('newThreadForm').reset(); document.getElementById('fileName').textContent = ""; closeNewThreadPage(); showToast("Publicado", "success"); btn.disabled = false; btn.innerText = "Publicar"; changeSection('Home');
+// SWIPE EN LISTAS
+let touchStartX = 0; 
+let touchEndX = 0; 
+const listPage = document.getElementById('userListPage'); 
+if(listPage) { 
+    listPage.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }); 
+    listPage.addEventListener('touchend', e => { 
+        touchEndX = e.changedTouches[0].screenX; 
+        if (touchEndX < touchStartX - 50 && currentActiveTab === 'following') switchListTab('followers'); 
+        if (touchEndX > touchStartX + 50 && currentActiveTab === 'followers') switchListTab('following'); 
+    }); 
+}
+
+window.toggleFollowFromList = function(target) { 
+    window.toggleFollow(target); 
+    setTimeout(() => { 
+        const term = document.getElementById('userListSearch').value.toLowerCase(); 
+        const filtered = window.currentRenderedList.filter(u => u.toLowerCase().includes(term)); 
+        renderUserListInModal(filtered); 
+    }, 200); 
 };
-// --- NUEVAS FUNCIONES DE AJUSTES (3 LÍNEAS - MI PERFIL) ---
-window.openProfileSettings = function() { document.getElementById('profileSettingsModal').style.display = 'block'; };
+
+document.getElementById('userListSearch').oninput = function(e) { 
+    const term = e.target.value.toLowerCase(); 
+    const filtered = window.currentRenderedList.filter(u => { 
+        const ud = allUsersMap[u] || {}; 
+        const dName = ud.displayName || ""; 
+        return u.toLowerCase().includes(term) || dName.toLowerCase().includes(term); 
+    }); 
+    renderUserListInModal(filtered); 
+};
+
+// --- NUEVA PUBLICACIÓN ---
+window.openNewThreadPage = function() { 
+    const user = localStorage.getItem('savedRobloxUser'); 
+    if(!user) return showToast("Inicia sesión", "error"); 
+    document.getElementById('newThreadPage').style.display = 'flex'; 
+};
+
+window.closeNewThreadPage = function() { 
+    document.getElementById('newThreadPage').style.display = 'none'; 
+};
+
+window.submitNewThread = async function() {
+    const user = localStorage.getItem('savedRobloxUser'); 
+    if(!user) return showToast("Inicia sesión", "error");
+    
+    const btn = document.getElementById('submitBtnHeader'); 
+    btn.disabled = true; 
+    btn.innerText = "Subiendo...";
+    
+    let imgs = []; 
+    const files = document.getElementById('imageFile').files;
+    
+    for (let i = 0; i < files.length; i++) { 
+        const fd = new FormData(); 
+        fd.append('file', files[i]); 
+        fd.append('upload_preset', 'comunidad_arc'); 
+        try { 
+            const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: fd }); 
+            const data = await res.json(); 
+            imgs.push(data.secure_url); 
+        } catch(err) {} 
+    }
+    
+    const post = { 
+        title: document.getElementById('title').value, 
+        description: document.getElementById('description').value, 
+        category: document.getElementById('categorySelect').value, 
+        username: user, 
+        images: imgs, 
+        image: imgs.length > 0 ? imgs[0] : "", 
+        timestamp: Date.now(), 
+        likeCount: 0 
+    };
+    
+    await push(threadsRef, post); 
+    document.getElementById('newThreadForm').reset(); 
+    document.getElementById('fileName').textContent = ""; 
+    closeNewThreadPage(); 
+    showToast("Publicado", "success"); 
+    btn.disabled = false; 
+    btn.innerText = "Publicar"; 
+    changeSection('Home');
+};
+// ======================================================
+// PARTE 4.2: AJUSTES, REPORTES, BLOQUEOS E INTERACCIONES
+// ======================================================
+
+// --- MENÚ DE AJUSTES (3 LÍNEAS - MI PERFIL) ---
+window.openProfileSettings = function() { 
+    document.getElementById('profileSettingsModal').style.display = 'block'; 
+};
 
 // PÁGINA DE BLOQUEADOS
-window.openBlockedPage = function() { closeModal('profileSettingsModal'); document.getElementById('blockedPage').style.display = 'flex'; renderBlockedList(); };
-function renderBlockedList() { const container = document.getElementById('blockedListContainer'); container.innerHTML = ''; if (myBlockedList.length === 0) { container.innerHTML = '<p style="text-align:center; padding:40px; color:#777;">No has bloqueado a nadie.</p>'; return; } myBlockedList.forEach(user => { const uData = allUsersMap[user] || {}; const div = document.createElement('div'); div.className = 'user-list-item'; div.innerHTML = `<div class="user-list-info"><img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar"><div class="user-list-texts"><span class="user-list-name">${uData.customHandle || user}</span><span class="user-list-handle" style="color:#777;">Bloqueado</span></div></div><button class="btn-unblock" onclick="unblockFromList('${user}')">Desbloquear</button>`; container.appendChild(div); }); }
-window.unblockFromList = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { showToast(`Desbloqueaste a ${targetUser}`, "success"); setTimeout(() => renderBlockedList(), 500); }); };
+window.openBlockedPage = function() { 
+    closeModal('profileSettingsModal'); 
+    document.getElementById('blockedPage').style.display = 'flex'; 
+    renderBlockedList(); 
+};
 
-// PÁGINA DE MI INFORMACIÓN
-window.openMyInfoPage = function() { closeModal('profileSettingsModal'); currentProfileTarget = localStorage.getItem('savedRobloxUser'); const uData = allUsersMap[currentProfileTarget] || {}; document.getElementById('myInfoAvatar').src = uData.avatar || DEFAULT_AVATAR; document.getElementById('myInfoName').innerText = uData.displayName || currentProfileTarget; let dateStr = "Desconocida"; if (uData.registeredAt) { const date = new Date(uData.registeredAt); const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; } document.getElementById('myInfoDate').innerText = dateStr; document.getElementById('myInfoLocation').innerText = uData.location || "Ubicación no disponible"; document.getElementById('myInfoPage').style.display = 'flex'; };
+function renderBlockedList() { 
+    const container = document.getElementById('blockedListContainer'); 
+    container.innerHTML = ''; 
+    if (myBlockedList.length === 0) { 
+        container.innerHTML = '<p style="text-align:center; padding:40px; color:#777;">No has bloqueado a nadie.</p>'; 
+        return; 
+    } 
+    myBlockedList.forEach(user => { 
+        const uData = allUsersMap[user] || {}; 
+        const div = document.createElement('div'); 
+        div.className = 'user-list-item'; 
+        div.innerHTML = `<div class="user-list-info"><img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar"><div class="user-list-texts"><span class="user-list-name">${uData.customHandle || user}</span><span class="user-list-handle" style="color:#777;">Bloqueado</span></div></div><button class="btn-unblock" onclick="unblockFromList('${user}')">Desbloquear</button>`; 
+        container.appendChild(div); 
+    }); 
+}
+
+window.unblockFromList = function(targetUser) { 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { 
+        showToast(`Desbloqueaste a ${targetUser}`, "success"); 
+        setTimeout(() => renderBlockedList(), 500); 
+    }); 
+};
+
+// PÁGINA DE MI INFORMACIÓN (CON PERSISTENCIA URL)
+window.openMyInfoPage = function() { 
+    closeModal('profileSettingsModal'); 
+    window.location.hash = 'my_info'; // <--- ESTO GUARDA LA POSICIÓN
+    
+    currentProfileTarget = localStorage.getItem('savedRobloxUser'); 
+    const uData = allUsersMap[currentProfileTarget] || {}; 
+    
+    document.getElementById('myInfoAvatar').src = uData.avatar || DEFAULT_AVATAR; 
+    document.getElementById('myInfoName').innerText = uData.displayName || currentProfileTarget; 
+    
+    let dateStr = "Desconocida"; 
+    if (uData.registeredAt) { 
+        const date = new Date(uData.registeredAt); 
+        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; 
+        dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; 
+    } 
+    document.getElementById('myInfoDate').innerText = dateStr; 
+    document.getElementById('myInfoLocation').innerText = uData.location || "Ubicación no disponible"; 
+    document.getElementById('myInfoPage').style.display = 'flex'; 
+};
+
+window.closeMyInfoPage = function() { 
+    document.getElementById('myInfoPage').style.display = 'none'; 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    window.location.hash = `profile_${myUser}`; 
+};
 
 // --- OPCIONES DE OTROS PERFILES (3 PUNTOS) ---
 let currentProfileTarget = '';
-window.openProfileOptions = function(targetUser) { currentProfileTarget = targetUser; const myUser = localStorage.getItem('savedRobloxUser'); const isMe = (targetUser === myUser); const dangerItems = document.querySelectorAll('#profileOptionsModal .sheet-item.danger'); dangerItems.forEach(el => el.style.display = isMe ? 'none' : 'block'); document.getElementById('profileOptionsModal').style.display = 'block'; };
+window.openProfileOptions = function(targetUser) { 
+    currentProfileTarget = targetUser; 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    const isMe = (targetUser === myUser); 
+    const dangerItems = document.querySelectorAll('#profileOptionsModal .sheet-item.danger'); 
+    dangerItems.forEach(el => el.style.display = isMe ? 'none' : 'block'); 
+    document.getElementById('profileOptionsModal').style.display = 'block'; 
+};
+
 window.confirmBlockUser = function() { closeModal('profileOptionsModal'); blockUser(currentProfileTarget); };
 window.confirmReportUser = function() { closeModal('profileOptionsModal'); reportUser(currentProfileTarget); };
-window.copyProfileUrl = function(target) { const userToCopy = target || currentProfileTarget; const url = `${window.location.origin}${window.location.pathname}#profile_${userToCopy}`; navigator.clipboard.writeText(url).then(() => { showToast("Enlace del perfil copiado", "success"); if(!target) closeModal('profileOptionsModal'); }); };
-window.copyPostLink = function(key) { const link = `${window.location.origin}${window.location.pathname}#post_${key}`; navigator.clipboard.writeText(link).then(() => showToast("Enlace de publicación copiado", "success")); };
 
-window.showAccountInfo = function() {
-    closeModal('profileOptionsModal'); closeModal('profileSettingsModal'); const uData = allUsersMap[currentProfileTarget] || {};
-    document.getElementById('infoAvatar').src = uData.avatar || DEFAULT_AVATAR; document.getElementById('infoUsername').innerText = uData.displayName || currentProfileTarget;
-    let dateStr = "Desconocida"; if (uData.registeredAt) { const date = new Date(uData.registeredAt); const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; }
-    document.getElementById('infoDate').innerText = dateStr; document.getElementById('infoLocation').innerText = uData.location || "Ubicación no disponible"; 
-    document.getElementById('accountInfoPage').style.display = 'flex';
+window.copyProfileUrl = function(target) { 
+    const userToCopy = target || currentProfileTarget; 
+    const url = `${window.location.origin}${window.location.pathname}#profile_${userToCopy}`; 
+    navigator.clipboard.writeText(url).then(() => { 
+        showToast("Enlace del perfil copiado", "success"); 
+        if(!target) closeModal('profileOptionsModal'); 
+    }); 
+};
+
+window.copyPostLink = function(key) { 
+    const link = `${window.location.origin}${window.location.pathname}#post_${key}`; 
+    navigator.clipboard.writeText(link).then(() => showToast("Enlace de publicación copiado", "success")); 
+};
+
+// MOSTRAR INFO DE OTROS (CON PERSISTENCIA URL)
+window.showAccountInfo = function() { 
+    closeModal('profileOptionsModal'); 
+    closeModal('profileSettingsModal'); 
+    window.location.hash = `info_${currentProfileTarget}`; // <--- ESTO GUARDA LA POSICIÓN
+    
+    const uData = allUsersMap[currentProfileTarget] || {}; 
+    document.getElementById('infoAvatar').src = uData.avatar || DEFAULT_AVATAR; 
+    document.getElementById('infoUsername').innerText = uData.displayName || currentProfileTarget; 
+    
+    let dateStr = "Desconocida"; 
+    if (uData.registeredAt) { 
+        const date = new Date(uData.registeredAt); 
+        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; 
+        dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; 
+    } 
+    document.getElementById('infoDate').innerText = dateStr; 
+    document.getElementById('infoLocation').innerText = uData.location || "Ubicación no disponible"; 
+    document.getElementById('accountInfoPage').style.display = 'flex'; 
+};
+
+window.closeAccountInfoPage = function() { 
+    document.getElementById('accountInfoPage').style.display = 'none'; 
+    window.location.hash = `profile_${currentProfileTarget}`; 
 };
 
 // --- EDITAR PERFIL ---
@@ -411,18 +633,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const hash = window.location.hash;
-    if (hash.startsWith('#profile_')) {
+
+    // --- DETECCIÓN DE URL (PERSISTENCIA) ---
+    if (hash === '#my_info') {
+        // CASO 1: Mi Información
+        if (user) {
+            viewingUserProfile = user;
+            currentSection = 'Perfil';
+            setTimeout(() => { openMyInfoPage(); }, 500); 
+        } else {
+            window.changeSection('Home');
+        }
+
+    } else if (hash.startsWith('#info_')) {
+        // CASO 2: Información de otro usuario
+        const targetUser = hash.replace('#info_', '');
+        viewingUserProfile = targetUser;
+        currentProfileTarget = targetUser;
+        currentSection = 'Perfil';
+        setTimeout(() => { showAccountInfo(); }, 500);
+
+    } else if (hash.startsWith('#profile_')) {
+        // CASO 3: Perfil normal
         viewingUserProfile = hash.replace('#profile_', '');
         currentSection = 'Perfil';
+
     } else if (hash.startsWith('#post_')) {
+        // CASO 4: Un post específico
         viewingSinglePostId = hash.replace('#post_', '');
         currentSection = 'Home';
+
     } else {
+        // CASO 5: Inicio normal
         const lastSection = localStorage.getItem('lastSection') || 'Home';
         if (lastSection === 'Perfil') {
             const savedProfile = localStorage.getItem('lastVisitedProfile');
             if (savedProfile) { viewingUserProfile = savedProfile; } 
-            else if (user) { viewingUserProfile = ''; }
+            else if (user) { viewingUserProfile = user; } 
             else { if(typeof window.changeSection === 'function') window.changeSection('Home'); return; }
         }
         currentSection = lastSection;

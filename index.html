@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Comunidad ARC</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    <main class="thread-container">
+    <main class="thread-container" id="mainFeedContainer">
         </main>
 
     <button id="floatingAddBtn" class="floating-add-btn" onclick="openNewThreadPage()">
@@ -52,7 +52,6 @@
             <i class="fas fa-search"></i>
         </div>
         <div class="nav-item-spacer"></div>
-        
         <div class="nav-item" id="nav-activity" onclick="changeSection('Activity')">
             <i class="fas fa-heart"></i>
         </div>
@@ -181,9 +180,8 @@
             </div>
         </div>
         <div id="userListContainer" class="page-list-container"></div>
-    </div>
-
-    <div id="accountInfoPage" class="full-screen-page" style="background:#000;">
+  </div>
+  <div id="accountInfoPage" class="full-screen-page" style="background:#000;">
         <div class="page-header-top">
             <button onclick="closeAccountInfoPage()" class="back-btn-page"><i class="fas fa-arrow-left"></i></button>
             <h3>Información</h3>
@@ -243,7 +241,7 @@
 
     <div id="blockedPage" class="full-screen-page">
         <div class="page-header-top">
-            <button onclick="document.getElementById('blockedPage').style.display='none'" class="back-btn-page"><i class="fas fa-arrow-left"></i></button>
+            <button onclick="document.getElementById('blockedPage').style.display='none'; toggleMainUI(true);" class="back-btn-page"><i class="fas fa-arrow-left"></i></button>
             <h3>Cuentas bloqueadas</h3>
             <div style="width: 30px;"></div>
         </div>
@@ -276,13 +274,13 @@
             <div class="sheet-divider"></div>
             <div class="sheet-item" onclick="closeModal('profileSettingsModal')">Cancelar</div>
         </div>
-  </div>
-  <div id="reportModal" class="modal-overlay" style="z-index: 7000;">
+    </div>
+
+    <div id="reportModal" class="modal-overlay" style="z-index: 7000;">
         <div class="info-content" style="max-width: 400px; padding: 20px; text-align: center;">
             <h3>Reportar</h3>
             <p id="reportTargetName" style="color:#00a2ff; font-weight:bold; margin-bottom:15px;"></p>
             <label style="display:block; margin:10px 0; text-align:left; color:#ccc;">Selecciona el motivo:</label>
-            
             <div class="custom-dropdown-container" style="margin-top: 5px; margin-bottom: 20px;">
                 <input type="hidden" id="reportReasonSelect" value="Spam">
                 <div class="dropdown-trigger" onclick="toggleCustomDropdown('repOptions')">
@@ -299,7 +297,6 @@
                     <div class="dropdown-option" onclick="selectCustomOption('reportReasonSelect', 'repDisplay', 'Otro', 'repOptions')">Otro motivo</div>
                 </div>
             </div>
-
             <div class="modal-actions">
                 <button onclick="document.getElementById('reportModal').style.display='none'" class="btn-modal btn-modal-cancel">Cancelar</button>
                 <button onclick="submitReportAction()" class="btn-modal btn-modal-submit">ENVIAR</button>
@@ -309,13 +306,9 @@
 
     <div id="reportSuccessModal" class="modal-overlay" style="z-index: 7500;">
         <div class="modal-content">
-            <div class="check-circle-icon">
-                <i class="fas fa-check"></i>
-            </div>
+            <div class="check-circle-icon"><i class="fas fa-check"></i></div>
             <h3>Gracias por denunciar esta cuenta</h3>
-            <p style="color:#888; font-size:0.9em; line-height:1.4;">
-                Mientras procesamos su caso, le sugerimos avanzar con estas otras medidas.
-            </p>
+            <p style="color:#888; font-size:0.9em; line-height:1.4;">Mientras procesamos su caso, le sugerimos avanzar con estas otras medidas.</p>
             <div class="report-option-list">
                 <div class="report-list-item" onclick="openBlockConfirmModal()">
                     <span class="text-danger"><i class="fas fa-ban icon-danger"></i> Bloquear a <span id="reportSuccessUser">Usuario</span></span>
@@ -330,9 +323,7 @@
         <div class="modal-content" style="text-align: center;">
             <img id="blockAvatarPreview" src="" style="width:70px; height:70px; border-radius:50%; margin-bottom:15px;">
             <h3 style="margin:0 0 10px 0;">¿Bloquear a <span id="blockTargetUser">Usuario</span>?</h3>
-            <p style="color:#888; font-size:0.9em; margin-bottom:25px;">
-                Puedes desbloquear al usuario cuando cuando quieras.
-            </p>
+            <p style="color:#888; font-size:0.9em; margin-bottom:25px;">Puedes desbloquear al usuario cuando quieras.</p>
             <div style="display:flex; align-items:start; gap:15px; text-align:left; margin-bottom:30px; color:#ccc;">
                 <i class="far fa-eye-slash" style="font-size:1.5em; margin-top:2px;"></i>
                 <span style="font-size:0.95em;">No podrás ver nuevas publicaciones que haga.</span>
@@ -346,19 +337,15 @@
     <div id="finalThanksModal" class="modal-overlay" style="z-index: 8500;">
         <div class="info-content" style="padding-bottom:0; overflow:hidden;">
             <div style="padding: 40px 20px;">
-                <div class="check-circle-icon check-circle-success">
-                    <i class="fas fa-check-circle"></i>
-                </div>
+                <div class="check-circle-icon check-circle-success"><i class="fas fa-check-circle"></i></div>
                 <h3 style="font-size:1.3rem; margin-bottom:15px;">Gracias por denunciar este perfil</h3>
-                <p style="color:#888; font-size:0.95em; line-height:1.5;">
-                    Tus comentarios son importantes para ayudarnos a lograr que la comunidad de ARC siga siendo un lugar seguro.
-                </p>
+                <p style="color:#888; font-size:0.95em; line-height:1.5;">Tus comentarios son importantes para ayudarnos a lograr que la comunidad de ARC siga siendo un lugar seguro.</p>
             </div>
             <button class="bottom-link-blue" onclick="closeAllReportModals()">Mostrar perfil</button>
         </div>
     </div>
 
-    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 6.2: Información Persistente.</p></div></div>
+    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 7.0: Fix de UI y Navegación.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
     
     <div id="confirmModal" class="modal-overlay" style="z-index: 8000;">
@@ -393,7 +380,6 @@
             }
         };
         
-        // --- LÓGICA DE DROPDOWNS PERSONALIZADOS ---
         window.toggleCustomDropdown = function(id) {
             document.querySelectorAll('.dropdown-options').forEach(el => {
                 if(el.id !== id) el.classList.remove('show');
@@ -410,7 +396,6 @@
         window.onclick = function(event) {
             const ids = ['reportModal', 'adminModal', 'profileOptionsModal', 'accountInfoModal', 'loginErrorModal', 'reportSuccessModal', 'blockConfirmModal', 'finalThanksModal', 'profileSettingsModal', 'confirmModal', 'updatesModal', 'contactModal'];
             ids.forEach(id => { if (event.target == document.getElementById(id)) document.getElementById(id).style.display = "none"; });
-            
             if (!event.target.closest('.custom-dropdown-container')) {
                 document.querySelectorAll('.dropdown-options.show').forEach(el => el.classList.remove('show'));
             }

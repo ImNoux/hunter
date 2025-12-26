@@ -32,6 +32,20 @@ let myBlockedList = [];
 let userBeingReported = ''; 
 let postBeingReported = null;
 let lastScrollTop = 0;
+// --- FUNCIÓN PARA OCULTAR HEADER Y BARRA INFERIOR ---
+window.toggleMainUI = function(show) {
+    const display = show ? '' : 'none';
+    const header = document.getElementById('mainHeader');
+    const nav = document.getElementById('mainBottomNav');
+    const fab = document.getElementById('floatingAddBtn');
+    const search = document.getElementById('searchContainer');
+    
+    if(header) header.style.display = display;
+    if(nav) nav.style.display = display;
+    if(fab) fab.style.display = display;
+    if(search) search.style.display = display;
+};
+
 window.showToast = function(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if(!container) return;
@@ -130,6 +144,50 @@ window.addEventListener("scroll", function() {
 function initFirebaseListener() {
     onValue(usersRef, (snap) => { 
         allUsersMap = snap.val() || {}; 
+        
+        // --- ACTUALIZACIÓN DINÁMICA DE MODALES ABIERTOS ---
+        // Si estoy viendo mi info y llegan los datos, refrescar
+        if (window.location.hash === '#my_info') {
+            const me = localStorage.getItem('savedRobloxUser');
+            if(allUsersMap[me]) {
+                const uData = allUsersMap[me];
+                const display = document.getElementById('myInfoPage').style.display;
+                if(display === 'flex') {
+                    // Refrescar datos en pantalla
+                    document.getElementById('myInfoAvatar').src = uData.avatar || DEFAULT_AVATAR;
+                    document.getElementById('myInfoName').innerText = uData.displayName || me;
+                    let dateStr = "Desconocida";
+                    if (uData.registeredAt) {
+                        const date = new Date(uData.registeredAt);
+                        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                        dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`;
+                    }
+                    document.getElementById('myInfoDate').innerText = dateStr;
+                    document.getElementById('myInfoLocation').innerText = uData.location || "Ubicación no disponible";
+                }
+            }
+        }
+        // Si estoy viendo info de otro
+        if (window.location.hash.startsWith('#info_')) {
+            const target = window.location.hash.replace('#info_', '');
+            if(allUsersMap[target]) {
+                const uData = allUsersMap[target];
+                const display = document.getElementById('accountInfoPage').style.display;
+                if(display === 'flex') {
+                    document.getElementById('infoAvatar').src = uData.avatar || DEFAULT_AVATAR;
+                    document.getElementById('infoUsername').innerText = uData.displayName || target;
+                    let dateStr = "Desconocida";
+                    if (uData.registeredAt) {
+                        const date = new Date(uData.registeredAt);
+                        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+                        dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`;
+                    }
+                    document.getElementById('infoDate').innerText = dateStr;
+                    document.getElementById('infoLocation').innerText = uData.location || "Ubicación no disponible";
+                }
+            }
+        }
+
         const myUser = localStorage.getItem('savedRobloxUser');
         if (myUser && allUsersMap[myUser] && allUsersMap[myUser].isBanned === true) {
             showToast("Tu cuenta ha sido suspendida", "error");
@@ -201,6 +259,10 @@ window.changeSection = function(sectionName) {
     if (sectionName !== 'Home') viewingSinglePostId = null;
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     const sc = document.getElementById('searchContainer');
+    
+    // Asegurar que el UI principal se vea al cambiar de sección principal
+    toggleMainUI(true);
+
     if(sectionName === 'Busqueda') { document.getElementById('nav-search').classList.add('active'); if(sc) sc.style.display = 'block'; }
     else { if(sc) sc.style.display = 'none'; const map = { Home: 'nav-home', Activity: 'nav-activity', Perfil: 'nav-profile' }; if(map[sectionName]) document.getElementById(map[sectionName]).classList.add('active'); }
     renderCurrentView(); if(sectionName === 'Home') window.scrollTo(0,0);
@@ -302,11 +364,13 @@ window.openListModal = function(initialTab, targetUser) {
     const page = document.getElementById('userListPage'); 
     page.style.display = 'flex'; 
     document.getElementById('listPageTitle').innerText = targetUser; 
+    toggleMainUI(false); // <--- OCULTAR HEADER
     switchListTab(initialTab); 
 };
 
 window.closeUserListPage = function() { 
     document.getElementById('userListPage').style.display = 'none'; 
+    toggleMainUI(true); // <--- MOSTRAR HEADER
 };
 
 window.switchListTab = function(tabName) {
@@ -411,11 +475,14 @@ document.getElementById('userListSearch').oninput = function(e) {
 window.openNewThreadPage = function() { 
     const user = localStorage.getItem('savedRobloxUser'); 
     if(!user) return showToast("Inicia sesión", "error"); 
+    
+    toggleMainUI(false); // <--- OCULTAR HEADER
     document.getElementById('newThreadPage').style.display = 'flex'; 
 };
 
 window.closeNewThreadPage = function() { 
     document.getElementById('newThreadPage').style.display = 'none'; 
+    toggleMainUI(true); // <--- MOSTRAR HEADER
 };
 
 window.submitNewThread = async function() {
@@ -472,6 +539,7 @@ window.openProfileSettings = function() {
 // PÁGINA DE BLOQUEADOS
 window.openBlockedPage = function() { 
     closeModal('profileSettingsModal'); 
+    toggleMainUI(false); // <--- OCULTAR HEADER
     document.getElementById('blockedPage').style.display = 'flex'; 
     renderBlockedList(); 
 };
@@ -500,9 +568,10 @@ window.unblockFromList = function(targetUser) {
     }); 
 };
 
-// PÁGINA DE MI INFORMACIÓN (CON PERSISTENCIA URL)
+// PÁGINA DE MI INFORMACIÓN (CON PERSISTENCIA URL + OCULTAR UI)
 window.openMyInfoPage = function() { 
     closeModal('profileSettingsModal'); 
+    toggleMainUI(false); // <--- OCULTAR HEADER INMEDIATAMENTE
     window.location.hash = 'my_info'; // <--- ESTO GUARDA LA POSICIÓN
     
     currentProfileTarget = localStorage.getItem('savedRobloxUser'); 
@@ -524,6 +593,7 @@ window.openMyInfoPage = function() {
 
 window.closeMyInfoPage = function() { 
     document.getElementById('myInfoPage').style.display = 'none'; 
+    toggleMainUI(true); // <--- MOSTRAR HEADER AL SALIR
     const myUser = localStorage.getItem('savedRobloxUser'); 
     window.location.hash = `profile_${myUser}`; 
 };
@@ -556,11 +626,12 @@ window.copyPostLink = function(key) {
     navigator.clipboard.writeText(link).then(() => showToast("Enlace de publicación copiado", "success")); 
 };
 
-// MOSTRAR INFO DE OTROS (CON PERSISTENCIA URL)
+// MOSTRAR INFO DE OTROS (CON PERSISTENCIA URL + OCULTAR UI)
 window.showAccountInfo = function() { 
     closeModal('profileOptionsModal'); 
     closeModal('profileSettingsModal'); 
-    window.location.hash = `info_${currentProfileTarget}`; // <--- ESTO GUARDA LA POSICIÓN
+    toggleMainUI(false); // <--- OCULTAR HEADER INMEDIATAMENTE
+    window.location.hash = `info_${currentProfileTarget}`; 
     
     const uData = allUsersMap[currentProfileTarget] || {}; 
     document.getElementById('infoAvatar').src = uData.avatar || DEFAULT_AVATAR; 
@@ -579,6 +650,7 @@ window.showAccountInfo = function() {
 
 window.closeAccountInfoPage = function() { 
     document.getElementById('accountInfoPage').style.display = 'none'; 
+    toggleMainUI(true); // <--- MOSTRAR HEADER AL SALIR
     window.location.hash = `profile_${currentProfileTarget}`; 
 };
 
@@ -634,37 +706,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hash = window.location.hash;
 
-    // --- DETECCIÓN DE URL (PERSISTENCIA) ---
+    // --- LOGICA SIN PARPADEOS: OCULTAR UI INMEDIATAMENTE ---
     if (hash === '#my_info') {
-        // CASO 1: Mi Información
         if (user) {
+            toggleMainUI(false); // Ocultar fondo
             viewingUserProfile = user;
             currentSection = 'Perfil';
-            setTimeout(() => { openMyInfoPage(); }, 500); 
+            document.getElementById('myInfoPage').style.display = 'flex'; // Mostrar modal vacío
+            // Los datos se llenarán solos cuando Firebase responda
         } else {
             window.changeSection('Home');
         }
 
     } else if (hash.startsWith('#info_')) {
-        // CASO 2: Información de otro usuario
         const targetUser = hash.replace('#info_', '');
+        toggleMainUI(false); // Ocultar fondo
         viewingUserProfile = targetUser;
         currentProfileTarget = targetUser;
         currentSection = 'Perfil';
-        setTimeout(() => { showAccountInfo(); }, 500);
+        document.getElementById('accountInfoPage').style.display = 'flex'; // Mostrar modal vacío
 
     } else if (hash.startsWith('#profile_')) {
-        // CASO 3: Perfil normal
         viewingUserProfile = hash.replace('#profile_', '');
         currentSection = 'Perfil';
 
     } else if (hash.startsWith('#post_')) {
-        // CASO 4: Un post específico
         viewingSinglePostId = hash.replace('#post_', '');
         currentSection = 'Home';
 
     } else {
-        // CASO 5: Inicio normal
         const lastSection = localStorage.getItem('lastSection') || 'Home';
         if (lastSection === 'Perfil') {
             const savedProfile = localStorage.getItem('lastVisitedProfile');

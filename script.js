@@ -34,7 +34,7 @@ let userBeingReported = '';
 let postBeingReported = null;
 let lastScrollTop = 0; 
 
-// VARIABLES UI & UX
+// VARIABLES NUEVAS
 let isSkeletonShown = false;
 let pullStartY = 0;
 let isPulling = false;
@@ -122,7 +122,7 @@ function initFirebaseListener() {
     onValue(usersRef, (snap) => { 
         allUsersMap = snap.val() || {}; 
         
-        // Deep Linking (Corrección: Esperar datos)
+        // Deep Linking
         const hash = window.location.hash;
         if (hash === '#my_info') { 
             const me = localStorage.getItem('savedRobloxUser'); 
@@ -156,7 +156,6 @@ function initFirebaseListener() {
         if (data) {
             const rawArray = Object.entries(data);
             if (allThreadsData.length === 0) {
-                // PRIMERA CARGA: MOSTRAR SKELETON Y MEZCLAR
                 toggleSkeleton(true);
                 setTimeout(() => {
                     allThreadsData = shuffleArray(rawArray);
@@ -164,7 +163,6 @@ function initFirebaseListener() {
                     renderCurrentView();
                 }, 800); 
             } else {
-                // ACTUALIZACIÓN: Mantener orden, actualizar datos
                 const newMap = new Map(Object.entries(data));
                 allThreadsData = allThreadsData.map(item => newMap.has(item[0]) ? [item[0], newMap.get(item[0])] : item);
                 if (rawArray.length > allThreadsData.length) {
@@ -178,11 +176,9 @@ function initFirebaseListener() {
             allThreadsData = [];
             renderCurrentView();
         }
-        
         const hash = window.location.hash;
         if (hash.startsWith('#post_')) { viewingSinglePostId = hash.replace('#post_', ''); currentSection = 'Home'; renderCurrentView(); }
     });
-
     onValue(verifiedRef, (snap) => { const data = snap.val(); verifiedUsersList = data ? Object.keys(data).map(n => n.toLowerCase()) : []; renderCurrentView(); });
 }
 
@@ -208,25 +204,47 @@ function toggleSkeleton(show) {
     }
 }
 
-// --- PULL TO REFRESH ---
-window.addEventListener('touchstart', (e) => { if (window.scrollY === 0 && currentSection === 'Home') { pullStartY = e.touches[0].clientY; isPulling = true; } }, { passive: true });
+// --- PULL TO REFRESH (ACTUALIZADO: HOME + PERFIL) ---
+window.addEventListener('touchstart', (e) => {
+    if (window.scrollY === 0 && (currentSection === 'Home' || currentSection === 'Perfil')) {
+        pullStartY = e.touches[0].clientY;
+        isPulling = true;
+    }
+}, { passive: true });
+
 window.addEventListener('touchmove', (e) => {
     if (!isPulling) return;
-    const y = e.touches[0].clientY; const diff = y - pullStartY;
+    const y = e.touches[0].clientY;
+    const diff = y - pullStartY;
+    
     if (diff > 0 && window.scrollY === 0) {
-        if (diff < pullThreshold) if(refreshContainer) refreshContainer.style.height = `${diff / 2.5}px`; 
-    } else { isPulling = false; if(refreshContainer) refreshContainer.style.height = '0px'; }
+        if (diff < pullThreshold) {
+            if(refreshContainer) refreshContainer.style.height = `${diff / 2.5}px`; 
+        }
+    } else {
+        isPulling = false;
+        if(refreshContainer) refreshContainer.style.height = '0px';
+    }
 }, { passive: true });
+
 window.addEventListener('touchend', () => {
-    if (!isPulling) return; isPulling = false;
-    if (refreshContainer && refreshContainer.offsetHeight > 40) performRefresh(); else if(refreshContainer) refreshContainer.style.height = '0px';
+    if (!isPulling) return;
+    isPulling = false;
+    
+    if (refreshContainer && refreshContainer.offsetHeight > 40) {
+        performRefresh();
+    } else {
+        if(refreshContainer) refreshContainer.style.height = '0px';
+    }
 });
 
 function performRefresh() {
     if(refreshContainer) refreshContainer.style.height = '50px'; 
-    if (currentSection === 'Home') toggleSkeleton(true);
+    toggleSkeleton(true);
     setTimeout(() => {
-        if (allThreadsData.length > 0) allThreadsData = shuffleArray(allThreadsData);
+        if (currentSection === 'Home' && allThreadsData.length > 0) {
+            allThreadsData = shuffleArray(allThreadsData);
+        }
         renderCurrentView();
         if(refreshContainer) refreshContainer.style.height = '0px';
         toggleSkeleton(false);
@@ -357,19 +375,17 @@ window.submitNewThread = async function() {
     const post = { title: document.getElementById('title').value, description: document.getElementById('description').value, category: document.getElementById('categorySelect').value, username: user, images: imgs, image: imgs.length > 0 ? imgs[0] : "", timestamp: Date.now(), likeCount: 0 };
     await push(threadsRef, post); document.getElementById('newThreadForm').reset(); document.getElementById('fileName').textContent = ""; closeNewThreadPage(); showToast("Publicado", "success"); btn.disabled = false; btn.innerText = "Publicar"; changeSection('Home');
 };
-// --- MENÚ DE AJUSTES (3 LÍNEAS) ---
-window.openProfileSettings = function() { document.getElementById('profileSettingsModal').style.display = 'block'; };
 
-// PÁGINA DE BLOQUEADOS
+// --- MENÚ AJUSTES Y PÁGINAS EXTRA ---
+window.openProfileSettings = function() { document.getElementById('profileSettingsModal').style.display = 'block'; };
 window.openBlockedPage = function() { closeModal('profileSettingsModal'); toggleMainUI(false); document.getElementById('blockedPage').style.display = 'flex'; renderBlockedList(); };
 function renderBlockedList() { const container = document.getElementById('blockedListContainer'); container.innerHTML = ''; if (myBlockedList.length === 0) { container.innerHTML = '<p style="text-align:center; padding:40px; color:#777;">No has bloqueado a nadie.</p>'; return; } myBlockedList.forEach(user => { const uData = allUsersMap[user] || {}; const div = document.createElement('div'); div.className = 'user-list-item'; div.innerHTML = `<div class="user-list-info"><img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar"><div class="user-list-texts"><span class="user-list-name">${uData.customHandle || user}</span><span class="user-list-handle" style="color:#777;">Bloqueado</span></div></div><button class="btn-unblock" onclick="unblockFromList('${user}')">Desbloquear</button>`; container.appendChild(div); }); }
 window.unblockFromList = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { showToast(`Desbloqueaste a ${targetUser}`, "success"); setTimeout(() => renderBlockedList(), 500); }); };
 
-// PÁGINA DE MI INFORMACIÓN
 window.openMyInfoPage = function() { closeModal('profileSettingsModal'); toggleMainUI(false); window.location.hash = 'my_info'; currentProfileTarget = localStorage.getItem('savedRobloxUser'); const uData = allUsersMap[currentProfileTarget] || {}; document.getElementById('myInfoAvatar').src = uData.avatar || DEFAULT_AVATAR; document.getElementById('myInfoName').innerText = uData.displayName || currentProfileTarget; let dateStr = "Desconocida"; if (uData.registeredAt) { const date = new Date(uData.registeredAt); const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; } document.getElementById('myInfoDate').innerText = dateStr; document.getElementById('myInfoLocation').innerText = uData.location || "Ubicación no disponible"; document.getElementById('myInfoPage').style.display = 'flex'; };
 window.closeMyInfoPage = function() { document.getElementById('myInfoPage').style.display = 'none'; toggleMainUI(true); const myUser = localStorage.getItem('savedRobloxUser'); window.location.hash = `profile_${myUser}`; };
 
-// --- OPCIONES DE OTROS PERFILES (3 PUNTOS) ---
+// --- OPCIONES OTROS PERFILES ---
 let currentProfileTarget = '';
 window.openProfileOptions = function(targetUser) { currentProfileTarget = targetUser; const myUser = localStorage.getItem('savedRobloxUser'); const isMe = (targetUser === myUser); const dangerItems = document.querySelectorAll('#profileOptionsModal .sheet-item.danger'); dangerItems.forEach(el => el.style.display = isMe ? 'none' : 'block'); document.getElementById('profileOptionsModal').style.display = 'block'; };
 window.confirmBlockUser = function() { closeModal('profileOptionsModal'); blockUser(currentProfileTarget); };
@@ -377,7 +393,6 @@ window.confirmReportUser = function() { closeModal('profileOptionsModal'); repor
 window.copyProfileUrl = function(target) { const userToCopy = target || currentProfileTarget; const url = `${window.location.origin}${window.location.pathname}#profile_${userToCopy}`; navigator.clipboard.writeText(url).then(() => { showToast("Enlace del perfil copiado", "success"); if(!target) closeModal('profileOptionsModal'); }); };
 window.copyPostLink = function(key) { const link = `${window.location.origin}${window.location.pathname}#post_${key}`; navigator.clipboard.writeText(link).then(() => showToast("Enlace de publicación copiado", "success")); };
 
-// MOSTRAR INFO DE OTROS
 window.showAccountInfo = function() { closeModal('profileOptionsModal'); closeModal('profileSettingsModal'); toggleMainUI(false); window.location.hash = `info_${currentProfileTarget}`; const uData = allUsersMap[currentProfileTarget] || {}; document.getElementById('infoAvatar').src = uData.avatar || DEFAULT_AVATAR; document.getElementById('infoUsername').innerText = uData.displayName || currentProfileTarget; let dateStr = "Desconocida"; if (uData.registeredAt) { const date = new Date(uData.registeredAt); const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; } document.getElementById('infoDate').innerText = dateStr; document.getElementById('infoLocation').innerText = uData.location || "Ubicación no disponible"; document.getElementById('accountInfoPage').style.display = 'flex'; };
 window.closeAccountInfoPage = function() { document.getElementById('accountInfoPage').style.display = 'none'; toggleMainUI(true); window.location.hash = `profile_${currentProfileTarget}`; };
 
@@ -392,7 +407,7 @@ window.saveProfileChanges = async function() {
     try { await update(ref(db), updates); showToast("Perfil actualizado", "success"); document.getElementById('editProfileModal').style.display='none'; } catch(e) { showToast("Error", "error"); } finally { btn.innerText = "GUARDAR CAMBIOS"; }
 };
 
-// --- FLUJO DE REPORTES ---
+// --- REPORTES ---
 window.blockUser = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) return; showConfirm(`¿Bloquear a ${targetUser}?`, () => { const updates = {}; updates[`users/${myUser}/blocked/${targetUser}`] = true; updates[`users/${myUser}/following/${targetUser}`] = null; updates[`users/${targetUser}/followers/${myUser}`] = null; update(ref(db), updates).then(() => { showToast("Bloqueado.", "success"); renderCurrentView(); }); }); };
 window.unblockUser = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); showConfirm(`¿Desbloquear a ${targetUser}?`, () => { set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { showToast("Desbloqueado.", "success"); renderCurrentView(); }); }); };
 window.reportUser = function(targetUser) { userBeingReported = targetUser; postBeingReported = null; openReportModal(targetUser); };
@@ -413,16 +428,127 @@ window.performBlockAndReportAction = function() { blockUserLogic(userBeingReport
 window.closeAllReportModals = function() { closeModal('finalThanksModal'); renderCurrentView(); };
 function blockUserLogic(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); if (!myUser) return; const updates = {}; updates[`users/${myUser}/blocked/${targetUser}`] = true; updates[`users/${myUser}/following/${targetUser}`] = null; updates[`users/${targetUser}/followers/${myUser}`] = null; update(ref(db), updates); }
 
-// --- ADMIN & INTERACCIONES ---
-window.banUser = function(targetUser) { showConfirm(`¿Banear cuenta?`, () => { update(ref(db), { [`users/${targetUser}/isBanned`]: true }).then(() => showToast("Usuario baneado.", "success")); }); };
-window.unbanUser = function(targetUser) { showConfirm(`¿Restaurar cuenta?`, () => { update(ref(db), { [`users/${targetUser}/isBanned`]: null }).then(() => showToast("Usuario restaurado.", "success")); }); };
-window.openAdminPanel = function() { const myUser = localStorage.getItem('savedRobloxUser'); if (!allUsersMap[myUser] || allUsersMap[myUser].role !== 'admin') return showToast("Acceso denegado.", "error"); document.getElementById('adminModal').style.display = 'block'; get(child(ref(db), 'reports')).then((snapshot) => { const container = document.getElementById('adminReportsList'); if (snapshot.exists()) { container.innerHTML = ''; Object.entries(snapshot.val()).forEach(([key, r]) => { const div = document.createElement('div'); div.style.cssText = "background:#333; margin-bottom:10px; padding:10px; border-radius:8px; border:1px solid #555;"; div.innerHTML = `<div style="font-size:0.9em; color:#aaa;">Reportado: <b>${r.reportedUser}</b><br>Motivo: ${r.reason}</div><div style="margin-top:5px;"><button onclick="deleteReport('${key}')" style="background:#555; padding:5px;">Borrar</button> <button onclick="banUser('${r.reportedUser}')" style="background:#cc0000; padding:5px;">BANEAR</button></div>`; container.appendChild(div); }); } else { container.innerHTML = '<p style="text-align:center; color:#777;">Sin reportes.</p>'; } }); };
-window.deleteReport = function(k) { set(ref(db, `reports/${k}`), null).then(() => { showToast("Borrado", "success"); window.openAdminPanel(); }); };
-window.toggleFollow = function(target) { const me = localStorage.getItem('savedRobloxUser'); if(!me) { showToast("Regístrate", "error"); return; } if(me === target) return; const isFollowing = myFollowingList.includes(target); const updates = {}; if (isFollowing) { updates[`users/${me}/following/${target}`] = null; updates[`users/${target}/followers/${me}`] = null; updates[`users/${me}/followingCount`] = increment(-1); updates[`users/${target}/followersCount`] = increment(-1); } else { updates[`users/${me}/following/${target}`] = true; updates[`users/${target}/followers/${me}`] = true; updates[`users/${me}/followingCount`] = increment(1); updates[`users/${target}/followersCount`] = increment(1); } update(ref(db), updates); setTimeout(() => renderCurrentView(), 200); };
-const searchIn = document.getElementById('searchInput'); if(searchIn) searchIn.oninput = (e) => { searchTerm = e.target.value.trim(); renderCurrentView(); };
-window.toggleLike = (k, c, b) => { const u = localStorage.getItem('savedRobloxUser'); if(!u) return showToast("Inicia sesión", "error"); const id = getUserId(); const isL = b.querySelector('i').classList.contains('fas'); update(ref(db), { [`threads/${k}/likeCount`]: isL ? c - 1 : c + 1, [`threads/${k}/likes/${id}`]: isL ? null : true }); };
-const avatarInput = document.getElementById('avatarUpload'); if(avatarInput) { avatarInput.onchange = async function() { const user = localStorage.getItem('savedRobloxUser'); if(!user || this.files.length === 0) return; showToast("Subiendo...", "info"); const formData = new FormData(); formData.append('file', this.files[0]); formData.append('upload_preset', 'comunidad_arc'); try { const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: formData }); const data = await res.json(); await update(ref(db, `users/${user}`), { avatar: data.secure_url }); document.getElementById('editAvatarPreview').src = data.secure_url; showToast("Actualizado", "success"); } catch(e) { showToast("Error", "error"); } }; }
-window.openComments = (key) => { const modal = document.getElementById('commentsModal'); const list = document.getElementById('commentsList'); modal.style.display = 'block'; off(ref(db, `threads/${key}/comments`)); onValue(ref(db, `threads/${key}/comments`), (snap) => { list.innerHTML = ''; const data = snap.val(); if(data) Object.values(data).forEach(c => { const d = document.createElement('div'); d.innerHTML = `<strong>${c.username}:</strong> ${makeLinksClickable(c.text)}`; d.style.cssText = "padding:5px 0; border-bottom:1px solid #333;"; list.appendChild(d); }); else list.innerHTML = '<p style="text-align:center; color:#777;">Sin comentarios.</p>'; }); const cForm = document.getElementById('commentForm'); const newForm = cForm.cloneNode(true); cForm.parentNode.replaceChild(newForm, cForm); newForm.onsubmit = (e) => { e.preventDefault(); const u = localStorage.getItem('savedRobloxUser'); if(!u) return showToast("Inicia sesión", "error"); push(ref(db, `threads/${key}/comments`), { text: document.getElementById('commentInput').value, username: u, timestamp: Date.now() }); document.getElementById('commentInput').value = ''; }; };
+// --- ADMIN & VARIOS ---
+window.banUser = function(targetUser) { 
+    showConfirm(`¿Banear cuenta?`, () => { 
+        update(ref(db), { [`users/${targetUser}/isBanned`]: true }).then(() => showToast("Usuario baneado.", "success")); 
+    }); 
+};
+
+window.unbanUser = function(targetUser) { 
+    showConfirm(`¿Restaurar cuenta?`, () => { 
+        update(ref(db), { [`users/${targetUser}/isBanned`]: null }).then(() => showToast("Usuario restaurado.", "success")); 
+    }); 
+};
+
+window.openAdminPanel = function() { 
+    const myUser = localStorage.getItem('savedRobloxUser'); 
+    if (!allUsersMap[myUser] || allUsersMap[myUser].role !== 'admin') return showToast("Acceso denegado.", "error"); 
+    document.getElementById('adminModal').style.display = 'block'; 
+    get(child(ref(db), 'reports')).then((snapshot) => { 
+        const container = document.getElementById('adminReportsList'); 
+        if (snapshot.exists()) { 
+            container.innerHTML = ''; 
+            Object.entries(snapshot.val()).forEach(([key, r]) => { 
+                const div = document.createElement('div'); 
+                div.style.cssText = "background:#333; margin-bottom:10px; padding:10px; border-radius:8px; border:1px solid #555;"; 
+                div.innerHTML = `<div style="font-size:0.9em; color:#aaa;">Reportado: <b>${r.reportedUser}</b><br>Motivo: ${r.reason}</div><div style="margin-top:5px;"><button onclick="deleteReport('${key}')" style="background:#555; padding:5px;">Borrar</button> <button onclick="banUser('${r.reportedUser}')" style="background:#cc0000; padding:5px;">BANEAR</button></div>`; 
+                container.appendChild(div); 
+            }); 
+        } else { 
+            container.innerHTML = '<p style="text-align:center; color:#777;">Sin reportes.</p>'; 
+        } 
+    }); 
+};
+
+window.deleteReport = function(k) { 
+    set(ref(db, `reports/${k}`), null).then(() => { 
+        showToast("Borrado", "success"); 
+        window.openAdminPanel(); 
+    }); 
+};
+
+window.toggleFollow = function(target) { 
+    const me = localStorage.getItem('savedRobloxUser'); 
+    if(!me) { showToast("Regístrate", "error"); return; } 
+    if(me === target) return; 
+    const isFollowing = myFollowingList.includes(target); 
+    const updates = {}; 
+    if (isFollowing) { 
+        updates[`users/${me}/following/${target}`] = null; 
+        updates[`users/${target}/followers/${me}`] = null; 
+        updates[`users/${me}/followingCount`] = increment(-1); 
+        updates[`users/${target}/followersCount`] = increment(-1); 
+    } else { 
+        updates[`users/${me}/following/${target}`] = true; 
+        updates[`users/${target}/followers/${me}`] = true; 
+        updates[`users/${me}/followingCount`] = increment(1); 
+        updates[`users/${target}/followersCount`] = increment(1); 
+    } 
+    update(ref(db), updates); 
+    setTimeout(() => renderCurrentView(), 200); 
+};
+
+const searchIn = document.getElementById('searchInput'); 
+if(searchIn) searchIn.oninput = (e) => { 
+    searchTerm = e.target.value.trim(); 
+    renderCurrentView(); 
+};
+
+window.toggleLike = (k, c, b) => { 
+    const u = localStorage.getItem('savedRobloxUser'); 
+    if(!u) return showToast("Inicia sesión", "error"); 
+    const id = getUserId(); 
+    const isL = b.querySelector('i').classList.contains('fas'); 
+    update(ref(db), { [`threads/${k}/likeCount`]: isL ? c - 1 : c + 1, [`threads/${k}/likes/${id}`]: isL ? null : true }); 
+};
+
+const avatarInput = document.getElementById('avatarUpload'); 
+if(avatarInput) { 
+    avatarInput.onchange = async function() { 
+        const user = localStorage.getItem('savedRobloxUser'); 
+        if(!user || this.files.length === 0) return; 
+        showToast("Subiendo...", "info"); 
+        const formData = new FormData(); 
+        formData.append('file', this.files[0]); 
+        formData.append('upload_preset', 'comunidad_arc'); 
+        try { 
+            const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: formData }); 
+            const data = await res.json(); 
+            await update(ref(db, `users/${user}`), { avatar: data.secure_url }); 
+            document.getElementById('editAvatarPreview').src = data.secure_url; 
+            showToast("Actualizado", "success"); 
+        } catch(e) { showToast("Error", "error"); } 
+    }; 
+}
+
+window.openComments = (key) => { 
+    const modal = document.getElementById('commentsModal'); 
+    const list = document.getElementById('commentsList'); 
+    modal.style.display = 'block'; 
+    off(ref(db, `threads/${key}/comments`)); 
+    onValue(ref(db, `threads/${key}/comments`), (snap) => { 
+        list.innerHTML = ''; 
+        const data = snap.val(); 
+        if(data) Object.values(data).forEach(c => { 
+            const d = document.createElement('div'); 
+            d.innerHTML = `<strong>${c.username}:</strong> ${makeLinksClickable(c.text)}`; 
+            d.style.cssText = "padding:5px 0; border-bottom:1px solid #333;"; 
+            list.appendChild(d); 
+        }); else list.innerHTML = '<p style="text-align:center; color:#777;">Sin comentarios.</p>'; 
+    }); 
+    const cForm = document.getElementById('commentForm'); 
+    const newForm = cForm.cloneNode(true); 
+    cForm.parentNode.replaceChild(newForm, cForm); 
+    newForm.onsubmit = (e) => { 
+        e.preventDefault(); 
+        const u = localStorage.getItem('savedRobloxUser'); 
+        if(!u) return showToast("Inicia sesión", "error"); 
+        push(ref(db, `threads/${key}/comments`), { text: document.getElementById('commentInput').value, username: u, timestamp: Date.now() }); 
+        document.getElementById('commentInput').value = ''; 
+    }; 
+};
+// --- INICIALIZACIÓN Y CARGA ---
 document.addEventListener('DOMContentLoaded', () => {
     // 1. REGISTRAR SW (Push)
     if ('serviceWorker' in navigator) {
@@ -441,7 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hash = window.location.hash;
 
-    // --- LOGICA DE INICIO (EVITA PARPADEO BLANCO/NEGRO) ---
+    // --- LOGICA DE INICIO (EVITA PARPADEO) ---
     if (hash === '#my_info') {
         if (user) {
             toggleMainUI(false); 

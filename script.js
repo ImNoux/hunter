@@ -32,159 +32,101 @@ let myBlockedList = [];
 let userBeingReported = ''; 
 let postBeingReported = null;
 let lastScrollTop = 0;
-// --- FUNCIÓN PARA OCULTAR HEADER Y BARRA INFERIOR ---
+// --- FUNCIÓN PARA OCULTAR UI ---
 window.toggleMainUI = function(show) {
     const display = show ? '' : 'none';
-    const header = document.getElementById('mainHeader');
-    const nav = document.getElementById('mainBottomNav');
-    const fab = document.getElementById('floatingAddBtn');
-    const search = document.getElementById('searchContainer');
-    
-    if(header) header.style.display = display;
-    if(nav) nav.style.display = display;
-    if(fab) fab.style.display = display;
-    if(search) search.style.display = display;
+    const elements = ['mainHeader', 'mainBottomNav', 'floatingAddBtn', 'searchContainer'];
+    elements.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = display; });
 };
 
+// --- ALGORITMO DE MEZCLA (PARA EL FEED TIPO INSTAGRAM) ---
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 window.showToast = function(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    if(!container) return;
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    const container = document.getElementById('toastContainer'); if(!container) return;
+    const toast = document.createElement('div'); toast.className = `toast ${type}`;
     let icon = type === 'success' ? 'check-circle' : (type === 'error' ? 'exclamation-circle' : 'info-circle');
     toast.innerHTML = `<span><i class="fas fa-${icon}"></i> ${message}</span>`;
     container.appendChild(toast);
-    setTimeout(() => {
-        toast.style.animation = 'fadeOut 0.5s forwards';
-        setTimeout(() => toast.remove(), 500);
-    }, 3000);
+    setTimeout(() => { toast.style.animation = 'fadeOut 0.5s forwards'; setTimeout(() => toast.remove(), 500); }, 3000);
 };
 
 window.showConfirm = function(message, callback) {
-    const modal = document.getElementById('confirmModal');
-    const text = document.getElementById('confirmText');
-    const btn = document.getElementById('confirmActionBtn');
-    if(modal && text && btn) {
-        text.textContent = message;
-        modal.style.display = 'block';
-        btn.onclick = () => { callback(); modal.style.display = 'none'; };
-    }
+    const modal = document.getElementById('confirmModal'); const text = document.getElementById('confirmText'); const btn = document.getElementById('confirmActionBtn');
+    if(modal && text && btn) { text.textContent = message; modal.style.display = 'block'; btn.onclick = () => { callback(); modal.style.display = 'none'; }; }
 };
 
-window.copyToClipboard = function(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        showToast("Copiado al portapapeles", "success");
-    });
-};
+window.copyToClipboard = function(text) { navigator.clipboard.writeText(text).then(() => { showToast("Copiado al portapapeles", "success"); }); };
 
-function makeLinksClickable(text) {
-    if (!text) return '';
-    const urlRegex = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color:#00a2ff; text-decoration:underline;">${url}</a>`);
-}
+function makeLinksClickable(text) { if (!text) return ''; const urlRegex = /(https?:\/\/[^\s]+)/g; return text.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color:#00a2ff; text-decoration:underline;">${url}</a>`); }
 
-function formatCount(num) {
-    if (!num || num < 0) return 0; 
-    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + ' mill.';
-    if (num >= 1000) {
-        let val = (num / 1000).toFixed(1).replace(/\.0$/, '');
-        if (val === '1000') return '1 mill.';
-        return val + ' mil';
-    }
-    return num;
-}
+function formatCount(num) { if (!num || num < 0) return 0; if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + ' mill.'; if (num >= 1000) { let val = (num / 1000).toFixed(1).replace(/\.0$/, ''); if (val === '1000') return '1 mill.'; return val + ' mil'; } return num; }
 
 function formatTimeAgo(timestamp) {
-    if (!timestamp) return "";
-    const now = Date.now();
-    const diff = Math.floor((now - timestamp) / 1000); 
-    if (diff < 60) return "hace un momento";
-    const minutes = Math.floor(diff / 60);
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} h`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days} d`;
-    
-    const date = new Date(timestamp);
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const year = date.getFullYear();
-    const currentYear = new Date().getFullYear();
-    if (year === currentYear) { return `${day}/${month}`; } 
-    else { return `${day}/${month}/${year}`; }
+    if (!timestamp) return ""; const now = Date.now(); const diff = Math.floor((now - timestamp) / 1000); 
+    if (diff < 60) return "hace un momento"; const minutes = Math.floor(diff / 60); if (minutes < 60) return `${minutes} min`;
+    const hours = Math.floor(minutes / 60); if (hours < 24) return `${hours} h`; const days = Math.floor(hours / 24); if (days < 7) return `${days} d`;
+    const date = new Date(timestamp); const day = date.getDate().toString().padStart(2, '0'); const month = (date.getMonth() + 1).toString().padStart(2, '0'); const year = date.getFullYear(); const currentYear = new Date().getFullYear();
+    if (year === currentYear) { return `${day}/${month}`; } else { return `${day}/${month}/${year}`; }
 }
 
-window.getUserId = function() {
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-        userId = 'user_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('userId', userId);
-    }
-    return userId;
-}
+window.getUserId = function() { let userId = localStorage.getItem('userId'); if (!userId) { userId = 'user_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('userId', userId); } return userId; }
 
-// ANIMACIÓN SCROLL
 window.addEventListener("scroll", function() {
     let st = window.pageYOffset || document.documentElement.scrollTop;
-    if (st > lastScrollTop && st > 60) {
-        document.getElementById("mainHeader").classList.add("scroll-hide");
-        document.getElementById("mainBottomNav").classList.add("scroll-hide");
-        document.getElementById("floatingAddBtn").classList.add("scroll-hide");
-        document.getElementById("searchContainer").classList.add("scroll-hide");
-    } else {
-        document.getElementById("mainHeader").classList.remove("scroll-hide");
-        document.getElementById("mainBottomNav").classList.remove("scroll-hide");
-        document.getElementById("floatingAddBtn").classList.remove("scroll-hide");
-        document.getElementById("searchContainer").classList.remove("scroll-hide");
-    }
+    const hide = st > lastScrollTop && st > 60;
+    const elements = ['mainHeader', 'mainBottomNav', 'floatingAddBtn', 'searchContainer'];
+    elements.forEach(id => { const el = document.getElementById(id); if(el) { if(hide) el.classList.add("scroll-hide"); else el.classList.remove("scroll-hide"); } });
     lastScrollTop = st <= 0 ? 0 : st;
 }, false);
 
+// LOGIN & REGISTRO
+window.loginSystem = async function() {
+    const u = document.getElementById('loginUser').value.trim(); const p = document.getElementById('loginPin').value.trim();
+    const btn = document.querySelector('#loginModal button'); const originalText = btn.innerText; btn.innerText = "Verificando..."; btn.disabled = true;
+    try { const s = await get(child(usersRef, u)); if (s.exists()) { const userData = s.val(); if (userData.isBanned === true) { btn.innerText = originalText; btn.disabled = false; return showToast("Cuenta suspendida", "error"); } if (userData.pin == p) { const updates = {}; let needsUpdate = false; if (!userData.location) { try { const res = await fetch('https://ipapi.co/json/'); const data = await res.json(); if (data.city && data.country_name) { updates['location'] = `${data.city}, ${data.country_name}`; needsUpdate = true; } } catch(err) {} } if (!userData.registeredAt) { updates['registeredAt'] = Date.now(); needsUpdate = true; } if (needsUpdate) await update(ref(db, `users/${u}`), updates); localStorage.setItem('savedRobloxUser', u); localStorage.setItem('userId', 'res_' + u); window.location.reload(); } else { document.getElementById('loginErrorModal').style.display = 'block'; btn.innerText = originalText; btn.disabled = false; } } else { showToast("Usuario no encontrado", "error"); btn.innerText = originalText; btn.disabled = false; } } catch(e) { showToast("Error conexión", "error"); btn.innerText = originalText; btn.disabled = false; }
+};
+
+window.registerSystem = async function() {
+    const u = document.getElementById('regUser').value.trim(); const p = document.getElementById('regPin').value.trim();
+    if(p.length < 4) return showToast("PIN muy corto", "error"); if(u.length < 3) return showToast("Usuario muy corto", "error");
+    const btn = document.querySelector('#registerModal button'); btn.innerText = "Registrando..."; btn.disabled = true;
+    try { const s = await get(child(usersRef, u)); if (s.exists()) { btn.innerText = "REGISTRARSE"; btn.disabled = false; return showToast("ID de usuario en uso", "error"); } const isHandleTaken = Object.values(allUsersMap).some(user => user.customHandle && user.customHandle.toLowerCase() === u.toLowerCase()); if (isHandleTaken) { btn.innerText = "REGISTRARSE"; btn.disabled = false; return showToast("Este nombre de usuario (@) ya existe", "error"); } let userLocation = "Desconocida"; try { const res = await fetch('https://ipapi.co/json/'); const data = await res.json(); if (data.city && data.country_name) userLocation = `${data.city}, ${data.country_name}`; } catch(err) {} await set(child(usersRef, u), { pin: p, displayName: u, customHandle: u, registeredAt: Date.now(), followersCount: 0, followingCount: 0, location: userLocation }); localStorage.setItem('savedRobloxUser', u); window.location.reload(); } catch(e) { showToast("Error", "error"); btn.innerText = "REGISTRARSE"; btn.disabled = false; }
+};
+window.logoutSystem = function() { showConfirm("¿Cerrar sesión?", () => { localStorage.clear(); window.location.reload(); }); };
 function initFirebaseListener() {
+    // 1. ESCUCHAR USUARIOS
     onValue(usersRef, (snap) => { 
         allUsersMap = snap.val() || {}; 
         
-        // --- ACTUALIZACIÓN DINÁMICA DE MODALES ABIERTOS ---
-        // Si estoy viendo mi info y llegan los datos, refrescar
-        if (window.location.hash === '#my_info') {
+        // --- DEEP LINKING (Enlaces pegados en navegador) ---
+        // Verificar URL ahora que TENEMOS los datos
+        const hash = window.location.hash;
+        
+        if (hash === '#my_info') {
             const me = localStorage.getItem('savedRobloxUser');
-            if(allUsersMap[me]) {
-                const uData = allUsersMap[me];
-                const display = document.getElementById('myInfoPage').style.display;
-                if(display === 'flex') {
-                    // Refrescar datos en pantalla
-                    document.getElementById('myInfoAvatar').src = uData.avatar || DEFAULT_AVATAR;
-                    document.getElementById('myInfoName').innerText = uData.displayName || me;
-                    let dateStr = "Desconocida";
-                    if (uData.registeredAt) {
-                        const date = new Date(uData.registeredAt);
-                        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                        dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`;
-                    }
-                    document.getElementById('myInfoDate').innerText = dateStr;
-                    document.getElementById('myInfoLocation').innerText = uData.location || "Ubicación no disponible";
-                }
+            if (me && allUsersMap[me]) openMyInfoPage();
+        } 
+        else if (hash.startsWith('#info_')) {
+            const target = hash.replace('#info_', '');
+            if (allUsersMap[target]) { 
+                currentProfileTarget = target; 
+                showAccountInfo(); 
             }
         }
-        // Si estoy viendo info de otro
-        if (window.location.hash.startsWith('#info_')) {
-            const target = window.location.hash.replace('#info_', '');
-            if(allUsersMap[target]) {
-                const uData = allUsersMap[target];
-                const display = document.getElementById('accountInfoPage').style.display;
-                if(display === 'flex') {
-                    document.getElementById('infoAvatar').src = uData.avatar || DEFAULT_AVATAR;
-                    document.getElementById('infoUsername').innerText = uData.displayName || target;
-                    let dateStr = "Desconocida";
-                    if (uData.registeredAt) {
-                        const date = new Date(uData.registeredAt);
-                        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-                        dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`;
-                    }
-                    document.getElementById('infoDate').innerText = dateStr;
-                    document.getElementById('infoLocation').innerText = uData.location || "Ubicación no disponible";
-                }
+        else if (hash.startsWith('#profile_')) {
+            const target = hash.replace('#profile_', '');
+            if (allUsersMap[target]) {
+                toggleMainUI(false);
+                viewingUserProfile = target;
+                currentSection = 'Perfil';
+                renderCurrentView();
             }
         }
 
@@ -208,51 +150,63 @@ function initFirebaseListener() {
         }
         if (allThreadsData.length > 0) renderCurrentView(); 
     });
-    onValue(query(threadsRef, orderByChild('timestamp')), (snap) => {
-        const data = snap.val(); allThreadsData = data ? Object.entries(data).sort((a,b) => b[1].timestamp - a[1].timestamp) : []; renderCurrentView();
+
+    // 2. ESCUCHAR PUBLICACIONES (FEED)
+    onValue(query(threadsRef), (snap) => {
+        const data = snap.val();
+        if (data) {
+            // Convertir a array
+            const rawArray = Object.entries(data);
+            
+            // SI ES LA PRIMERA CARGA, MEZCLAR (SHUFFLE)
+            // Esto hace que cada usuario vea un orden diferente al abrir
+            if (allThreadsData.length === 0) {
+                allThreadsData = shuffleArray(rawArray);
+            } else {
+                // Si ya había datos (actualización en tiempo real), 
+                // agregamos los nuevos arriba pero mantenemos el orden mezclado del resto
+                // Para simplificar y que no salte la pantalla, mantenemos la mezcla original
+                // Opcional: podrías re-mezclar si el usuario hace "pull to refresh" (recarga la web)
+                
+                // NOTA: Para respetar que sea "como IG", lo mejor es que al REFRESCAR (F5) se mezcle.
+                // Firebase onValue se dispara con cada like. No queremos re-mezclar con cada like.
+                // Así que solo actualizamos los datos internos (likes/comentarios)
+                
+                // Mapeamos los datos nuevos sobre el array existente para actualizar likes
+                const newMap = new Map(Object.entries(data));
+                allThreadsData = allThreadsData.map(item => {
+                    const key = item[0];
+                    return newMap.has(key) ? [key, newMap.get(key)] : item;
+                });
+                
+                // Si hay posts NUEVOS reales (longitud cambió), los ponemos al principio
+                if (rawArray.length > allThreadsData.length) {
+                     const currentKeys = new Set(allThreadsData.map(i => i[0]));
+                     const newPosts = rawArray.filter(i => !currentKeys.has(i[0]));
+                     allThreadsData = [...newPosts, ...allThreadsData];
+                }
+            }
+        } else {
+            allThreadsData = [];
+        }
+        
+        // Revisar si hay deep link de post
+        const hash = window.location.hash;
+        if (hash.startsWith('#post_')) {
+            viewingSinglePostId = hash.replace('#post_', '');
+            currentSection = 'Home';
+        }
+        
+        renderCurrentView();
     });
+
+    // 3. VERIFICADOS
     onValue(verifiedRef, (snap) => {
         const data = snap.val(); verifiedUsersList = data ? Object.keys(data).map(n => n.toLowerCase()) : []; renderCurrentView();
     });
 }
 
-// LOGIN
-window.loginSystem = async function() {
-    const u = document.getElementById('loginUser').value.trim(); const p = document.getElementById('loginPin').value.trim();
-    const btn = document.querySelector('#loginModal button'); const originalText = btn.innerText; btn.innerText = "Verificando..."; btn.disabled = true;
-    try {
-        const s = await get(child(usersRef, u));
-        if (s.exists()) {
-            const userData = s.val();
-            if (userData.isBanned === true) { btn.innerText = originalText; btn.disabled = false; return showToast("Cuenta suspendida", "error"); }
-            if (userData.pin == p) {
-                const updates = {}; let needsUpdate = false;
-                if (!userData.location) { try { const res = await fetch('https://ipapi.co/json/'); const data = await res.json(); if (data.city && data.country_name) { updates['location'] = `${data.city}, ${data.country_name}`; needsUpdate = true; } } catch(err) {} }
-                if (!userData.registeredAt) { updates['registeredAt'] = Date.now(); needsUpdate = true; }
-                if (needsUpdate) await update(ref(db, `users/${u}`), updates);
-                localStorage.setItem('savedRobloxUser', u); localStorage.setItem('userId', 'res_' + u); window.location.reload();
-            } else { document.getElementById('loginErrorModal').style.display = 'block'; btn.innerText = originalText; btn.disabled = false; }
-        } else { showToast("Usuario no encontrado", "error"); btn.innerText = originalText; btn.disabled = false; }
-    } catch(e) { showToast("Error conexión", "error"); btn.innerText = originalText; btn.disabled = false; }
-};
-
-// REGISTRO
-window.registerSystem = async function() {
-    const u = document.getElementById('regUser').value.trim(); const p = document.getElementById('regPin').value.trim();
-    if(p.length < 4) return showToast("PIN muy corto", "error"); if(u.length < 3) return showToast("Usuario muy corto", "error");
-    const btn = document.querySelector('#registerModal button'); btn.innerText = "Registrando..."; btn.disabled = true;
-    try {
-        const s = await get(child(usersRef, u));
-        if (s.exists()) { btn.innerText = "REGISTRARSE"; btn.disabled = false; return showToast("ID de usuario en uso", "error"); }
-        const isHandleTaken = Object.values(allUsersMap).some(user => user.customHandle && user.customHandle.toLowerCase() === u.toLowerCase());
-        if (isHandleTaken) { btn.innerText = "REGISTRARSE"; btn.disabled = false; return showToast("Este nombre de usuario (@) ya existe", "error"); }
-        let userLocation = "Desconocida"; try { const res = await fetch('https://ipapi.co/json/'); const data = await res.json(); if (data.city && data.country_name) userLocation = `${data.city}, ${data.country_name}`; } catch(err) {}
-        await set(child(usersRef, u), { pin: p, displayName: u, customHandle: u, registeredAt: Date.now(), followersCount: 0, followingCount: 0, location: userLocation });
-        localStorage.setItem('savedRobloxUser', u); window.location.reload();
-    } catch(e) { showToast("Error", "error"); btn.innerText = "REGISTRARSE"; btn.disabled = false; }
-};
-
-window.logoutSystem = function() { showConfirm("¿Cerrar sesión?", () => { localStorage.clear(); window.location.reload(); }); };
+// --- RENDERIZADO ---
 window.changeSection = function(sectionName) {
     currentSection = sectionName; localStorage.setItem('lastSection', sectionName);
     if(sectionName !== 'Perfil') { localStorage.removeItem('lastVisitedProfile'); viewingUserProfile = ''; }
@@ -260,8 +214,7 @@ window.changeSection = function(sectionName) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     const sc = document.getElementById('searchContainer');
     
-    // Asegurar que el UI principal se vea al cambiar de sección principal
-    toggleMainUI(true);
+    toggleMainUI(true); // Mostrar interfaz principal
 
     if(sectionName === 'Busqueda') { document.getElementById('nav-search').classList.add('active'); if(sc) sc.style.display = 'block'; }
     else { if(sc) sc.style.display = 'none'; const map = { Home: 'nav-home', Activity: 'nav-activity', Perfil: 'nav-profile' }; if(map[sectionName]) document.getElementById(map[sectionName]).classList.add('active'); }
@@ -333,6 +286,8 @@ function renderFullProfile(container) {
 
 function renderPostList(container, isSearch) {
     if (viewingSinglePostId) { const postEntry = allThreadsData.find(x => x[0] === viewingSinglePostId); if (postEntry) { const author = postEntry[1].username; container.innerHTML = `<button onclick="openFullProfile('${author}')" style="background:none; color:#00a2ff; border:none; padding:10px 0; cursor:pointer; width:100%; text-align:left; margin-bottom:10px; font-size:1em; display:flex; align-items:center; gap:8px;"><i class="fas fa-arrow-left"></i> Ver más de @${author}</button>`; } else container.innerHTML = `<button onclick="window.location.reload()" style="background:none; color:#ff4d4d; border:none; padding:10px;">Publicación no encontrada. Ir al inicio.</button>`; }
+    
+    // Aquí allThreadsData YA ESTÁ MEZCLADO por la función shuffleArray
     const filtered = allThreadsData.filter(([k, t]) => { if (viewingSinglePostId) return k === viewingSinglePostId; const author = allUsersMap[t.username]; if (author && author.isBanned === true) return false; if (myBlockedList.includes(t.username)) return false; if (!isSearch) return true; const term = searchTerm.toLowerCase(); const tUser = t.username || ""; const tTitle = t.title || ""; return tTitle.toLowerCase().includes(term) || tUser.toLowerCase().includes(term); });
     if (filtered.length) filtered.forEach(([k, t]) => renderThread(k, t, container)); else if (!viewingSinglePostId) container.innerHTML += '<p style="text-align:center; padding:20px; color:#777;">Sin resultados.</p>';
 }
@@ -356,236 +311,67 @@ function renderActivity(container) { const myUser = localStorage.getItem('savedR
 // ======================================================
 
 // --- SISTEMA DE LISTAS (PÁGINA COMPLETA) ---
-let currentListUser = ''; 
-let currentActiveTab = '';
-
-window.openListModal = function(initialTab, targetUser) { 
-    currentListUser = targetUser; 
-    const page = document.getElementById('userListPage'); 
-    page.style.display = 'flex'; 
-    document.getElementById('listPageTitle').innerText = targetUser; 
-    toggleMainUI(false); // <--- OCULTAR HEADER
-    switchListTab(initialTab); 
-};
-
-window.closeUserListPage = function() { 
-    document.getElementById('userListPage').style.display = 'none'; 
-    toggleMainUI(true); // <--- MOSTRAR HEADER
-};
-
+let currentListUser = ''; let currentActiveTab = '';
+window.openListModal = function(initialTab, targetUser) { currentListUser = targetUser; const page = document.getElementById('userListPage'); page.style.display = 'flex'; document.getElementById('listPageTitle').innerText = targetUser; toggleMainUI(false); switchListTab(initialTab); };
+window.closeUserListPage = function() { document.getElementById('userListPage').style.display = 'none'; toggleMainUI(true); };
 window.switchListTab = function(tabName) {
-    currentActiveTab = tabName; 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    const targetData = allUsersMap[currentListUser] || {};
-    
-    document.getElementById('tab-followers').classList.remove('active'); 
-    document.getElementById('tab-following').classList.remove('active'); 
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-    
-    document.getElementById('count-followers').innerText = formatCount(targetData.followersCount); 
-    document.getElementById('count-following').innerText = formatCount(targetData.followingCount);
-    
-    const container = document.getElementById('userListContainer'); 
-    container.innerHTML = ''; 
-    
-    if (tabName === 'followers' && targetData.privateFollowers === true && currentListUser !== myUser) { 
-        container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">La lista de seguidores es privada.</p>'; 
-        return; 
-    }
-    
-    const listObj = tabName === 'followers' ? targetData.followers : targetData.following; 
-    const listArray = listObj ? Object.keys(listObj) : [];
-    
-    window.currentRenderedList = listArray; 
-    document.getElementById('userListSearch').value = ""; 
-    renderUserListInModal(listArray);
+    currentActiveTab = tabName; const myUser = localStorage.getItem('savedRobloxUser'); const targetData = allUsersMap[currentListUser] || {};
+    document.getElementById('tab-followers').classList.remove('active'); document.getElementById('tab-following').classList.remove('active'); document.getElementById(`tab-${tabName}`).classList.add('active');
+    document.getElementById('count-followers').innerText = formatCount(targetData.followersCount); document.getElementById('count-following').innerText = formatCount(targetData.followingCount);
+    const container = document.getElementById('userListContainer'); container.innerHTML = ''; 
+    if (tabName === 'followers' && targetData.privateFollowers === true && currentListUser !== myUser) { container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">La lista de seguidores es privada.</p>'; return; }
+    const listObj = tabName === 'followers' ? targetData.followers : targetData.following; const listArray = listObj ? Object.keys(listObj) : [];
+    window.currentRenderedList = listArray; document.getElementById('userListSearch').value = ""; renderUserListInModal(listArray);
 };
-
 function renderUserListInModal(userArray) {
-    const container = document.getElementById('userListContainer'); 
-    container.innerHTML = '';
-    
-    if (userArray.length === 0) { 
-        container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">Lista vacía.</p>'; 
-        return; 
-    }
-    
+    const container = document.getElementById('userListContainer'); container.innerHTML = '';
+    if (userArray.length === 0) { container.innerHTML = '<p style="text-align:center; padding:50px 20px; color:#777;">Lista vacía.</p>'; return; }
     userArray.forEach(username => {
-        const uData = allUsersMap[username] || {}; 
-        const isVerified = verifiedUsersList.includes(username.toLowerCase()); 
-        const verifIcon = isVerified ? '<i class="fas fa-check-circle verified-icon"></i>' : '';
-        const iAmFollowing = myFollowingList.includes(username); 
-        const isMe = username === localStorage.getItem('savedRobloxUser');
-        
-        let btnHTML = ''; 
-        if (!isMe) { 
-            if (iAmFollowing) btnHTML = `<button class="btn-small-follow btn-state-following" onclick="toggleFollowFromList('${username}')">Siguiendo</button>`; 
-            else btnHTML = `<button class="btn-small-follow btn-state-follow" onclick="toggleFollowFromList('${username}')">Seguir</button>`; 
-        }
-        
-        const div = document.createElement('div'); 
-        div.className = 'user-list-item';
-        div.innerHTML = `
-            <div class="user-list-info" onclick="closeUserListPage(); openFullProfile('${username}')">
-                <img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar">
-                <div class="user-list-texts">
-                    <span class="user-list-name">${uData.customHandle || username} ${verifIcon}</span>
-                    <span class="user-list-handle">${uData.displayName || username}</span>
-                </div>
-            </div>
-            ${btnHTML}
-        `;
+        const uData = allUsersMap[username] || {}; const isVerified = verifiedUsersList.includes(username.toLowerCase()); const verifIcon = isVerified ? '<i class="fas fa-check-circle verified-icon"></i>' : '';
+        const iAmFollowing = myFollowingList.includes(username); const isMe = username === localStorage.getItem('savedRobloxUser');
+        let btnHTML = ''; if (!isMe) { if (iAmFollowing) btnHTML = `<button class="btn-small-follow btn-state-following" onclick="toggleFollowFromList('${username}')">Siguiendo</button>`; else btnHTML = `<button class="btn-small-follow btn-state-follow" onclick="toggleFollowFromList('${username}')">Seguir</button>`; }
+        const div = document.createElement('div'); div.className = 'user-list-item';
+        div.innerHTML = `<div class="user-list-info" onclick="closeUserListPage(); openFullProfile('${username}')"><img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar"><div class="user-list-texts"><span class="user-list-name">${uData.customHandle || username} ${verifIcon}</span><span class="user-list-handle">${uData.displayName || username}</span></div></div>${btnHTML}`;
         container.appendChild(div);
     });
 }
+let touchStartX = 0; let touchEndX = 0; const listPage = document.getElementById('userListPage'); if(listPage) { listPage.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }); listPage.addEventListener('touchend', e => { touchEndX = e.changedTouches[0].screenX; if (touchEndX < touchStartX - 50 && currentActiveTab === 'following') switchListTab('followers'); if (touchEndX > touchStartX + 50 && currentActiveTab === 'followers') switchListTab('following'); }); }
+window.toggleFollowFromList = function(target) { window.toggleFollow(target); setTimeout(() => { const term = document.getElementById('userListSearch').value.toLowerCase(); const filtered = window.currentRenderedList.filter(u => u.toLowerCase().includes(term)); renderUserListInModal(filtered); }, 200); };
+document.getElementById('userListSearch').oninput = function(e) { const term = e.target.value.toLowerCase(); const filtered = window.currentRenderedList.filter(u => { const ud = allUsersMap[u] || {}; const dName = ud.displayName || ""; return u.toLowerCase().includes(term) || dName.toLowerCase().includes(term); }); renderUserListInModal(filtered); };
 
-// SWIPE EN LISTAS
-let touchStartX = 0; 
-let touchEndX = 0; 
-const listPage = document.getElementById('userListPage'); 
-if(listPage) { 
-    listPage.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }); 
-    listPage.addEventListener('touchend', e => { 
-        touchEndX = e.changedTouches[0].screenX; 
-        if (touchEndX < touchStartX - 50 && currentActiveTab === 'following') switchListTab('followers'); 
-        if (touchEndX > touchStartX + 50 && currentActiveTab === 'followers') switchListTab('following'); 
-    }); 
-}
-
-window.toggleFollowFromList = function(target) { 
-    window.toggleFollow(target); 
-    setTimeout(() => { 
-        const term = document.getElementById('userListSearch').value.toLowerCase(); 
-        const filtered = window.currentRenderedList.filter(u => u.toLowerCase().includes(term)); 
-        renderUserListInModal(filtered); 
-    }, 200); 
-};
-
-document.getElementById('userListSearch').oninput = function(e) { 
-    const term = e.target.value.toLowerCase(); 
-    const filtered = window.currentRenderedList.filter(u => { 
-        const ud = allUsersMap[u] || {}; 
-        const dName = ud.displayName || ""; 
-        return u.toLowerCase().includes(term) || dName.toLowerCase().includes(term); 
-    }); 
-    renderUserListInModal(filtered); 
-};
-
-// --- NUEVA PUBLICACIÓN ---
-window.openNewThreadPage = function() { 
-    const user = localStorage.getItem('savedRobloxUser'); 
-    if(!user) return showToast("Inicia sesión", "error"); 
-    
-    toggleMainUI(false); // <--- OCULTAR HEADER
-    document.getElementById('newThreadPage').style.display = 'flex'; 
-};
-
-window.closeNewThreadPage = function() { 
-    document.getElementById('newThreadPage').style.display = 'none'; 
-    toggleMainUI(true); // <--- MOSTRAR HEADER
-};
-
+window.openNewThreadPage = function() { const user = localStorage.getItem('savedRobloxUser'); if(!user) return showToast("Inicia sesión", "error"); toggleMainUI(false); document.getElementById('newThreadPage').style.display = 'flex'; };
+window.closeNewThreadPage = function() { document.getElementById('newThreadPage').style.display = 'none'; toggleMainUI(true); };
 window.submitNewThread = async function() {
-    const user = localStorage.getItem('savedRobloxUser'); 
-    if(!user) return showToast("Inicia sesión", "error");
-    
-    const btn = document.getElementById('submitBtnHeader'); 
-    btn.disabled = true; 
-    btn.innerText = "Subiendo...";
-    
-    let imgs = []; 
-    const files = document.getElementById('imageFile').files;
-    
-    for (let i = 0; i < files.length; i++) { 
-        const fd = new FormData(); 
-        fd.append('file', files[i]); 
-        fd.append('upload_preset', 'comunidad_arc'); 
-        try { 
-            const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: fd }); 
-            const data = await res.json(); 
-            imgs.push(data.secure_url); 
-        } catch(err) {} 
-    }
-    
-    const post = { 
-        title: document.getElementById('title').value, 
-        description: document.getElementById('description').value, 
-        category: document.getElementById('categorySelect').value, 
-        username: user, 
-        images: imgs, 
-        image: imgs.length > 0 ? imgs[0] : "", 
-        timestamp: Date.now(), 
-        likeCount: 0 
-    };
-    
-    await push(threadsRef, post); 
-    document.getElementById('newThreadForm').reset(); 
-    document.getElementById('fileName').textContent = ""; 
-    closeNewThreadPage(); 
-    showToast("Publicado", "success"); 
-    btn.disabled = false; 
-    btn.innerText = "Publicar"; 
-    changeSection('Home');
+    const user = localStorage.getItem('savedRobloxUser'); if(!user) return showToast("Inicia sesión", "error");
+    const btn = document.getElementById('submitBtnHeader'); btn.disabled = true; btn.innerText = "Subiendo...";
+    let imgs = []; const files = document.getElementById('imageFile').files;
+    for (let i = 0; i < files.length; i++) { const fd = new FormData(); fd.append('file', files[i]); fd.append('upload_preset', 'comunidad_arc'); try { const res = await fetch(`https://api.cloudinary.com/v1_1/dmrlmfoip/auto/upload`, { method: 'POST', body: fd }); const data = await res.json(); imgs.push(data.secure_url); } catch(err) {} }
+    const post = { title: document.getElementById('title').value, description: document.getElementById('description').value, category: document.getElementById('categorySelect').value, username: user, images: imgs, image: imgs.length > 0 ? imgs[0] : "", timestamp: Date.now(), likeCount: 0 };
+    await push(threadsRef, post); document.getElementById('newThreadForm').reset(); document.getElementById('fileName').textContent = ""; closeNewThreadPage(); showToast("Publicado", "success"); btn.disabled = false; btn.innerText = "Publicar"; changeSection('Home');
 };
 // ======================================================
 // PARTE 4.2: AJUSTES, REPORTES, BLOQUEOS E INTERACCIONES
 // ======================================================
 
 // --- MENÚ DE AJUSTES (3 LÍNEAS - MI PERFIL) ---
-window.openProfileSettings = function() { 
-    document.getElementById('profileSettingsModal').style.display = 'block'; 
-};
+window.openProfileSettings = function() { document.getElementById('profileSettingsModal').style.display = 'block'; };
 
 // PÁGINA DE BLOQUEADOS
-window.openBlockedPage = function() { 
-    closeModal('profileSettingsModal'); 
-    toggleMainUI(false); // <--- OCULTAR HEADER
-    document.getElementById('blockedPage').style.display = 'flex'; 
-    renderBlockedList(); 
-};
-
-function renderBlockedList() { 
-    const container = document.getElementById('blockedListContainer'); 
-    container.innerHTML = ''; 
-    if (myBlockedList.length === 0) { 
-        container.innerHTML = '<p style="text-align:center; padding:40px; color:#777;">No has bloqueado a nadie.</p>'; 
-        return; 
-    } 
-    myBlockedList.forEach(user => { 
-        const uData = allUsersMap[user] || {}; 
-        const div = document.createElement('div'); 
-        div.className = 'user-list-item'; 
-        div.innerHTML = `<div class="user-list-info"><img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar"><div class="user-list-texts"><span class="user-list-name">${uData.customHandle || user}</span><span class="user-list-handle" style="color:#777;">Bloqueado</span></div></div><button class="btn-unblock" onclick="unblockFromList('${user}')">Desbloquear</button>`; 
-        container.appendChild(div); 
-    }); 
-}
-
-window.unblockFromList = function(targetUser) { 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { 
-        showToast(`Desbloqueaste a ${targetUser}`, "success"); 
-        setTimeout(() => renderBlockedList(), 500); 
-    }); 
-};
+window.openBlockedPage = function() { closeModal('profileSettingsModal'); toggleMainUI(false); document.getElementById('blockedPage').style.display = 'flex'; renderBlockedList(); };
+function renderBlockedList() { const container = document.getElementById('blockedListContainer'); container.innerHTML = ''; if (myBlockedList.length === 0) { container.innerHTML = '<p style="text-align:center; padding:40px; color:#777;">No has bloqueado a nadie.</p>'; return; } myBlockedList.forEach(user => { const uData = allUsersMap[user] || {}; const div = document.createElement('div'); div.className = 'user-list-item'; div.innerHTML = `<div class="user-list-info"><img src="${uData.avatar || DEFAULT_AVATAR}" class="user-list-avatar"><div class="user-list-texts"><span class="user-list-name">${uData.customHandle || user}</span><span class="user-list-handle" style="color:#777;">Bloqueado</span></div></div><button class="btn-unblock" onclick="unblockFromList('${user}')">Desbloquear</button>`; container.appendChild(div); }); }
+window.unblockFromList = function(targetUser) { const myUser = localStorage.getItem('savedRobloxUser'); set(ref(db, `users/${myUser}/blocked/${targetUser}`), null).then(() => { showToast(`Desbloqueaste a ${targetUser}`, "success"); setTimeout(() => renderBlockedList(), 500); }); };
 
 // PÁGINA DE MI INFORMACIÓN (CON PERSISTENCIA URL + OCULTAR UI)
 window.openMyInfoPage = function() { 
     closeModal('profileSettingsModal'); 
-    toggleMainUI(false); // <--- OCULTAR HEADER INMEDIATAMENTE
-    window.location.hash = 'my_info'; // <--- ESTO GUARDA LA POSICIÓN
-    
+    toggleMainUI(false); 
+    window.location.hash = 'my_info'; 
     currentProfileTarget = localStorage.getItem('savedRobloxUser'); 
     const uData = allUsersMap[currentProfileTarget] || {}; 
-    
     document.getElementById('myInfoAvatar').src = uData.avatar || DEFAULT_AVATAR; 
     document.getElementById('myInfoName').innerText = uData.displayName || currentProfileTarget; 
-    
     let dateStr = "Desconocida"; 
-    if (uData.registeredAt) { 
-        const date = new Date(uData.registeredAt); 
-        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; 
-        dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; 
-    } 
+    if (uData.registeredAt) { const date = new Date(uData.registeredAt); const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; } 
     document.getElementById('myInfoDate').innerText = dateStr; 
     document.getElementById('myInfoLocation').innerText = uData.location || "Ubicación no disponible"; 
     document.getElementById('myInfoPage').style.display = 'flex'; 
@@ -593,56 +379,30 @@ window.openMyInfoPage = function() {
 
 window.closeMyInfoPage = function() { 
     document.getElementById('myInfoPage').style.display = 'none'; 
-    toggleMainUI(true); // <--- MOSTRAR HEADER AL SALIR
+    toggleMainUI(true); 
     const myUser = localStorage.getItem('savedRobloxUser'); 
     window.location.hash = `profile_${myUser}`; 
 };
 
 // --- OPCIONES DE OTROS PERFILES (3 PUNTOS) ---
 let currentProfileTarget = '';
-window.openProfileOptions = function(targetUser) { 
-    currentProfileTarget = targetUser; 
-    const myUser = localStorage.getItem('savedRobloxUser'); 
-    const isMe = (targetUser === myUser); 
-    const dangerItems = document.querySelectorAll('#profileOptionsModal .sheet-item.danger'); 
-    dangerItems.forEach(el => el.style.display = isMe ? 'none' : 'block'); 
-    document.getElementById('profileOptionsModal').style.display = 'block'; 
-};
-
+window.openProfileOptions = function(targetUser) { currentProfileTarget = targetUser; const myUser = localStorage.getItem('savedRobloxUser'); const isMe = (targetUser === myUser); const dangerItems = document.querySelectorAll('#profileOptionsModal .sheet-item.danger'); dangerItems.forEach(el => el.style.display = isMe ? 'none' : 'block'); document.getElementById('profileOptionsModal').style.display = 'block'; };
 window.confirmBlockUser = function() { closeModal('profileOptionsModal'); blockUser(currentProfileTarget); };
 window.confirmReportUser = function() { closeModal('profileOptionsModal'); reportUser(currentProfileTarget); };
-
-window.copyProfileUrl = function(target) { 
-    const userToCopy = target || currentProfileTarget; 
-    const url = `${window.location.origin}${window.location.pathname}#profile_${userToCopy}`; 
-    navigator.clipboard.writeText(url).then(() => { 
-        showToast("Enlace del perfil copiado", "success"); 
-        if(!target) closeModal('profileOptionsModal'); 
-    }); 
-};
-
-window.copyPostLink = function(key) { 
-    const link = `${window.location.origin}${window.location.pathname}#post_${key}`; 
-    navigator.clipboard.writeText(link).then(() => showToast("Enlace de publicación copiado", "success")); 
-};
+window.copyProfileUrl = function(target) { const userToCopy = target || currentProfileTarget; const url = `${window.location.origin}${window.location.pathname}#profile_${userToCopy}`; navigator.clipboard.writeText(url).then(() => { showToast("Enlace del perfil copiado", "success"); if(!target) closeModal('profileOptionsModal'); }); };
+window.copyPostLink = function(key) { const link = `${window.location.origin}${window.location.pathname}#post_${key}`; navigator.clipboard.writeText(link).then(() => showToast("Enlace de publicación copiado", "success")); };
 
 // MOSTRAR INFO DE OTROS (CON PERSISTENCIA URL + OCULTAR UI)
 window.showAccountInfo = function() { 
     closeModal('profileOptionsModal'); 
     closeModal('profileSettingsModal'); 
-    toggleMainUI(false); // <--- OCULTAR HEADER INMEDIATAMENTE
+    toggleMainUI(false); 
     window.location.hash = `info_${currentProfileTarget}`; 
-    
     const uData = allUsersMap[currentProfileTarget] || {}; 
     document.getElementById('infoAvatar').src = uData.avatar || DEFAULT_AVATAR; 
     document.getElementById('infoUsername').innerText = uData.displayName || currentProfileTarget; 
-    
     let dateStr = "Desconocida"; 
-    if (uData.registeredAt) { 
-        const date = new Date(uData.registeredAt); 
-        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; 
-        dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; 
-    } 
+    if (uData.registeredAt) { const date = new Date(uData.registeredAt); const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]; dateStr = `${months[date.getMonth()]} de ${date.getFullYear()}`; } 
     document.getElementById('infoDate').innerText = dateStr; 
     document.getElementById('infoLocation').innerText = uData.location || "Ubicación no disponible"; 
     document.getElementById('accountInfoPage').style.display = 'flex'; 
@@ -650,7 +410,7 @@ window.showAccountInfo = function() {
 
 window.closeAccountInfoPage = function() { 
     document.getElementById('accountInfoPage').style.display = 'none'; 
-    toggleMainUI(true); // <--- MOSTRAR HEADER AL SALIR
+    toggleMainUI(true); 
     window.location.hash = `profile_${currentProfileTarget}`; 
 };
 
@@ -706,28 +466,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hash = window.location.hash;
 
-    // --- LOGICA SIN PARPADEOS: OCULTAR UI INMEDIATAMENTE ---
+    // --- LOGICA DE RUTAS (Deep Linking) ---
     if (hash === '#my_info') {
         if (user) {
             toggleMainUI(false); // Ocultar fondo
             viewingUserProfile = user;
             currentSection = 'Perfil';
-            document.getElementById('myInfoPage').style.display = 'flex'; // Mostrar modal vacío
-            // Los datos se llenarán solos cuando Firebase responda
+            document.getElementById('myInfoPage').style.display = 'flex'; 
         } else {
             window.changeSection('Home');
         }
 
     } else if (hash.startsWith('#info_')) {
         const targetUser = hash.replace('#info_', '');
-        toggleMainUI(false); // Ocultar fondo
+        toggleMainUI(false); 
         viewingUserProfile = targetUser;
         currentProfileTarget = targetUser;
         currentSection = 'Perfil';
-        document.getElementById('accountInfoPage').style.display = 'flex'; // Mostrar modal vacío
+        document.getElementById('accountInfoPage').style.display = 'flex';
 
     } else if (hash.startsWith('#profile_')) {
-        viewingUserProfile = hash.replace('#profile_', '');
+        const target = hash.replace('#profile_', '');
+        toggleMainUI(false); 
+        viewingUserProfile = target;
         currentSection = 'Perfil';
 
     } else if (hash.startsWith('#post_')) {
@@ -735,6 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSection = 'Home';
 
     } else {
+        // Inicio normal
         const lastSection = localStorage.getItem('lastSection') || 'Home';
         if (lastSection === 'Perfil') {
             const savedProfile = localStorage.getItem('lastVisitedProfile');

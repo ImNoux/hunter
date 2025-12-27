@@ -1,7 +1,10 @@
 {
   "name": "Comunidad ARC",
   "short_name": "ARC",
+  "description": "La mejor comunidad de tecnología y juegos.",
+  "lang": "es",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#010a3d",
   "theme_color": "#00d2ff",

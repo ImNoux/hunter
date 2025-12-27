@@ -337,3 +337,39 @@ label[for="avatarUpload"] { color: #0095f6 !important; font-weight: 600; font-si
     animation: shimmer 1.5s infinite;
 }
 @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+/* --- SUGERENCIAS DE NOMBRE DE USUARIO (NUEVO) --- */
+#usernameSuggestions {
+    display: none; /* Oculto por defecto */
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    border: 1px solid #333;
+    text-align: left;
+}
+
+.suggestion-chip {
+    display: inline-block;
+    background-color: #00d2ff; /* Azul ARC */
+    color: #000;
+    padding: 6px 12px;
+    margin: 4px 4px 4px 0;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.suggestion-chip:active {
+    transform: scale(0.95);
+}
+
+.suggestion-msg {
+    color: #ff4d4d;
+    font-size: 0.85em;
+    margin-bottom: 8px;
+    display: block;
+}

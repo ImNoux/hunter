@@ -150,8 +150,13 @@
         <div class="modal-content small-modal">
             <span class="close-modal" onclick="closeModal('registerModal')">&times;</span>
             <h2>Crear Cuenta</h2>
-            <input type="text" id="regUser" placeholder="Nombre de usuario">
+            
+            <input type="text" id="regUser" placeholder="Nombre de usuario (@)">
+            
+            <div id="usernameSuggestions"></div>
+            
             <input type="password" id="regPin" placeholder="Crea un PIN (4 dígitos)" maxlength="4">
+            
             <button onclick="registerSystem()">REGISTRARSE</button>
             <p class="switch-auth" onclick="openModal('loginModal')">¿Ya tienes cuenta? Entra aquí</p>
         </div>

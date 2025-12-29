@@ -178,4 +178,72 @@ input:focus, textarea:focus, select:focus { border-color: #0095f6; background: #
 .info-text label { font-size: 0.85em; color: #888; margin-top: 3px; }
 .btn-unblock { background-color: transparent; border: 1px solid #555; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; }
 .btn-unblock:active { background-color: #333; }
-.toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%
+.toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 10000; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+.toast { background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(10px); color: white; padding: 12px 20px; border-radius: 50px; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; animation: fadeInUp 0.3s forwards; pointer-events: auto; text-align: center; border: 1px solid #333; }
+.toast span { display: flex; align-items: center; gap: 8px; }
+.toast.success { border-color: #00e676; }
+.toast.error { border-color: #ff3040; }
+.toast.info { border-color: #0095f6; }
+.toast i { font-size: 1.1em; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
+/* =========================================
+   ESTILOS NUEVOS: VALIDACIÓN DE USUARIO
+   ========================================= */
+.input-wrapper { position: relative; width: 100%; }
+.input-wrapper input { width: 100%; padding-right: 40px !important; }
+.input-spinner { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #0095f6; border-radius: 50%; animation: spin 0.8s linear infinite; z-index: 10; }
+.validation-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-size: 1.1em; z-index: 10; }
+.error-msg { color: #ff3040; font-size: 0.85em; margin-top: 5px; text-align: left; margin-left: 5px; }
+.suggestions-container { margin-top: 8px; border: 1px solid #333; border-radius: 12px; background-color: #1a1a1a; overflow: hidden; animation: fadeIn 0.2s ease; }
+.suggestion-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid #262626; cursor: pointer; transition: background 0.2s; text-align: left; }
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background-color: #262626; }
+.suggestion-item span { color: #fff; font-size: 0.95em; }
+.suggestion-check { color: #00e676; font-size: 1.1em; }
+.input-error { border-color: #ff3040 !important; }
+.input-success { border-color: #00e676 !important; }
+/* ESTILOS PARA ACTIVIDAD Y BÚSQUEDA */
+.user-search-result { 
+    display: flex; 
+    align-items: center; 
+    padding: 12px 15px; 
+    border-bottom: 1px solid #262626; 
+    cursor: pointer; 
+}
+
+.user-search-avatar { 
+    width: 44px; 
+    height: 44px; 
+    border-radius: 50%; 
+    margin-right: 12px; 
+    object-fit: cover;
+}
+
+.activity-item { 
+    display: flex; 
+    align-items: center; 
+    padding: 12px 15px; 
+    border-bottom: 1px solid #262626; 
+    gap: 12px; 
+}
+
+.activity-avatar { 
+    width: 44px; 
+    height: 44px; 
+    min-width: 44px; /* Esto evita que se aplaste */
+    border-radius: 50%; 
+    object-fit: cover; 
+    border: 1px solid #333; 
+}
+
+.activity-text { 
+    font-size: 0.95em; 
+    color: #ccc; 
+}
+
+.activity-text strong { 
+    color: white; 
+    font-weight: 600; 
+    cursor: pointer; 
+}

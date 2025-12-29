@@ -12,12 +12,12 @@
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="logo.png" type="image/png">
-    <meta name="description" content="Únete a la Comunidad ARC. La mejor comunidad dentro del videojuego roblox.">
-    <meta name="keywords" content="ARC, Comunidad ARC, Arc Team, App ARC, Arceus ©, Redes">
-    <meta name="kiut" content="Comunidad ARC">
-    <meta name="google-site-verification" content="VcaCCjCXy6S9wE4X3xn4NJt_3W0kg6Lv9m_l8UZlbKw" />
-    <script type="application/ld+json">
-    { "@context": "https://schema.org", "@type": "WebSite", "name": "Team Arceus", "url": "https://arceus-gilt.vercel.app/" }
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          emailjs.init("nbGJumzDGjbxKiImuDWLa"); // Tu Public Key
+       })();
     </script>
 </head>
 <body>
@@ -50,9 +50,8 @@
             <i class="fas fa-search search-icon"></i>
             <input type="text" id="searchInput" placeholder="Buscar usuarios o posts...">
         </div>
-    </div>
-
-    <main class="thread-container" id="mainFeedContainer">
+  </div>
+  <main class="thread-container" id="mainFeedContainer">
         <div id="skeletonLoader">
             <div class="skeleton-post">
                 <div class="sk-header"><div class="sk-avatar"></div><div class="sk-name"></div></div>
@@ -66,7 +65,8 @@
         </div>
         <div id="realContentContainer"></div>
     </main>
-<button id="floatingAddBtn" class="floating-add-btn" onclick="openNewThreadPage()">
+    
+    <button id="floatingAddBtn" class="floating-add-btn" onclick="openNewThreadPage()">
         <i class="fas fa-plus"></i>
     </button>
 
@@ -85,9 +85,8 @@
         <div class="nav-item" id="nav-profile" onclick="openMyProfile()">
             <i class="fas fa-user"></i>
         </div>
-    </nav>
-
-    <div id="newThreadPage" class="full-screen-page">
+  </nav>
+  <div id="newThreadPage" class="full-screen-page">
         <div class="page-header-top">
             <button onclick="closeNewThreadPage()" class="back-btn-page"><i class="fas fa-times"></i></button>
             <h3>Nueva Publicación</h3>
@@ -96,7 +95,6 @@
         <div style="padding: 20px;">
             <form id="newThreadForm">
                 <input type="text" id="title" placeholder="Título..." required maxlength="50" style="background:transparent; border:none; border-bottom:1px solid #333; border-radius:0; font-size:1.2em; padding:10px 0;">
-                
                 <div class="custom-dropdown-container">
                     <input type="hidden" id="categorySelect" value="Creator">
                     <div class="dropdown-trigger" onclick="toggleCustomDropdown('catOptions')">
@@ -113,19 +111,11 @@
                         <div class="dropdown-option" onclick="selectCustomOption('categorySelect', 'catDisplay', 'Moon & Sun', 'catOptions')">Moon & Sun</div>
                     </div>
                 </div>
-                
                 <textarea id="description" placeholder="¿Qué estás pensando?" required style="background:transparent; border:none; border-bottom:1px solid #333; border-radius:0; min-height:150px; font-size:1em; margin-top:15px;"></textarea>
                 <label for="imageFile" class="upload-btn-gray" style="margin-top:20px;"><i class="fas fa-images"></i> Agregar imágenes</label>
                 <input type="file" id="imageFile" accept="image/*" multiple style="display:none;">
                 <span id="fileName" style="font-size:0.9em; color:#00a2ff; display:block; margin-top:5px;"></span>
             </form>
-        </div>
-    </div>
-<div id="loginErrorModal" class="modal-overlay" style="z-index: 9000;">
-        <div class="info-content" style="max-width: 320px; padding: 25px; text-align: center;">
-            <h3 style="margin-top:0; font-size:1.2rem;">Contraseña incorrecta</h3>
-            <p style="color:#ccc; font-size:0.95em; line-height:1.4; margin: 15px 0 25px 0;">La contraseña que has escrito no es correcta.</p>
-            <button onclick="closeModal('loginErrorModal')" style="background:none; border:none; color:#0095f6; font-weight:700; font-size:1rem; width:100%; padding:10px; border-top:1px solid #333;">ACEPTAR</button>
         </div>
     </div>
 
@@ -136,9 +126,7 @@
             <input type="text" id="loginUser" placeholder="Usuario">
             <input type="password" id="loginPin" placeholder="PIN (4 dígitos)" maxlength="4">
             <button onclick="loginSystem()">ENTRAR</button>
-            
             <p class="switch-auth" onclick="closeModal('loginModal'); openModal('recoveryModal')" style="margin-top: 10px; font-size: 0.85em; color: #ff4d4d;">¿Olvidaste tu PIN?</p>
-            
             <p class="switch-auth" onclick="closeModal('loginModal'); openModal('registerModal')">¿No tienes cuenta? Regístrate</p>
         </div>
     </div>
@@ -147,7 +135,6 @@
         <div class="modal-content small-modal">
             <span class="close-modal" onclick="closeModal('registerModal')">&times;</span>
             <h2>Crear Cuenta</h2>
-            
             <div class="username-section" style="position: relative; margin-bottom: 15px;">
                 <div class="input-wrapper" style="position: relative;">
                     <input type="text" id="regUser" placeholder="Nombre de usuario" autocomplete="off" style="padding-right: 40px;">
@@ -157,34 +144,41 @@
                 <p id="usernameErrorMsg" class="error-msg" style="display: none;"></p>
                 <div id="suggestionsList" class="suggestions-container" style="display: none;"></div>
             </div>
-
             <input type="password" id="regPin" placeholder="Crea un PIN (4 dígitos)" maxlength="4">
             
-            <input type="text" id="regRecovery" placeholder="Palabra secreta (Mascota, Color...)" style="margin-bottom: 15px;">
+            <input type="email" id="regEmail" placeholder="Tu correo (para recuperar cuenta)" style="margin-bottom: 15px;">
             
             <button id="btnRegisterSubmit" onclick="registerSystem()">REGISTRARSE</button>
             <p class="switch-auth" onclick="closeModal('registerModal'); openModal('loginModal')">¿Ya tienes cuenta? Entra aquí</p>
         </div>
-    </div>
-
-    <div id="recoveryModal" class="modal-overlay">
+  </div>
+  <div id="recoveryModal" class="modal-overlay">
         <div class="modal-content small-modal">
             <span class="close-modal" onclick="closeModal('recoveryModal')">&times;</span>
             <h3>Recuperar Cuenta</h3>
-            <p style="color:#888; font-size:0.9em; margin-bottom:15px; text-align:center;">
-                Escribe tu usuario y la palabra secreta que usaste al registrarte.
-            </p>
             
-            <input type="text" id="recUser" placeholder="Tu Usuario exacto">
-            <input type="text" id="recKey" placeholder="Tu Palabra Secreta">
-            <input type="password" id="recNewPin" placeholder="Nuevo PIN (4 dígitos)" maxlength="4">
-            
-            <button id="btnRecover" onclick="recoverAccountSystem()">CAMBIAR PIN</button>
+            <div id="recStep1">
+                <p style="color:#888; font-size:0.9em; margin-bottom:15px; text-align:center;">
+                    Escribe tu usuario para buscar tu correo.
+                </p>
+                <input type="text" id="recUserEmail" placeholder="Tu Usuario exacto">
+                <button onclick="sendRecoveryCode()">ENVIAR CÓDIGO</button>
+            </div>
+
+            <div id="recStep2" style="display:none;">
+                <p style="color:#00e676; font-size:0.9em; text-align:center; margin-bottom:15px;">
+                    <i class="fas fa-envelope"></i> ¡Correo enviado! Revisa tu bandeja.
+                </p>
+                <input type="number" id="recCodeInput" placeholder="Código de 4 dígitos">
+                <input type="password" id="recNewPinEmail" placeholder="Nuevo PIN (4 dígitos)" maxlength="4">
+                <button onclick="verifyCodeAndChangePin()">CAMBIAR PIN</button>
+            </div>
             
             <p class="switch-auth" onclick="closeModal('recoveryModal'); openModal('loginModal')">Cancelar</p>
         </div>
     </div>
-<div id="userListPage" class="full-screen-page">
+
+    <div id="userListPage" class="full-screen-page">
         <div class="page-header-top">
             <button onclick="closeUserListPage()" class="back-btn-page"><i class="fas fa-arrow-left"></i></button>
             <h3 id="listPageTitle">Usuario</h3><div style="width: 30px;"></div>
@@ -206,12 +200,11 @@
         <div class="page-header-top"><button onclick="closeAccountInfoPage()" class="back-btn-page"><i class="fas fa-arrow-left"></i></button><h3>Información</h3><div style="width: 30px;"></div></div>
         <div style="padding: 20px; text-align: center;"><img id="infoAvatar" src="" style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #333; margin-bottom: 15px;"><h2 id="infoUsername" style="margin: 0 0 20px 0; font-size: 1.3rem;"></h2><p style="color: #888; font-size: 0.95em; margin-bottom: 30px;">En TEAM ARCEUS valoramos la autenticidad de cada usuario, por esta razón mostramos la información de algunas cuentas.</p><div class="info-row" style="background: #111; padding: 20px; border-radius: 12px; margin-bottom: 10px; border:none;"><i class="far fa-calendar-alt" style="color: #666;"></i><div class="info-text"><span style="font-size: 0.9em; color: #888;">Fecha de unión</span><label id="infoDate" style="color: #fff; font-size: 1.1em; margin-top: 5px; font-weight: 600;"></label></div></div><div class="info-row" style="background: #111; padding: 20px; border-radius: 12px; border:none;"><i class="fas fa-map-marker-alt" style="color: #666;"></i><div class="info-text"><span style="font-size: 0.9em; color: #888;">Ubicación principal</span><label id="infoLocation" style="color: #fff; font-size: 1.1em; margin-top: 5px; font-weight: 600;">Desconocida</label></div></div></div>
     </div>
-
     <div id="myInfoPage" class="full-screen-page" style="background:#000;">
         <div class="page-header-top"><button onclick="closeMyInfoPage()" class="back-btn-page"><i class="fas fa-arrow-left"></i></button><h3>Información de la cuenta</h3><div style="width: 30px;"></div></div>
         <div style="padding: 20px; text-align: center;"><img id="myInfoAvatar" src="" style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #333; margin-bottom: 15px;"><h2 id="myInfoName" style="margin: 0 0 20px 0; font-size: 1.3rem;"></h2><p style="color: #888; font-size: 0.95em; margin-bottom: 30px;">Esta es la información asociada a tu cuenta.</p><div class="info-row" style="background: #111; padding: 20px; border-radius: 12px; margin-bottom: 10px; border:none;"><i class="far fa-calendar-alt" style="color: #666;"></i><div class="info-text"><span style="font-size: 0.9em; color: #888;">Fecha de unión</span><label id="myInfoDate" style="color: #fff; font-size: 1.1em; margin-top: 5px; font-weight: 600;"></label></div></div><div class="info-row" style="background: #111; padding: 20px; border-radius: 12px; border:none;"><i class="fas fa-map-marker-alt" style="color: #666;"></i><div class="info-text"><span style="font-size: 0.9em; color: #888;">Ubicación de la cuenta</span><label id="myInfoLocation" style="color: #fff; font-size: 1.1em; margin-top: 5px; font-weight: 600;">Desconocida</label></div></div></div>
-    </div>
-<div id="blockedPage" class="full-screen-page"><div class="page-header-top"><button onclick="document.getElementById('blockedPage').style.display='none'; toggleMainUI(true);" class="back-btn-page"><i class="fas fa-arrow-left"></i></button><h3>Cuentas bloqueadas</h3><div style="width: 30px;"></div></div><div id="blockedListContainer" class="page-list-container" style="padding:10px;"></div></div>
+  </div>
+  <div id="blockedPage" class="full-screen-page"><div class="page-header-top"><button onclick="document.getElementById('blockedPage').style.display='none'; toggleMainUI(true);" class="back-btn-page"><i class="fas fa-arrow-left"></i></button><h3>Cuentas bloqueadas</h3><div style="width: 30px;"></div></div><div id="blockedListContainer" class="page-list-container" style="padding:10px;"></div></div>
 
     <div id="profileSettingsModal" class="modal-overlay" style="z-index: 6000;"><div class="bottom-sheet-content"><div class="bottom-sheet-handle"></div><div class="sheet-item" onclick="openBlockedPage()"><i class="fas fa-ban" style="margin-right:10px; width:20px; text-align:center;"></i> Cuentas bloqueadas</div><div class="sheet-item" onclick="openMyInfoPage()"><i class="fas fa-info-circle" style="margin-right:10px; width:20px; text-align:center;"></i> Información de la cuenta</div><div class="sheet-item" onclick="requestNotificationPermission()"><i class="fas fa-bell" style="margin-right:10px; width:20px; text-align:center;"></i> Activar Notificaciones</div><div class="sheet-divider"></div><div class="sheet-item" onclick="closeModal('profileSettingsModal')">Cancelar</div></div></div>
     <div id="profileOptionsModal" class="modal-overlay" style="z-index: 6000;"><div class="bottom-sheet-content"><div class="bottom-sheet-handle"></div><div class="sheet-item danger" onclick="confirmBlockUser()">Bloquear</div><div class="sheet-item danger" onclick="confirmReportUser()">Denunciar</div><div class="sheet-divider"></div><div class="sheet-item" onclick="showAccountInfo()">Información sobre esta cuenta</div><div class="sheet-item" onclick="copyProfileUrl()">Copiar URL del perfil</div><div class="sheet-item" onclick="closeModal('profileOptionsModal')">Cancelar</div></div></div>
@@ -221,9 +214,14 @@
     <div id="blockConfirmModal" class="modal-overlay" style="z-index: 8000;"><div class="modal-content" style="text-align: center;"><img id="blockAvatarPreview" src="" style="width:70px; height:70px; border-radius:50%; margin-bottom:15px;"><h3 style="margin:0 0 10px 0;">¿Bloquear a <span id="blockTargetUser">Usuario</span>?</h3><button onclick="performBlockAction()" class="btn-block-blue">Bloquear</button><button onclick="closeModal('blockConfirmModal')" style="background:none; border:none; color:#777; margin-top:15px;">Cancelar</button></div></div>
     <div id="finalThanksModal" class="modal-overlay" style="z-index: 8500;"><div class="info-content"><div style="padding: 40px 20px;"><div class="check-circle-icon check-circle-success"><i class="fas fa-check-circle"></i></div><h3 style="font-size:1.3rem;">Gracias por denunciar</h3></div><button class="bottom-link-blue" onclick="closeAllReportModals()">Mostrar perfil</button></div></div>
     
-    <div id="editProfileModal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick="closeModal('editProfileModal')">&times;</span><h3>Editar Perfil</h3><div style="text-align:center; margin-bottom:15px;"><img id="editAvatarPreview" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid #333;"><label for="avatarUpload" style="display:block; color:#00a2ff; cursor:pointer; margin-top:10px; font-size:0.9em;">Cambiar foto</label></div><label style="color:#666; font-size:0.8em; margin-left:5px;">Nombre</label><input type="text" id="editNameInput" placeholder="Nombre visible"><label style="color:#666; font-size:0.8em; margin-left:5px;">Usuario</label><input type="text" id="editHandleInput" placeholder="Usuario (@)"><label style="color:#666; font-size:0.8em; margin-left:5px;">Estado / Rol</label><input type="text" id="editStatusInput" placeholder="Estado (ej. Creator...)"><label style="color:#666; font-size:0.8em; margin-left:5px;">Biografía</label><textarea id="editBioInput" placeholder="Biografía..."></textarea><button id="saveProfileBtn" onclick="saveProfileChanges()">GUARDAR CAMBIOS</button></div></div>
+    <div id="editProfileModal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick="closeModal('editProfileModal')">&times;</span><h3>Editar Perfil</h3><div style="text-align:center; margin-bottom:15px;"><img id="editAvatarPreview" src="" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:2px solid #333;"><label for="avatarUpload" style="display:block; color:#00a2ff; cursor:pointer; margin-top:10px; font-size:0.9em;">Cambiar foto</label></div><label style="color:#666; font-size:0.8em; margin-left:5px;">Nombre</label><input type="text" id="editNameInput" placeholder="Nombre visible"><label style="color:#666; font-size:0.8em; margin-left:5px;">Usuario</label><input type="text" id="editHandleInput" placeholder="Usuario (@)"><label style="color:#666; font-size:0.8em; margin-left:5px;">Estado / Rol</label><input type="text" id="editStatusInput" placeholder="Estado (ej. Creator...)"><label style="color:#666; font-size:0.8em; margin-left:5px;">Biografía</label><textarea id="editBioInput" placeholder="Biografía..."></textarea>
+    <label style="color:#00a2ff; font-size:0.8em; margin-left:5px; margin-top:10px; display:block;">Vincular Correo</label>
+    <input type="email" id="editEmailInput" placeholder="usuario@ejemplo.com">
+    <button id="saveProfileBtn" onclick="saveProfileChanges()">GUARDAR CAMBIOS</button></div></div>
+
+    <div id="loginErrorModal" class="modal-overlay" style="z-index: 9000;"><div class="info-content" style="max-width: 320px; padding: 25px; text-align: center;"><h3 style="margin-top:0; font-size:1.2rem;">Contraseña incorrecta</h3><p style="color:#ccc; font-size:0.95em; line-height:1.4; margin: 15px 0 25px 0;">La contraseña que has escrito no es correcta.</p><button onclick="closeModal('loginErrorModal')" style="background:none; border:none; color:#0095f6; font-weight:700; font-size:1rem; width:100%; padding:10px; border-top:1px solid #333;">ACEPTAR</button></div></div>
     <div id="commentsModal" class="modal-overlay"><div class="modal-content"><span class="close-modal" onclick="closeModal('commentsModal')">&times;</span><h3>Comentarios</h3><div id="commentsList" style="max-height: 300px; overflow-y: auto; text-align: left; margin-bottom: 15px;"></div><form id="commentForm" style="display:flex; gap:5px;"><input type="text" id="commentInput" placeholder="Escribe..." required style="flex:1;"><button type="submit" style="width:auto; padding:0 15px;"><i class="fas fa-paper-plane"></i></button></form></div></div>
-    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 8.0: Push & Pull.</p></div></div>
+    <div id="updatesModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('updatesModal')">&times;</span><h3>Actualizaciones</h3><p>Versión 9.0: Seguridad por Email + Notificaciones.</p></div></div>
     <div id="contactModal" class="modal-overlay"><div class="info-content"><span class="close-modal" onclick="closeModal('contactModal')">&times;</span><h3>Contacto</h3><p>Instagram: arc_clxn</p></div></div>
     <div id="confirmModal" class="modal-overlay" style="z-index: 8000;"><div class="info-content" style="max-width: 300px; padding: 20px;"><h3>Confirmación</h3><p id="confirmText">¿Estás seguro?</p><div style="display:flex; justify-content:center; gap:10px;"><button onclick="closeModal('confirmModal')" style="background:#333; color:white; border:none; padding:8px 20px; border-radius:4px;">No</button><button id="confirmActionBtn" style="background:#ff4d4d; color:white; border:none; padding:8px 20px; border-radius:4px;">Sí</button></div></div></div>
     <div id="adminModal" class="modal-overlay"><div class="modal-content" style="max-height: 80vh; overflow-y: auto;"><span class="close-modal" onclick="closeModal('adminModal')">&times;</span><h3 style="color: #ff4d4d;">Panel Admin</h3><div id="adminReportsList"></div></div></div>
@@ -240,7 +238,6 @@
         window.toggleCustomDropdown = function(id) { document.querySelectorAll('.dropdown-options').forEach(el => { if(el.id !== id) el.classList.remove('show'); }); document.getElementById(id).classList.toggle('show'); };
         window.selectCustomOption = function(inputId, displayId, value, menuId) { document.getElementById(inputId).value = value; document.getElementById(displayId).innerText = value; document.getElementById(menuId).classList.remove('show'); };
         window.onclick = function(event) {
-            // AQUÍ AGREGUÉ 'recoveryModal' PARA QUE CIERRE AL TOCAR FUERA
             const ids = ['recoveryModal', 'reportModal', 'adminModal', 'profileOptionsModal', 'accountInfoModal', 'loginErrorModal', 'reportSuccessModal', 'blockConfirmModal', 'finalThanksModal', 'profileSettingsModal', 'confirmModal', 'updatesModal', 'contactModal', 'editProfileModal', 'commentsModal'];
             ids.forEach(id => { if (event.target == document.getElementById(id)) document.getElementById(id).style.display = "none"; });
             if (!event.target.closest('.custom-dropdown-container')) document.querySelectorAll('.dropdown-options.show').forEach(el => el.classList.remove('show'));
